@@ -1,6 +1,6 @@
 package com.example.lockly.exception;
 
-import com.example.smart_restaurant.common.ApiResponse;
+import com.example.lockly.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
