@@ -1,0 +1,104 @@
+package com.example.lockly.controller;
+
+import com.example.lockly.common.response.ListResponse;
+import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
+import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.service.Impl.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Validated
+@RestController
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping(ApiPath.API_V1 + "/users")
+@Tag(name = "User Controller", description = "API quản lý user và friend system")
+public class UserController {
+
+    UserServiceImpl userService;
+
+    @GetMapping("/friends/{user_id}")
+    @Operation(
+            summary = "Lấy danh sách bạn bè",
+            description = "Trả về danh sách bạn bè của user theo user_id"
+    )
+    public ResponseEntity<ListResponse<UserResponseDto>> getListFriendsByUserId(
+            @Parameter(description = "ID của user")
+            @PathVariable("user_id") String userId
+    ) {
+        List<UserResponseDto> listFriend =
+                userService.findAllListFriendByUserId(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ListResponse.success("Thành công", listFriend));
+    }
+
+    @GetMapping("/friendships/{user_id}")
+    @Operation(
+            summary = "Lấy danh sách lời mời kết bạn",
+            description = "Trả về danh sách friend request (PENDING)"
+    )
+    public ResponseEntity<ListResponse<FriendshipsResponseDto>> getFriendRequests(
+            @Parameter(description = "ID của user")
+            @PathVariable("user_id") String userId
+    ) {
+        List<FriendshipsResponseDto> result =
+                userService.findAllFriendshipsByUserId(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ListResponse.success("Thành công", result));
+    }
+
+    @PostMapping("/friend-request")
+    @Operation(
+            summary = "Gửi lời mời kết bạn",
+            description = "Tạo friendship request trạng thái PENDING"
+    )
+    public ResponseEntity<FriendshipsResponseDto> sendFriendRequest(
+            @RequestBody FriendshipsRequestDto request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(userService.sendFriendshipRequest(request));
+    }
+
+    @PostMapping("/friend-request/accept")
+    @Operation(
+            summary = "Chấp nhận lời mời kết bạn",
+            description = "Chuyển trạng thái PENDING → ACCEPTED"
+    )
+    public ResponseEntity<FriendshipsResponseDto> acceptFriendRequest(
+            @RequestBody FriendshipsRequestDto request
+    ) {
+        return ResponseEntity.ok(
+                userService.acceptAddFriendRequest(request)
+        );
+    }
+
+    @PostMapping("/friend-request/reject")
+    @Operation(
+            summary = "Từ chối lời mời kết bạn",
+            description = "Chuyển trạng thái REJECTED và xóa khỏi db"
+    )
+    public ResponseEntity<FriendshipsResponseDto> rejectFriendRequest(
+            @RequestBody FriendshipsRequestDto request
+    ) {
+        return ResponseEntity.ok(
+                userService.rejectAddFriendRequest(request)
+        );
+    }
+}
