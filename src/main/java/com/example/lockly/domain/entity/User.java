@@ -25,14 +25,17 @@ public class User {
     @Column(length = 100, name = "display_name", nullable = false)
     private String displayName;
 
+    @Column(length = 10, name = "phone_number")
+    private String phoneNumber;
+
     @Column(length = 100, unique = true)
     private String email;
 
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(name = "avatar_key")
-    private String avatarKey;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Column
     private UserRole role;

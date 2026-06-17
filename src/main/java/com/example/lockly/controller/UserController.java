@@ -1,5 +1,6 @@
 package com.example.lockly.controller;
 
+import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
@@ -34,7 +35,7 @@ public class UserController {
             summary = "Lấy danh sách bạn bè",
             description = "Trả về danh sách bạn bè của user theo user_id"
     )
-    public ResponseEntity<ListResponse<UserResponseDto>> getListFriendsByUserId(
+    public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
             @Parameter(description = "ID của user")
             @PathVariable("user_id") String userId
     ) {
@@ -43,7 +44,8 @@ public class UserController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ListResponse.success("Thành công", listFriend));
+                .body(ApiResponse
+                        .success("Thành công", ListResponse.of(listFriend)));
     }
 
     @GetMapping("/friendships/{user_id}")
@@ -51,7 +53,7 @@ public class UserController {
             summary = "Lấy danh sách lời mời kết bạn",
             description = "Trả về danh sách friend request (PENDING)"
     )
-    public ResponseEntity<ListResponse<FriendshipsResponseDto>> getFriendRequests(
+    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests(
             @Parameter(description = "ID của user")
             @PathVariable("user_id") String userId
     ) {
@@ -60,7 +62,8 @@ public class UserController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ListResponse.success("Thành công", result));
+                .body(ApiResponse
+                        .success("Thành công", ListResponse.of(result)));
     }
 
     @PostMapping("/friend-request")
@@ -68,12 +71,13 @@ public class UserController {
             summary = "Gửi lời mời kết bạn",
             description = "Tạo friendship request trạng thái PENDING"
     )
-    public ResponseEntity<FriendshipsResponseDto> sendFriendRequest(
+    public ResponseEntity<ApiResponse<FriendshipsResponseDto>> sendFriendRequest(
             @RequestBody FriendshipsRequestDto request
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userService.sendFriendshipRequest(request));
+                .body(ApiResponse
+                        .created("Thành công" ,userService.sendFriendshipRequest(request)));
     }
 
     @PostMapping("/friend-request/accept")
@@ -81,12 +85,13 @@ public class UserController {
             summary = "Chấp nhận lời mời kết bạn",
             description = "Chuyển trạng thái PENDING → ACCEPTED"
     )
-    public ResponseEntity<FriendshipsResponseDto> acceptFriendRequest(
+    public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
             @RequestBody FriendshipsRequestDto request
     ) {
-        return ResponseEntity.ok(
-                userService.acceptAddFriendRequest(request)
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse
+                        .success("Thành công", userService.acceptAddFriendRequest(request)));
     }
 
     @PostMapping("/friend-request/reject")
@@ -94,11 +99,12 @@ public class UserController {
             summary = "Từ chối lời mời kết bạn",
             description = "Chuyển trạng thái REJECTED và xóa khỏi db"
     )
-    public ResponseEntity<FriendshipsResponseDto> rejectFriendRequest(
+    public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
             @RequestBody FriendshipsRequestDto request
     ) {
-        return ResponseEntity.ok(
-                userService.rejectAddFriendRequest(request)
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse
+                        .success("Thành công", userService.rejectAddFriendRequest(request)));
     }
 }
