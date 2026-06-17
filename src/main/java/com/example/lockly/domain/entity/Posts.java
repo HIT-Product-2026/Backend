@@ -24,8 +24,8 @@ public class Posts {
     @Column(name = "user_id", length = 36, nullable = false)
     private String userId;
 
-    @Column(name = "image_key")
-    private String imageKey;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(length = 100)
     private String caption;

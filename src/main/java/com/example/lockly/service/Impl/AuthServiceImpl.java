@@ -108,14 +108,14 @@ public class AuthServiceImpl implements AuthService {
     public CommonResponseDto logout(LogoutRequestDto request) {
         try{
             // Tách các thành phần trong token
-            SignedJWT signedJWT = SignedJWT.parse(request.getToken());
+            SignedJWT signedJWT = SignedJWT.parse(request.token());
 
             // [2]. Get username and get user details to validate token
-            String username = jwtProvider.extractUsername(request.getToken());
+            String username = jwtProvider.extractUsername(request.token());
             UserDetails userDetails = userService.loadUserByUsername(username);
 
             // [3]. Validate token
-            if (!jwtProvider.isTokenValid(request.getToken(), userDetails)) {
+            if (!jwtProvider.isTokenValid(request.token(), userDetails)) {
                 throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
             }
 

@@ -1,7 +1,7 @@
 package com.example.lockly.security;
 
 
-import com.example.lockly.common.ApiResponse;
+import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.repository.InvalidatedTokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

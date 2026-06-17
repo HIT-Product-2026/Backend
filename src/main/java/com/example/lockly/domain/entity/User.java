@@ -31,11 +31,8 @@ public class User {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(name = "avatar_key")
-    private String avatarKey;
-
-    @Column
-    private UserRole role;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
