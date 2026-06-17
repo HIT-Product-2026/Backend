@@ -25,9 +25,6 @@ public class User {
     @Column(length = 100, name = "display_name", nullable = false)
     private String displayName;
 
-    @Column(length = 10, name = "phone_number")
-    private String phoneNumber;
-
     @Column(length = 100, unique = true)
     private String email;
 
@@ -36,9 +33,6 @@ public class User {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
-
-    @Column
-    private UserRole role;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;

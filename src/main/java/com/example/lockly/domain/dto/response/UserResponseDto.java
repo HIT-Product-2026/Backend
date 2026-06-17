@@ -10,8 +10,7 @@ public record UserResponseDto(
     String username,
     String email,
     String displayName,
-    String avatarKey,
-    UserRole role
+    String avatarUrl
 ){
 
     public static UserResponseDto from(User user){
@@ -20,8 +19,7 @@ public record UserResponseDto(
                 user.getUsername(),
                 user.getEmail(),
                 user.getDisplayName(),
-                user.getAvatarKey(),
-                user.getRole()
+                user.getAvatarUrl()
         );
     }
 }
