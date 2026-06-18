@@ -10,6 +10,7 @@ import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -63,7 +64,7 @@ public class UserController {
     @PostMapping("/friend-request")
     @Operation(summary = "Gửi lời mời kết bạn", description = "Tạo friendship request trạng thái PENDING")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> sendFriendRequest(
-            @RequestBody FriendshipsRequestDto request
+            @RequestBody @Valid FriendshipsRequestDto request
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -73,7 +74,7 @@ public class UserController {
     @PostMapping("/friend-request/accept")
     @Operation(summary = "Chấp nhận lời mời kết bạn", description = "Chuyển trạng thái PENDING → ACCEPTED")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
-            @RequestBody FriendshipsRequestDto request
+            @RequestBody @Valid FriendshipsRequestDto request
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -83,7 +84,7 @@ public class UserController {
     @PostMapping("/friend-request/reject")
     @Operation(summary = "Từ chối lời mời kết bạn", description = "Chuyển trạng thái REJECTED và xóa khỏi db")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
-            @RequestBody FriendshipsRequestDto request
+            @RequestBody @Valid FriendshipsRequestDto request
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -105,5 +106,39 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Cập nhật avatar thành công", null));
+    }
+
+    @PostMapping("/{user_id}/location")
+    @Operation(summary = "Cập nhật vị trí user", description = "Lưu latitude (vĩ độ) và longitude (kinh độ) của user")
+    public ResponseEntity<ApiResponse<Void>> updateUserLocation(
+            @Parameter(description = "ID user")
+            @PathVariable("user_id") String userId,
+
+            @RequestParam("latitude") Double latitude,
+
+            @RequestParam("longitude") Double longitude
+    ) {
+
+        userService.updateUserLocation(userId, latitude, longitude);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Cập nhật vị trí thành công", null));
+    }
+
+    @GetMapping("/{user_id}/online")
+    @Operation(summary = "Kiểm tra trạng thái online",
+            description = "Trả về true nếu user hoạt động trong 5 phút gần nhất"
+    )
+    public ResponseEntity<ApiResponse<Boolean>> isUserOnline(
+            @Parameter(description = "ID user")
+            @PathVariable("user_id") String userId
+    ) {
+
+        boolean isOnline = userService.isUserOnline(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", isOnline));
     }
 }

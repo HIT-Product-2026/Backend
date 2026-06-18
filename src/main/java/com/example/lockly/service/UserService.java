@@ -18,4 +18,6 @@ public interface UserService {
     public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request);
     UserResponseDto getUserById(String id);
     void updateAvatar(String userId, MultipartFile file) throws Exception;
+    public boolean isUserOnline(String userId);
+    public void updateUserLocation(String userId, Double latitude, Double longitude);
 }

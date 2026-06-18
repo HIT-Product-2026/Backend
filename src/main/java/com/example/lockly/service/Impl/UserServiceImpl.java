@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -67,6 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request){
         Friendship friendship = friendshipsRepository
                 .findById(request.id())
@@ -84,6 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request){
         Friendship friendship = friendshipsRepository
                 .findById(request.id())
@@ -126,6 +129,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request){
 
         User requester = userRepository
@@ -196,5 +200,34 @@ public class UserServiceImpl implements UserService {
         user.setAvatarUrl(objectName);
 
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserLocation(String userId, Double latitude, Double longitude) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        user.setLatitude(latitude);
+        user.setLongitude(longitude);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean isUserOnline(String userId) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (user.getLastActiveAt() == null)
+            return false;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
     }
 }
