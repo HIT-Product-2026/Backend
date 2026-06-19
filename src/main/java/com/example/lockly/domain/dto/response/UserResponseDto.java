@@ -10,7 +10,9 @@ public record UserResponseDto(
     String username,
     String email,
     String displayName,
-    String avatarUrl
+    String avatarUrl,
+    Double latitude,
+    Double longitude
 ){
 
     public static UserResponseDto from(User user){
@@ -19,7 +21,9 @@ public record UserResponseDto(
                 user.getUsername(),
                 user.getEmail(),
                 user.getDisplayName(),
-                user.getAvatarUrl()
+                user.getAvatarUrl(),
+                user.getLatitude(),
+                user.getLongitude()
         );
     }
 }

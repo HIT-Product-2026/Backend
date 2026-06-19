@@ -34,6 +34,12 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
     @Column(name = "create_at")
     private LocalDateTime createAt;
 
