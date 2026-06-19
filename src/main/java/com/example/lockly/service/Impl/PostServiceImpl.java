@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
@@ -60,14 +61,8 @@ public class PostServiceImpl implements PostService {
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty())
             throw new IllegalArgumentException("Original filename is missing");
 
-        String objectName =
-                prefix
-                + "/"
-                + userId
-                + "/"
-                + UUID.randomUUID()
-                + "_"
-                + file.getOriginalFilename();;
+        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
+
 
         minioClient.putObject(
                 PutObjectArgs.builder()

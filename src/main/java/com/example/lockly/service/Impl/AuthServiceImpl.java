@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(request.username())
                 .email(request.email())
-                .password(PasswordUtil.hash(request.password()))
+                .passwordHash(PasswordUtil.hash(request.password()))
                 .build();
         userRepository.save(user);
         return UserResponseDto.from(user);
@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
                                 request.username()));
 
         // Check password
-        boolean valid = PasswordUtil.verify(request.password(), user.getPassword());
+        boolean valid = PasswordUtil.verify(request.password(), user.getPasswordHash());
         if (!valid) {
             throw new BadRequestException("Invalid credentials");
         }

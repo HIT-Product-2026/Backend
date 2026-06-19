@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
@@ -179,14 +180,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        String objectName =
-                prefix
-                + "/"
-                + userId
-                + "/"
-                + UUID.randomUUID()
-                + "_"
-                + file.getOriginalFilename();
+        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
 
         minioClient.putObject(
                 PutObjectArgs.builder()
