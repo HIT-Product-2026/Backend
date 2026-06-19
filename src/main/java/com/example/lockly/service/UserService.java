@@ -1,8 +1,7 @@
 package com.example.lockly.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
-
-    public UserDetails loadUserByUsername(String username);
+// FIX: extend UserDetailsService để Spring nhận diện được Bean
+public interface UserService extends UserDetailsService {
 }

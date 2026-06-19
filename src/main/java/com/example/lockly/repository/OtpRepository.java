@@ -15,11 +15,11 @@ import java.util.Optional;
 public interface OtpRepository extends JpaRepository<OtpCode, Long> {
 
     /**
-     * Lấy OTP mới nhất, chưa dùng, chưa hết hạn của một số điện thoại/Zalo ID
+     * Lấy OTP mới nhất, chưa dùng, chưa hết hạn của một email
      */
     @Query("""
         SELECT o FROM OtpCode o
-        WHERE o.phoneOrZaloId = :phoneOrZaloId
+        WHERE o.email = :email
           AND o.purpose = :purpose
           AND o.used = false
           AND o.expiredAt > :now
@@ -27,23 +27,23 @@ public interface OtpRepository extends JpaRepository<OtpCode, Long> {
         LIMIT 1
     """)
     Optional<OtpCode> findValidOtp(
-            @Param("phoneOrZaloId") String phoneOrZaloId,
+            @Param("email") String email,
             @Param("purpose") OtpPurpose purpose,
             @Param("now") LocalDateTime now
     );
 
     /**
-     * Xóa toàn bộ OTP cũ của 1 user (dọn dẹp trước khi gửi mã mới)
+     * Xóa toàn bộ OTP cũ của 1 email trước khi gửi mã mới
      */
     @Modifying
-    @Query("DELETE FROM OtpCode o WHERE o.phoneOrZaloId = :phoneOrZaloId AND o.purpose = :purpose")
-    void deleteAllByPhoneOrZaloIdAndPurpose(
-            @Param("phoneOrZaloId") String phoneOrZaloId,
+    @Query("DELETE FROM OtpCode o WHERE o.email = :email AND o.purpose = :purpose")
+    void deleteAllByEmailAndPurpose(
+            @Param("email") String email,
             @Param("purpose") OtpPurpose purpose
     );
 
     /**
-     * Xóa các OTP đã hết hạn (dùng trong Cron Job cleanup)
+     * Xóa các OTP đã hết hạn — dùng trong Cron Job cleanup
      */
     @Modifying
     @Query("DELETE FROM OtpCode o WHERE o.expiredAt < :now")

@@ -19,31 +19,24 @@ public class OtpCode {
     private Long id;
 
     /**
-     * Số điện thoại hoặc Zalo ID của người dùng
-     * Dùng làm "key" để tra cứu OTP
+     * Gmail của người dùng — dùng làm key tra cứu OTP
      */
-    @Column(name = "phone_or_zalo_id", nullable = false, length = 50)
-    private String phoneOrZaloId;
+    @Column(name = "email", nullable = false, length = 100)
+    private String email;
 
     @Column(name = "otp", nullable = false, length = 6)
     private String otp;
 
     /**
-     * Loại OTP: REGISTER hoặc LOGIN
+     * Mục đích: REGISTER hoặc FORGOT_PASSWORD
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "purpose", nullable = false)
     private OtpPurpose purpose;
 
-    /**
-     * OTP hết hạn sau bao lâu (mặc định 5 phút)
-     */
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
-    /**
-     * Đã dùng OTP này chưa (tránh dùng lại)
-     */
     @Column(name = "used", nullable = false)
     private boolean used = false;
 

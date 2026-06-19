@@ -16,10 +16,10 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    // This method returns the authorities (roles) of the user.
+    // Vì đã xóa role, gán một Role mặc định chung là ROLE_USER cho tất cả tài khoản hợp lệ
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
@@ -34,6 +34,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
         return true;
     }
 

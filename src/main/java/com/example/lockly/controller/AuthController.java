@@ -1,8 +1,8 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.ApiResponse;
+import com.example.lockly.constant.SuccessMessage;
 import com.example.lockly.domain.dto.request.*;
-import com.example.lockly.domain.dto.response.CommonResponseDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.service.AuthService;
@@ -20,123 +20,70 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Tag(name = "Auth", description = "API Xác thực - Đăng ký, Đăng nhập, OTP")
+@Tag(name = "Auth", description = "Đăng ký, Đăng nhập Gmail, Quên mật khẩu")
 public class AuthController {
 
     AuthService authService;
 
-    // =============================================
-    // ĐĂNG KÝ / ĐĂNG NHẬP CŨ (Username + Password)
-    // =============================================
-
-    @Operation(summary = "Đăng ký tài khoản (Username + Password)")
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponseDto>> register(
+    /** BƯỚC 1/2 — Đăng ký */
+    @Operation(summary = "[Đăng ký] Bước 1/2 — Nhập thông tin và gửi OTP về Gmail")
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<ApiResponse<Void>> sendOtpForRegister(
             @Valid @RequestBody RegisterRequestDto request) {
 
-        UserResponseDto user = authService.register(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(201, "Đăng ký thành công", user));
+        authService.sendOtpForRegister(request);
+        return ResponseEntity.ok(ApiResponse.ok(200, SuccessMessage.Auth.SEND_OTP_SUCCESS));
     }
 
-    @Operation(summary = "Đăng nhập (Username + Password)")
+    /** BƯỚC 2/2 — Đăng ký */
+    @Operation(summary = "[Đăng ký] Bước 2/2 — Xác thực OTP và tạo tài khoản")
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<ApiResponse<UserResponseDto>> verifyOtpAndRegister(
+            @Valid @RequestBody VerifyOtpRegisterRequestDto request) {
+
+        UserResponseDto data = authService.verifyOtpAndRegister(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(201, SuccessMessage.Auth.REGISTER_SUCCESS, data));
+    }
+
+    /** POST /api/v1/auth/login */
+    @Operation(summary = "[Đăng nhập] Gmail + Password → nhận JWT")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(
             @Valid @RequestBody LoginRequestDto request) {
 
-        LoginResponseDto token = authService.authentication(request);
-        return ResponseEntity.ok(ApiResponse.ok(200, "Đăng nhập thành công", token));
+        LoginResponseDto data = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok(200, SuccessMessage.Auth.LOGIN_SUCCESS, data));
     }
 
+    /** POST /api/v1/auth/logout */
     @Operation(summary = "Đăng xuất")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @Valid @RequestBody LogoutRequestDto request) {
 
-        authService.logout(request);
-        return ResponseEntity.ok(ApiResponse.ok(200, "Đăng xuất thành công"));
+        authService.logout(request);  // ← giờ trả void, controller tự build response
+        return ResponseEntity.ok(ApiResponse.ok(200, SuccessMessage.Auth.LOGOUT_SUCCESS));
     }
 
-    // =============================================
-    // ĐĂNG KÝ BẰNG OTP (2 bước)
-    // =============================================
+    /** BƯỚC 1/2 — Quên mật khẩu */
+    @Operation(summary = "[Quên MK] Bước 1/2 — Gửi OTP về Gmail")
+    @PostMapping("/forgot-password/send-otp")
+    public ResponseEntity<ApiResponse<Void>> sendOtpForForgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDto request) {
 
-    /**
-     * BƯỚC 1/2 - Đăng ký:
-     * Client gửi số điện thoại -> BE gửi OTP qua Zalo Bot.
-     * <p>
-     * Request:  POST /api/v1/auth/otp/register/send
-     * Body:     { "phoneNumber": "0912345678" }
-     * Response: 200 OK + message xác nhận
-     */
-    @Operation(summary = "[OTP] Bước 1: Gửi mã OTP để đăng ký")
-    @PostMapping("/otp/register/send")
-    public ResponseEntity<ApiResponse<Void>> sendOtpForRegister(
-            @Valid @RequestBody SendOtpRequestDto request) {
-
-        authService.sendOtpForRegister(request);
-        return ResponseEntity.ok(
-                ApiResponse.ok(200, "Mã OTP đã được gửi qua Zalo. Vui lòng nhập mã trong vòng 5 phút.")
-        );
+        authService.sendOtpForForgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok(200, SuccessMessage.Auth.SEND_OTP_SUCCESS));
     }
 
-    /**
-     * BƯỚC 2/2 - Đăng ký:
-     * Client gửi SĐT + OTP + thông tin tài khoản -> BE xác thực OTP và tạo user.
-     * <p>
-     * Request:  POST /api/v1/auth/otp/register/verify
-     * Body:     { "phoneNumber": "...", "otp": "123456", "username": "...", "displayName": "..." }
-     * Response: 201 CREATED + thông tin user
-     */
-    @Operation(summary = "[OTP] Bước 2: Xác thực OTP và hoàn tất đăng ký")
-    @PostMapping("/otp/register/verify")
-    public ResponseEntity<ApiResponse<UserResponseDto>> verifyOtpAndRegister(
-            @Valid @RequestBody VerifyOtpRegisterRequestDto request) {
+    /** BƯỚC 2/2 — Quên mật khẩu */
+    @Operation(summary = "[Quên MK] Bước 2/2 — Xác thực OTP và đặt mật khẩu mới")
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDto request) {
 
-        UserResponseDto user = authService.verifyOtpAndRegister(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(201, "Đăng ký tài khoản thành công!", user));
-    }
-
-    // =============================================
-    // ĐĂNG NHẬP BẰNG OTP (2 bước)
-    // =============================================
-
-    /**
-     * BƯỚC 1/2 - Đăng nhập:
-     * Client gửi số điện thoại -> BE gửi OTP qua Zalo Bot.
-     * <p>
-     * Request:  POST /api/v1/auth/otp/login/send
-     * Body:     { "phoneNumber": "0912345678" }
-     * Response: 200 OK + message xác nhận
-     */
-    @Operation(summary = "[OTP] Bước 1: Gửi mã OTP để đăng nhập")
-    @PostMapping("/otp/login/send")
-    public ResponseEntity<ApiResponse<Void>> sendOtpForLogin(
-            @Valid @RequestBody SendOtpRequestDto request) {
-
-        authService.sendOtpForLogin(request);
-        return ResponseEntity.ok(
-                ApiResponse.ok(200, "Mã OTP đã được gửi qua Zalo. Vui lòng nhập mã trong vòng 5 phút.")
-        );
-    }
-
-    /**
-     * BƯỚC 2/2 - Đăng nhập:
-     * Client gửi SĐT + OTP -> BE xác thực và cấp JWT token.
-     * <p>
-     * Request:  POST /api/v1/auth/otp/login/verify
-     * Body:     { "phoneNumber": "0912345678", "otp": "123456" }
-     * Response: 200 OK + { accessToken, refreshToken, userId, tokenType }
-     */
-    @Operation(summary = "[OTP] Bước 2: Xác thực OTP và lấy JWT token")
-    @PostMapping("/otp/login/verify")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> verifyOtpAndLogin(
-            @Valid @RequestBody VerifyOtpLoginRequestDto request) {
-
-        LoginResponseDto token = authService.verifyOtpAndLogin(request);
-        return ResponseEntity.ok(ApiResponse.ok(200, "Đăng nhập thành công!", token));
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok(200, SuccessMessage.Auth.RESET_PASSWORD_SUCCESS));
     }
 }

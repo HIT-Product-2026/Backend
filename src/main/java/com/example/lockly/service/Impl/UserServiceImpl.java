@@ -23,7 +23,8 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository
                 .findUserDetailByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
         return new CustomUserDetails(user);
     }
 }

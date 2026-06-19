@@ -1,17 +1,14 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.common.util.PasswordUtil;
+import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
-import com.example.lockly.constant.SuccessMessage;
 import com.example.lockly.domain.dto.request.*;
-import com.example.lockly.domain.dto.response.CommonResponseDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
 import com.example.lockly.domain.entity.OtpPurpose;
 import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserRole;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ResourceNotFoundException;
@@ -21,23 +18,18 @@ import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.OtpService;
-import com.example.lockly.service.UserService;
-import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +38,9 @@ public class AuthServiceImpl implements AuthService {
 
     UserRepository userRepository;
     JwtProvider jwtProvider;
-    UserService userService;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    OtpService otpService;   // <-- inject OtpService mới
+    OtpService otpService;
+    PasswordUtil passwordUtil;
 
     @NonFinal
     @Value("${jwt.access.expiration_time}")
@@ -60,154 +52,102 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponseDto register(RegisterRequestDto request) {
-        if (userRepository.existsByEmail(request.email()))
+    public void sendOtpForRegister(RegisterRequestDto request) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new DuplicateResourceException("User", "email", request.email());
-
-        if (userRepository.existsByUsername(request.username()))
+        }
+        if (userRepository.existsByUsername(request.username())) {
             throw new DuplicateResourceException("User", "username", request.username());
+        }
+        otpService.sendOtp(request.email(), OtpPurpose.REGISTER);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
+
+        if (userRepository.existsByEmail(request.email())) {
+            throw new DuplicateResourceException("User", "email", request.email());
+        }
+        if (userRepository.existsByUsername(request.username())) {
+            throw new DuplicateResourceException("User", "username", request.username());
+        }
 
         User user = User.builder()
                 .username(request.username())
+                .displayName(request.displayName())
                 .email(request.email())
-                .password(PasswordUtil.hash(request.password()))
-                .role(UserRole.USER)
+                .password(passwordUtil.hash(request.password()))  // ← instance method
                 .build();
+
         userRepository.save(user);
         return UserResponseDto.from(user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public LoginResponseDto authentication(LoginRequestDto request) {
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", request.username()));
+    public LoginResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BadRequestException("Email hoặc mật khẩu không chính xác."));
 
-        boolean valid = PasswordUtil.verify(request.password(), user.getPassword());
-        if (!valid) {
-            throw new BadRequestException("Sai tên đăng nhập hoặc mật khẩu.");
+        if (!passwordUtil.verify(request.password(), user.getPassword())) {  // ← instance method
+            throw new BadRequestException("Email hoặc mật khẩu không chính xác.");
         }
 
         return buildLoginResponse(user);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public CommonResponseDto logout(LogoutRequestDto request) {
-        try {
-            SignedJWT signedJWT = SignedJWT.parse(request.getToken());
+    @Transactional
+    public void logout(LogoutRequestDto request) {
+        String token = request.getToken();
 
-            String username = jwtProvider.extractUsername(request.getToken());
-            UserDetails userDetails = userService.loadUserByUsername(username);
-
-            if (!jwtProvider.isTokenValid(request.getToken(), userDetails)) {
-                throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
-            }
-
-            String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
-            Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-            LocalDateTime expirationTime = expirationDate.toInstant()
-                    .atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-            if (invalidatedTokenRepository.existsById(jwtId)) {
-                throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
-            }
-
-            invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
-
-            return new CommonResponseDto(HttpStatus.OK, SuccessMessage.Auth.LOGOUT_SUCCESS);
-        } catch (ParseException e) {
-            throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_GET_TOKEN_CLAIM_SET_FAIL);
+        if (jwtProvider.isTokenExpired(token)) {
+            throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
         }
-    }
 
+        String jwtId = jwtProvider.extractTokenId(token);
+
+        if (invalidatedTokenRepository.existsById(jwtId)) {
+            throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
+        }
+
+        Date expirationDate = jwtProvider.extractExpiration(token);
+        LocalDateTime expirationTime = expirationDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
+    }
 
     @Override
     @Transactional
-    public CommonResponseDto sendOtpForRegister(SendOtpRequestDto request) {
-        // Kiểm tra số điện thoại đã được dùng chưa
-        if (userRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new DuplicateResourceException("User", "phoneNumber", request.phoneNumber());
+    public void sendOtpForForgotPassword(ForgotPasswordRequestDto request) {
+        if (!userRepository.existsByEmail(request.email())) {
+            throw new BadRequestException("Nếu email tồn tại, mã OTP sẽ được gửi tới Gmail của bạn.");
         }
-
-        otpService.sendOtp(request.phoneNumber(), OtpPurpose.REGISTER);
-
-        return new CommonResponseDto(
-                HttpStatus.OK,
-                "Mã OTP đã được gửi tới Zalo của bạn. Vui lòng kiểm tra trong " +
-                        "vòng 5 phút."
-        );
+        otpService.sendOtp(request.email(), OtpPurpose.FORGOT_PASSWORD);
     }
-
 
     @Override
     @Transactional
-    public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
-        // Xác thực OTP (throw exception nếu sai/hết hạn)
-        otpService.verifyOtp(request.phoneNumber(), request.otp(), OtpPurpose.REGISTER);
-
-        // Kiểm tra username đã tồn tại chưa
-        if (userRepository.existsByUsername(request.username())) {
-            throw new DuplicateResourceException("User", "username", request.username());
+    public void resetPassword(ResetPasswordRequestDto request) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new BadRequestException("Mật khẩu xác nhận không khớp.");
         }
 
-        // Kiểm tra số điện thoại đã được đăng ký chưa (race condition check)
-        if (userRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new DuplicateResourceException("User", "phoneNumber", request.phoneNumber());
-        }
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.FORGOT_PASSWORD);
 
-        // Tạo user mới
-        // Không có password vì đăng nhập bằng OTP
-        // Dùng UUID ngẫu nhiên làm placeholder password (không bao giờ dùng thực tế)
-        User user = User.builder()
-                .id(UUID.randomUUID().toString())
-                .username(request.username())
-                .displayName(request.displayName())
-                .phoneNumber(request.phoneNumber())
-                .password(PasswordUtil.hash(UUID.randomUUID().toString())) // placeholder
-                .role(UserRole.USER)
-                .build();
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
 
+        user.setPassword(passwordUtil.hash(request.newPassword()));  // ← instance method
         userRepository.save(user);
-
-        return UserResponseDto.from(user);
     }
-
-
-    @Override
-    @Transactional
-    public CommonResponseDto sendOtpForLogin(SendOtpRequestDto request) {
-        // Kiểm tra số điện thoại có tồn tại trong hệ thống không
-        if (!userRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new ResourceNotFoundException("User", "phoneNumber", request.phoneNumber());
-        }
-
-        otpService.sendOtp(request.phoneNumber(), OtpPurpose.LOGIN);
-
-        return new CommonResponseDto(
-                HttpStatus.OK,
-                "Mã OTP đã được gửi tới Zalo của bạn. Vui lòng kiểm tra trong " +
-                        "vòng 5 phút."
-        );
-    }
-
-    @Override
-    @Transactional
-    public LoginResponseDto verifyOtpAndLogin(VerifyOtpLoginRequestDto request) {
-        // Xác thực OTP
-        otpService.verifyOtp(request.phoneNumber(), request.otp(), OtpPurpose.LOGIN);
-
-        // Tìm user theo số điện thoại
-        User user =userRepository.findByPhoneNumber(request.phoneNumber())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "phoneNumber", request.phoneNumber()));
-
-        // Cấp JWT token
-        return buildLoginResponse(user);
-    }
-
 
     private LoginResponseDto buildLoginResponse(User user) {
-        String accessToken = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
+        String accessToken  = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
         String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
 
         return LoginResponseDto.builder()

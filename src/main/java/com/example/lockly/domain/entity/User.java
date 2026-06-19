@@ -34,20 +34,11 @@ public class User {
     @Column(name = "avatar_key")
     private String avatarKey;
 
-    @Column
-    private UserRole role;
-
     @Column(name = "create_at")
     private LocalDateTime createAt;
 
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
-
-    @Column(name = "phone_number", unique = true, length = 15)
-    private String phoneNumber;
-
-    @Column(name = "zalo_user_id", length = 50)
-    private String zaloUserId;
 
     @PrePersist
     void prePersist(){
