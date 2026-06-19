@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Friendships {
+public class Friendship {
 
     @Id
     @Column(length = 36, name = "id", nullable = false, updatable = false)

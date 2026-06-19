@@ -1,9 +1,21 @@
 package com.example.lockly.domain.dto.request;
 
-public record LoginRequestDto(
-        String username,
-        String password,
-        String email
-) {
-}
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
+public record LoginRequestDto(
+
+        @NotBlank(message = "Tên đăng nhập không được để trống")
+        @Size(min = 3, max = 100, message = "Tên đăng nhập phải từ 3 đến 100 ký tự")
+        String username,
+
+        @NotBlank(message = "Mật khẩu không được để trống")
+        @Size(min = 6, max = 100, message = "Mật khẩu phải từ 6 đến 100 ký tự")
+        String password,
+
+        @Email(message = "Email không đúng định dạng")
+        @Size(max = 100, message = "Email tối đa 100 ký tự")
+        String email
+){
+}
