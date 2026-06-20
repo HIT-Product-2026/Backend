@@ -7,7 +7,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,24 +34,25 @@ public class GlobalExceptionHandle {
                 .body(ApiResponse.error(400, ex.getMessage()));
     }
 
-    // Validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handValidationError(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Void>> handValidationError(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
 
-        // Gộp toàn bộ message lỗi thành 1 chuỗi, phân tách bởi dấu phẩy
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String field = error.getField();
+            String code = error.getCode(); // tên annotation: NotBlank, NotNull, Size, Pattern...
+            boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
+
+            if (!errors.containsKey(field) || isEmptyCheck) {
+                errors.put(field, error.getDefaultMessage());
+            }
+        });
+
         String combinedMessage = String.join(", ", errors.values());
-
-        // data trả về null cho từng field bị lỗi (chỉ giữ lại tên field)
-        Map<String, String> nullData = new LinkedHashMap<>();
-        errors.keySet().forEach(field -> nullData.put(field, null));
 
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.error(400, combinedMessage, nullData));
+                .body(ApiResponse.error(400, combinedMessage));
     }
 
     // Exception chung
