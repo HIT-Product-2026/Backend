@@ -10,8 +10,8 @@ public record FriendshipsResponseDto(
         UserResponseDto requester,
         UserResponseDto receiver,
         FriendshipStatus status,
-        LocalDateTime createAt,
-        LocalDateTime updateAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static <T> FriendshipsResponseDto from(Friendship friendship){
         return new FriendshipsResponseDto(
@@ -19,8 +19,8 @@ public record FriendshipsResponseDto(
                 UserResponseDto.from(friendship.getRequester()),
                 UserResponseDto.from(friendship.getReceiver()),
                 friendship.getStatus(),
-                friendship.getCreateAt(),
-                friendship.getUpdateAt()
+                friendship.getCreatedAt(),
+                friendship.getUpdatedAt()
         );
     }
 }

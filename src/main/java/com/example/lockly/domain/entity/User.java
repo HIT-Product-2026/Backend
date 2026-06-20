@@ -45,7 +45,7 @@ public class User {
     @Column(name = "fcm_token", nullable = false)
     private String fcmToken;
 
-    @Column(name = "create_at")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "last_active_at")

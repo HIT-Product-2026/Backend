@@ -1,0 +1,91 @@
+name: CI/CD Pipeline
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - 'v*'
+    paths-ignore:
+      - 'README.md'
+      - 'minIO_db/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+#      - name: Build Spring Boot
+#        run: mvn -B clean package -DskipTests
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/spring-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: admin
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+
+            set -e
+
+            echo "Stopping old containers..."
+            cd /home/admin/app
+            docker compose down --remove-orphans
+
+            echo "Cleaning unused images older than 7 days..."
+#            docker image prune -af --filter "until=168h"
+
+            echo "Pulling latest image..."
+            docker compose pull
+
+            echo "Starting new stack..."
+            docker compose up -d
+
+            echo "Deployment done"
