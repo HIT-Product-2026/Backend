@@ -11,7 +11,6 @@ import java.util.List;
 
 public interface UserService {
 
-    public UserDetails loadUserByUsername(String username);
     public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id);
     public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request);
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request);
