@@ -1,21 +1,20 @@
 package com.example.lockly.common.util;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class PasswordUtil {
-    private static final BCryptPasswordEncoder ENCODER =
-            new BCryptPasswordEncoder();
 
-    private PasswordUtil() {
+    private final PasswordEncoder passwordEncoder;
+
+    public String hash(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
     }
 
-    // Hash password
-    public static String hash(String rawPassword) {
-        return ENCODER.encode(rawPassword);
-    }
-
-     // Verify password
-    public static boolean verify(String rawPassword, String hashedPassword) {
-        return ENCODER.matches(rawPassword, hashedPassword);
+    public boolean verify(String rawPassword, String hashedPassword) {
+        return passwordEncoder.matches(rawPassword, hashedPassword);
     }
 }

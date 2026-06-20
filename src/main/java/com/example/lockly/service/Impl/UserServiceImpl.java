@@ -15,15 +15,12 @@ import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
-import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,15 +40,6 @@ public class UserServiceImpl implements UserService {
     MinioClient minioClient;
     MinioProperties props;
     String prefix = "users/avatar";
-    String prefixApi = "user";
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository
-                .findUserDetailByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
-        return new CustomUserDetails(user);
-    }
 
     @Override
     public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id){

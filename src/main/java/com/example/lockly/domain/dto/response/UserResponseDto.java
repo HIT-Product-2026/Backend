@@ -1,7 +1,6 @@
 package com.example.lockly.domain.dto.response;
 
 import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserRole;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
