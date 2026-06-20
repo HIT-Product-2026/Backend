@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/post")
+@RequestMapping(ApiPath.API_V1 + "/posts")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 
@@ -66,18 +66,9 @@ public class PostController {
     ) throws Exception {
         InputStream inputStream = postService.getPostImage(postId);
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+                .ok()
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(inputStream.readAllBytes());
-    }
-
-    @GetMapping("/user/{user_id}")
-    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
-    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostsByUser(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId
-    ) {
-        return ResponseEntity
-                .ok(ApiResponse.success("Thành công", postService.getPostByUserId(userId)));
     }
 }

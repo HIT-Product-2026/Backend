@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/message")
+@RequestMapping(ApiPath.API_V1 + "/messages")
 @Tag(name = "Message Controller", description = "API quản lý tin nhắn")
 public class MessageController {
 
@@ -63,35 +63,26 @@ public class MessageController {
             MultipartFile file
 
     ) throws Exception {
-        SendImageMessageRequestDto request = new SendImageMessageRequestDto(
-                conversationId,
-                senderId,
-                file
-        );
+        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, senderId, file);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.created(
-                                "Gửi ảnh thành công",
-                                messageService.sendImageMessage(request)
-                        )
-                );
+                .body(ApiResponse.created("Gửi ảnh thành công", messageService.sendImageMessage(request)));
     }
 
 
-    @GetMapping("/conversation/{conversation_id}")
+    @GetMapping("/{conversation_id}/messages")
     @Operation(summary = "Lấy danh sách message", description = "Lấy tất cả message theo conversation")
     public ResponseEntity<ApiResponse<List<MessageResponseDto>>> findMessagesByConversationId(
             @Parameter(description = "ID conversation")
             @PathVariable("conversation_id")
             String conversationId
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.success(
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
                         "Thành công",
-                        messageService.findMessagesByConversationId(conversationId)
-                )
-        );
+                        messageService.findMessagesByConversationId(conversationId)));
     }
 
 
@@ -102,12 +93,9 @@ public class MessageController {
             @PathVariable("message_id")
             String messageId
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Thành công",
-                        messageService.findMessageById(messageId)
-                )
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", messageService.findMessageById(messageId)));
     }
 
 

@@ -3,6 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
@@ -132,7 +133,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request){
+    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
 
         User requester = userRepository
                 .findById(request.requester().id())
