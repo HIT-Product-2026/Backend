@@ -1,5 +1,6 @@
 package com.example.lockly.service;
 
+<<<<<<< HEAD
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
@@ -19,3 +20,11 @@ public interface UserService {
     UserResponseDto getUserById(String id);
     void updateAvatar(String userId, MultipartFile file) throws Exception;
 }
+=======
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import org.springframework.security.core.userdetails.UserDetailsService;
+
+public interface UserService extends UserDetailsService {
+    UserResponseDto getMyInfo(String username);
+}
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe

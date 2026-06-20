@@ -16,10 +16,16 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
+<<<<<<< HEAD
     // This method returns the authorities (roles) of the user.
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+=======
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
     }
 
     @Override
@@ -38,6 +44,14 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
+<<<<<<< HEAD
+=======
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
     public boolean isCredentialsNonExpired() {
         return true;
     }
@@ -50,4 +64,8 @@ public class CustomUserDetails implements UserDetails {
     public User getUser() {
         return user;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe

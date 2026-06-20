@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+<<<<<<< HEAD
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
@@ -17,6 +18,15 @@ import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+=======
+import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.repository.UserRepository;
+import com.example.lockly.security.CustomUserDetails;
+import com.example.lockly.service.UserService;
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,11 +34,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+<<<<<<< HEAD
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+=======
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 
 @Service
 @RequiredArgsConstructor
@@ -36,21 +49,30 @@ import java.util.stream.Stream;
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
+<<<<<<< HEAD
     FriendshipsRepository friendshipsRepository;
     MinioClient minioClient;
     MinioProperties props;
     String prefix = "users/avatar";
     String prefixApi = "user";
+=======
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository
                 .findUserDetailByUsername(username)
+<<<<<<< HEAD
                 .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+=======
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
         return new CustomUserDetails(user);
     }
 
     @Override
+<<<<<<< HEAD
     public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id){
         User requester = userRepository
                 .findById(id)
@@ -198,3 +220,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 }
+=======
+    @Transactional(readOnly = true)
+    public UserResponseDto getMyInfo(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+        return UserResponseDto.from(user);
+    }
+}
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe

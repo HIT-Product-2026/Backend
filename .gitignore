@@ -31,7 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+<<<<<<< HEAD
 
 
 .env
 minIO_db/
+=======
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe

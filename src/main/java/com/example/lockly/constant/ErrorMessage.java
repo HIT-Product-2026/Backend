@@ -25,6 +25,13 @@ public class ErrorMessage {
         public static final String ERR_MALFORMED_TOKEN = "exception.auth.malformed.token";
         public static final String ERR_TOKEN_ALREADY_INVALIDATED = "exception.auth.token.already.invalidated";
 
+<<<<<<< HEAD
+=======
+        // Bổ sung các hằng số lỗi cho OTP & Reset Password
+        public static final String ERR_INVALID_OTP = "exception.auth.invalid.otp";
+        public static final String ERR_EXPIRED_OTP = "exception.auth.expired.otp";
+        public static final String ERR_PASSWORD_NOT_MATCH = "exception.auth.password.not.match";
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
     }
 
     public static class User {
@@ -36,5 +43,8 @@ public class ErrorMessage {
     public static class Admin {
         public static final String ERR_NOT_ADMIN = "exception.admin.not.admin";
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 }

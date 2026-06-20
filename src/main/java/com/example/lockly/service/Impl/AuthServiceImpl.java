@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+<<<<<<< HEAD
 import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.common.util.PasswordUtil;
 import com.example.lockly.constant.ErrorMessage;
@@ -11,6 +12,16 @@ import com.example.lockly.domain.dto.response.CommonResponseDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
+=======
+import com.example.lockly.common.util.PasswordUtil;
+import com.example.lockly.constant.CommonConstant;
+import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.request.*;
+import com.example.lockly.domain.dto.response.LoginResponseDto;
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.InvalidatedToken;
+import com.example.lockly.domain.entity.OtpPurpose;
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
@@ -20,19 +31,29 @@ import com.example.lockly.repository.InvalidatedTokenRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
+<<<<<<< HEAD
 import com.example.lockly.service.UserService;
 import com.nimbusds.jwt.SignedJWT;
+=======
+import com.example.lockly.service.OtpService;
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+<<<<<<< HEAD
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+=======
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -44,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
 
     UserRepository userRepository;
     JwtProvider jwtProvider;
+<<<<<<< HEAD
     UserService userService;
     InvalidatedTokenRepository invalidatedTokenRepository;
 
@@ -69,12 +91,49 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.email())
                 .password(PasswordUtil.hash(request.password()))
                 .build();
+=======
+    InvalidatedTokenRepository invalidatedTokenRepository;
+    OtpService otpService;
+    PasswordUtil passwordUtil;
+
+    @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
+    @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
+
+    @Override
+    @Transactional
+    public void sendOtpForRegister(RegisterRequestDto request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new DuplicateResourceException("User", "email", request.email());
+        }
+        otpService.sendOtp(request.email(), OtpPurpose.REGISTER);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
+        }
+        if (userRepository.existsByUsername(request.username())) {
+            throw new DuplicateResourceException("User", "username", request.username());
+        }
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
+
+        User user = User.builder()
+                .username(request.username())
+                .displayName(request.displayName())
+                .email(request.email())
+                .password(passwordUtil.hash(request.password()))
+                .build();
+
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
         userRepository.save(user);
         return UserResponseDto.from(user);
     }
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< HEAD
     public LoginResponseDto authentication(LoginRequestDto request) {
 
         // Check username
@@ -95,6 +154,68 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
         String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
 
+=======
+    public LoginResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS));
+
+        if (!passwordUtil.verify(request.password(), user.getPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
+        }
+        return buildLoginResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void logout(LogoutRequestDto request) {
+        String token = request.token();
+
+        if (jwtProvider.isTokenExpired(token)) {
+            throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
+        }
+        String jwtId = jwtProvider.extractTokenId(token);
+        if (invalidatedTokenRepository.existsById(jwtId)) {
+            throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
+        }
+
+        Date expirationDate = jwtProvider.extractExpiration(token);
+        LocalDateTime expirationTime = expirationDate.toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+        invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
+    }
+
+    @Override
+    @Transactional
+    public void sendOtpForForgotPassword(ForgotPasswordRequestDto request) {
+        if (!userRepository.existsByEmail(request.email())) {
+            throw new BadRequestException("Nếu email tồn tại, mã OTP sẽ được gửi tới Gmail của bạn.");
+        }
+        otpService.sendOtp(request.email(), OtpPurpose.FORGOT_PASSWORD);
+    }
+
+    @Override
+    @Transactional
+    public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request) {
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.FORGOT_PASSWORD);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDto request) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
+        }
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
+
+        user.setPassword(passwordUtil.hash(request.newPassword()));
+        userRepository.save(user);
+    }
+
+    private LoginResponseDto buildLoginResponse(User user) {
+        String accessToken  = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
+        String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -102,6 +223,7 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
     }
+<<<<<<< HEAD
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -140,3 +262,6 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 }
+=======
+}
+>>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
