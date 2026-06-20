@@ -20,11 +20,11 @@ public class Conversation {
     private String id;
 
     // Quy ước user1 là người có id nhỏ hơn
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user1_id")
     private User user1;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user2_id")
     private User user2;
 

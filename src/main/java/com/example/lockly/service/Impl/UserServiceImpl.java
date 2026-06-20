@@ -61,7 +61,8 @@ public class UserServiceImpl implements UserService {
         List<Friendship> friendshipList = friendshipsRepository
                 .findByRequesterAndStatus(requester, FriendshipStatus.PENDING);
 
-        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList.stream()
+        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList
+                .stream()
                 .map(FriendshipsResponseDto::from)
                 .toList();
 

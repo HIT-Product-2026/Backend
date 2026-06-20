@@ -27,7 +27,7 @@ public class Message {
     @JoinColumn(name = "sender_id")
     private User sender;
 
-    // Nếu là thì sẽ chưa đường dẫn ở đây
+    // Nếu là ảnh thì sẽ chứa đường dẫn ở đây
     private String content;
 
     @Column(nullable = false)
