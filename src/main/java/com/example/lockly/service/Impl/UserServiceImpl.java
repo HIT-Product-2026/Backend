@@ -1,7 +1,9 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
@@ -60,7 +62,8 @@ public class UserServiceImpl implements UserService {
         List<Friendship> friendshipList = friendshipsRepository
                 .findByRequesterAndStatus(requester, FriendshipStatus.PENDING);
 
-        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList.stream()
+        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList
+                .stream()
                 .map(FriendshipsResponseDto::from)
                 .toList();
 
@@ -130,7 +133,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request){
+    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
 
         User requester = userRepository
                 .findById(request.requester().id())
@@ -179,14 +182,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        String objectName =
-                prefix
-                + "/"
-                + userId
-                + "/"
-                + UUID.randomUUID()
-                + "_"
-                + file.getOriginalFilename();
+        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
 
         minioClient.putObject(
                 PutObjectArgs.builder()
