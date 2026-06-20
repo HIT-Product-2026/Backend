@@ -1,5 +1,6 @@
 package com.example.lockly.service;
 
+import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
@@ -14,7 +15,9 @@ public interface UserService {
     public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request);
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request);
     public List<UserResponseDto> findAllListFriendByUserId(String id);
-    public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request);
+    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
     UserResponseDto getUserById(String id);
     void updateAvatar(String userId, MultipartFile file) throws Exception;
+    public boolean isUserOnline(String userId);
+    public void updateUserLocation(String userId, Double latitude, Double longitude);
 }

@@ -1,6 +1,9 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
+import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -46,7 +50,8 @@ public class UserServiceImpl implements UserService {
         List<Friendship> friendshipList = friendshipsRepository
                 .findByRequesterAndStatus(requester, FriendshipStatus.PENDING);
 
-        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList.stream()
+        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList
+                .stream()
                 .map(FriendshipsResponseDto::from)
                 .toList();
 
@@ -54,6 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request){
         Friendship friendship = friendshipsRepository
                 .findById(request.id())
@@ -71,6 +77,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request){
         Friendship friendship = friendshipsRepository
                 .findById(request.id())
@@ -113,7 +120,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public FriendshipsResponseDto sendFriendshipRequest(FriendshipsRequestDto request){
+    @Transactional
+    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
 
         User requester = userRepository
                 .findById(request.requester().id())
@@ -162,14 +170,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        String objectName =
-                prefix
-                + "/"
-                + userId
-                + "/"
-                + UUID.randomUUID()
-                + "_"
-                + file.getOriginalFilename();
+        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
 
         minioClient.putObject(
                 PutObjectArgs.builder()
@@ -183,5 +184,34 @@ public class UserServiceImpl implements UserService {
         user.setAvatarUrl(objectName);
 
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserLocation(String userId, Double latitude, Double longitude) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        user.setLatitude(latitude);
+        user.setLongitude(longitude);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean isUserOnline(String userId) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (user.getLastActiveAt() == null)
+            return false;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
     }
 }

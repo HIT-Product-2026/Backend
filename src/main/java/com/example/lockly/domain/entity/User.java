@@ -26,11 +26,11 @@ public class User {
     @Column(length = 100, name = "display_name", nullable = false)
     private String displayName;
 
-    @Column(length = 100, unique = true)
+    @Column(length = 100, unique = true, nullable = false)
     private String email;
 
     @Column(length = 100, nullable = false)
-    private String password;
+    private String passwordHash;
 
     @Column(name = "avatar_url")
     private String avatarUrl;
@@ -41,8 +41,12 @@ public class User {
     @Column
     private Double longitude;
 
+    // Địa chỉ của thiết bị, giúp fe biết cần gửi thông báo đến đâu
+    @Column(name = "fcm_token", nullable = false)
+    private String fcmToken;
+
     @Column(name = "create_at")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
@@ -52,7 +56,7 @@ public class User {
         if (id == null){
             id = UUID.randomUUID().toString();
         }
-        createAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
