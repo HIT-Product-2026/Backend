@@ -26,13 +26,13 @@ public class ConversationServiceImpl implements ConversationService {
     UserRepository userRepository;
 
     @Override
-    public List<ConversationResponseDto> findByUser(String userId){
+    public List<ConversationResponseDto> findByUserId(String userId){
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new BadRequestException("User id ", userId));
 
         return conversationRepository
-                .findAllByUser(user)
+                .findByUser(user)
                 .stream()
                 .map(ConversationResponseDto::from)
                 .toList();
@@ -68,13 +68,12 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponseDto getConversationById(String id){
+    public ConversationResponseDto findById(String id){
         Conversation conversation = conversationRepository
                 .findById(id)
                 .orElseThrow(() -> new BadRequestException("Conversation id", id));
 
         return ConversationResponseDto.from(conversation);
     }
-
 
 }

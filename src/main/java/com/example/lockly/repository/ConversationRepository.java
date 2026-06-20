@@ -19,7 +19,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
        or c.user2 = :user
     order by c.lastMessageTime desc
 """)
-    List<Conversation> findAllByUser(@Param("user") User user);
+    List<Conversation> findByUser(@Param("user") User user);
 
     boolean existsByUser1AndUser2(User user1, User user2);
 
