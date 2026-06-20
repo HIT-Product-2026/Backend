@@ -19,11 +19,8 @@ public class User {
     @Column(name = "id", length = 36, updatable = false, nullable = false)
     private String id;
 
-<<<<<<< HEAD
-    @Column(length = 100, nullable = false)
-=======
+
     @Column(length = 100, nullable = false, unique = true)
->>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
     private String username;
 
     @Column(length = 100, name = "display_name", nullable = false)
@@ -35,7 +32,6 @@ public class User {
     @Column(length = 100, nullable = false)
     private String password;
 
-<<<<<<< HEAD
     @Column(name = "avatar_url")
     private String avatarUrl;
 
@@ -44,10 +40,6 @@ public class User {
 
     @Column
     private Double longitude;
-=======
-    @Column(name = "avatar_key")
-    private String avatarKey;
->>>>>>> acba5e954f2a3c3fb5981d13d96bf84354d83cbe
 
     @Column(name = "create_at")
     private LocalDateTime createAt;

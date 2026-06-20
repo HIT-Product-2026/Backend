@@ -1,6 +1,6 @@
     package com.example.lockly.controller;
 
-    import com.example.lockly.common.ApiResponse;
+    import com.example.lockly.common.response.ApiResponse;
     import com.example.lockly.constant.SuccessMessage;
     import com.example.lockly.domain.dto.request.*;
     import com.example.lockly.domain.dto.response.LoginResponseDto;
@@ -51,8 +51,10 @@
         ) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(ApiResponse
-                            .created(SuccessMessage.Auth.REGISTER_SUCCESS, authService.verifyOtpAndRegister(request)));
+                    .body(ApiResponse.created(
+                            SuccessMessage.Auth.REGISTER_SUCCESS,
+                            authService.verifyOtpAndRegister(request))
+                    );
         }
 
         @PostMapping("/login")
@@ -65,8 +67,9 @@
         ) {
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(ApiResponse
-                            .success(SuccessMessage.Auth.LOGIN_SUCCESS, authService.login(request)));
+                    .body(ApiResponse.success(
+                            SuccessMessage.Auth.LOGIN_SUCCESS,
+                            authService.login(request)));
         }
 
         @PostMapping("/logout")
