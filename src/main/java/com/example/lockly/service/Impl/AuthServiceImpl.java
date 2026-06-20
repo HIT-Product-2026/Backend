@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(request.username())
                 .displayName(request.displayName())
                 .email(request.email())
-                .password(passwordUtil.hash(request.password()))
+                .passwordHash(passwordUtil.hash(request.password()))
                 .build();
 
         userRepository.save(user);
@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS));
 
-        if (!passwordUtil.verify(request.password(), user.getPassword())) {
+        if (!passwordUtil.verify(request.password(), user.getPasswordHash())) {
             throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
         }
         return buildLoginResponse(user);
@@ -131,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
 
-        user.setPassword(passwordUtil.hash(request.newPassword()));
+        user.setPasswordHash(passwordUtil.hash(request.newPassword()));
         userRepository.save(user);
     }
 

@@ -34,6 +34,6 @@ public class Post {
     @Column(name = "content_type")
     private String contentType;
 
-    @Column(name = "create_at")
-    private LocalDateTime createAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

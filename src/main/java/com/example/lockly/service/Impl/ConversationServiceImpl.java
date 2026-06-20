@@ -6,7 +6,6 @@ import com.example.lockly.domain.entity.Conversation;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
-import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.ConversationRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.ConversationService;
