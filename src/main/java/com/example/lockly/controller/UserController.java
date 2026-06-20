@@ -3,6 +3,8 @@ package com.example.lockly.controller;
 import com.example.lockly.common.ApiResponse;
 import com.example.lockly.constant.SuccessMessage;
 import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.service.CustomUserDetailsService;
+import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +26,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User Controller", description = "Quản lý thông tin người dùng")
 public class UserController {
 
-    UserService customUserDetailsService;
+    CustomUserDetailsService customUserDetailsService;
+    UserService userService;
 
     @GetMapping("/me")
     @Operation(
