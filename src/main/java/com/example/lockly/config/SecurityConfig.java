@@ -27,8 +27,6 @@ public class SecurityConfig {
 
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // ── Các endpoint không cần token ─────────────────────────────────────────
-    // FIX: đồng bộ đúng với path trong AuthController
     static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/register/send-otp",
             "/api/v1/auth/register/verify-otp",
@@ -41,7 +39,6 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs/**",
     };
-    // NOTE: /logout KHÔNG public — phải có Bearer token hợp lệ mới logout được
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

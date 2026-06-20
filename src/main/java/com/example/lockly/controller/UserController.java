@@ -3,7 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.ApiResponse;
 import com.example.lockly.constant.SuccessMessage;
 import com.example.lockly.domain.dto.response.UserResponseDto;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.CustomUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User Controller", description = "Quản lý thông tin người dùng")
 public class UserController {
 
-    UserService userService;
+    CustomUserDetailsService customUserDetailsService;
 
     @GetMapping("/me")
     @Operation(
@@ -36,7 +36,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDto>> getMyInfo(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        UserResponseDto data = userService.getMyInfo(userDetails.getUsername());
+        UserResponseDto data = customUserDetailsService.getMyInfo(userDetails.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(SuccessMessage.User.GET_MY_INFO_SUCCESS, data));
