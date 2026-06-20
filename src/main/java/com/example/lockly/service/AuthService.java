@@ -8,7 +8,9 @@ public interface AuthService {
     void sendOtpForRegister(RegisterRequestDto request);
     UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request);
     LoginResponseDto login(LoginRequestDto request);
-    void logout(LogoutRequestDto request);   // ← đổi CommonResponseDto → void
+    void logout(LogoutRequestDto request);
     void sendOtpForForgotPassword(ForgotPasswordRequestDto request);
+    void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request);
     void resetPassword(ResetPasswordRequestDto request);
+
 }

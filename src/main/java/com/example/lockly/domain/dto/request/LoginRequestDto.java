@@ -1,15 +1,14 @@
 package com.example.lockly.domain.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import com.example.lockly.common.validator.ValidEmail;
+import com.example.lockly.common.validator.ValidPassword;
 
 public record LoginRequestDto(
 
-        @NotBlank(message = "Email không được để trống")
-        @Email(message = "Email không đúng định dạng")
+        @ValidEmail
         String email,
 
-        @NotBlank(message = "Mật khẩu không được để trống")
+        @ValidPassword
         String password
 
 ) {}

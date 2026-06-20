@@ -87,9 +87,6 @@ public class OtpServiceImpl implements OtpService {
         log.info("[OTP] Xác thực thành công {} OTP cho {}", purpose, email);
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE
-    // ══════════════════════════════════════════════════════════════════════════
 
     private void checkResendCooldown(String email, OtpPurpose purpose) {
         otpRepository.findValidOtp(email, purpose, LocalDateTime.now())

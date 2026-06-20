@@ -1,10 +1,10 @@
 package com.example.lockly.domain.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@Setter
-public class LogoutRequestDto {
-    private String token;
-}
+public record LogoutRequestDto(
+
+        @NotBlank(message = "Token không được để trống")
+        String token
+
+) {}

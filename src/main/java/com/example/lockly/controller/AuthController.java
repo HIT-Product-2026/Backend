@@ -84,30 +84,29 @@
         }
 
         @PostMapping("/forgot-password/send-otp")
-        @Operation(
-                summary = "Quên mật khẩu — Bước 1/2",
-                description = "Gửi OTP về Gmail"
-        )
+        @Operation(summary = "[Quên MK] Bước 1/3 — Nhập email và gửi OTP về Gmail")
         public ResponseEntity<ApiResponse<Void>> sendOtpForForgotPassword(
-                @Valid @RequestBody ForgotPasswordRequestDto request
-        ) {
+                @Valid @RequestBody ForgotPasswordRequestDto request) {
             authService.sendOtpForForgotPassword(request);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.SEND_OTP_SUCCESS));
         }
 
+        @PostMapping("/forgot-password/verify-otp")
+        @Operation(summary = "[Quên MK] Bước 2/3 — Xác thực OTP")
+        public ResponseEntity<ApiResponse<Void>> verifyOtpForgotPassword(
+                @Valid @RequestBody VerifyOtpForgotPasswordRequestDto request) {
+            authService.verifyOtpForgotPassword(request);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(SuccessMessage.Auth.VERIFY_OTP_SUCCESS));
+        }
+
         @PostMapping("/forgot-password/reset")
-        @Operation(
-                summary = "Quên mật khẩu — Bước 2/2",
-                description = "Xác thực OTP và đặt mật khẩu mới"
-        )
+        @Operation(summary = "[Quên MK] Bước 3/3 — Nhập mật khẩu mới")
         public ResponseEntity<ApiResponse<Void>> resetPassword(
-                @Valid @RequestBody ResetPasswordRequestDto request
-        ) {
+                @Valid @RequestBody ResetPasswordRequestDto request) {
             authService.resetPassword(request);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.RESET_PASSWORD_SUCCESS));
         }
     }

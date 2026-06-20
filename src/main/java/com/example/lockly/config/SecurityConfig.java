@@ -30,18 +30,13 @@ public class SecurityConfig {
     // ── Các endpoint không cần token ─────────────────────────────────────────
     // FIX: đồng bộ đúng với path trong AuthController
     static final String[] PUBLIC_ENDPOINTS = {
-            // Đăng ký (2 bước)
             "/api/v1/auth/register/send-otp",
             "/api/v1/auth/register/verify-otp",
-
-            // Đăng nhập
             "/api/v1/auth/login",
-
-            // Quên mật khẩu (2 bước)
             "/api/v1/auth/forgot-password/send-otp",
+            "/api/v1/auth/forgot-password/verify-otp",  // ← thêm
             "/api/v1/auth/forgot-password/reset",
-
-            // Swagger UI
+            "/api/v1/auth/logout",                       // ← thêm
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",

@@ -42,13 +42,8 @@ public class AuthServiceImpl implements AuthService {
     OtpService otpService;
     PasswordUtil passwordUtil;
 
-    @NonFinal
-    @Value("${jwt.access.expiration_time}")
-    long ACCESS_TOKEN_EXPIRATION;
-
-    @NonFinal
-    @Value("${jwt.refresh.expiration_time}")
-    long REFRESH_TOKEN_EXPIRATION;
+    @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
+    @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
 
     @Override
     @Transactional
@@ -56,29 +51,25 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new DuplicateResourceException("User", "email", request.email());
         }
-        if (userRepository.existsByUsername(request.username())) {
-            throw new DuplicateResourceException("User", "username", request.username());
-        }
         otpService.sendOtp(request.email(), OtpPurpose.REGISTER);
     }
 
     @Override
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
-        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
-
-        if (userRepository.existsByEmail(request.email())) {
-            throw new DuplicateResourceException("User", "email", request.email());
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
         }
         if (userRepository.existsByUsername(request.username())) {
             throw new DuplicateResourceException("User", "username", request.username());
         }
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
 
         User user = User.builder()
                 .username(request.username())
                 .displayName(request.displayName())
                 .email(request.email())
-                .password(passwordUtil.hash(request.password()))  // ← instance method
+                .password(passwordUtil.hash(request.password()))
                 .build();
 
         userRepository.save(user);
@@ -89,35 +80,30 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BadRequestException("Email hoặc mật khẩu không chính xác."));
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS));
 
-        if (!passwordUtil.verify(request.password(), user.getPassword())) {  // ← instance method
-            throw new BadRequestException("Email hoặc mật khẩu không chính xác.");
+        if (!passwordUtil.verify(request.password(), user.getPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
         }
-
         return buildLoginResponse(user);
     }
 
     @Override
     @Transactional
     public void logout(LogoutRequestDto request) {
-        String token = request.getToken();
+        String token = request.token();
 
         if (jwtProvider.isTokenExpired(token)) {
             throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
         }
-
         String jwtId = jwtProvider.extractTokenId(token);
-
         if (invalidatedTokenRepository.existsById(jwtId)) {
             throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
         }
 
         Date expirationDate = jwtProvider.extractExpiration(token);
         LocalDateTime expirationTime = expirationDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
-
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
         invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
     }
 
@@ -132,24 +118,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request) {
+        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.FORGOT_PASSWORD);
+    }
+
+    @Override
+    @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
         if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new BadRequestException("Mật khẩu xác nhận không khớp.");
+            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
         }
-
-        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.FORGOT_PASSWORD);
-
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
 
-        user.setPassword(passwordUtil.hash(request.newPassword()));  // ← instance method
+        user.setPassword(passwordUtil.hash(request.newPassword()));
         userRepository.save(user);
     }
 
     private LoginResponseDto buildLoginResponse(User user) {
         String accessToken  = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
         String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
-
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

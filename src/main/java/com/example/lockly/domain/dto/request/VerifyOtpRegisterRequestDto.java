@@ -1,17 +1,13 @@
 package com.example.lockly.domain.dto.request;
 
-import jakarta.validation.constraints.Email;
+import com.example.lockly.common.validator.ValidEmail;
+import com.example.lockly.common.validator.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/**
- * Đăng ký bước 2: Client gửi lại toàn bộ thông tin + OTP.
- * BE xác thực OTP rồi tạo tài khoản.
- */
 public record VerifyOtpRegisterRequestDto(
 
-        @NotBlank(message = "Email không được để trống")
-        @Email(message = "Email không đúng định dạng")
+        @ValidEmail
         String email,
 
         @NotBlank(message = "OTP không được để trống")
@@ -26,8 +22,10 @@ public record VerifyOtpRegisterRequestDto(
         @Size(min = 2, max = 100, message = "Tên hiển thị từ 2 đến 100 ký tự")
         String displayName,
 
-        @NotBlank(message = "Mật khẩu không được để trống")
-        @Size(min = 6, max = 100, message = "Mật khẩu từ 6 đến 100 ký tự")
-        String password
+        @ValidPassword
+        String password,
+
+        @NotBlank(message = "Xác nhận mật khẩu không được để trống")
+        String confirmPassword
 
 ) {}

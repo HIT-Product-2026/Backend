@@ -16,7 +16,6 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    // Vì đã xóa role, gán một Role mặc định chung là ROLE_USER cho tất cả tài khoản hợp lệ
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
