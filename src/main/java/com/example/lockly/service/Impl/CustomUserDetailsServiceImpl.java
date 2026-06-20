@@ -4,7 +4,6 @@ import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.repository.UserRepository;
-import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.CustomUserDetailsService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
