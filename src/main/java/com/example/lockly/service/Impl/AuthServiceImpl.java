@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
@@ -91,20 +93,49 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(LogoutRequestDto request) {
+
         String token = request.token();
 
-        if (jwtProvider.isTokenExpired(token)) {
-            throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
-        }
-        String jwtId = jwtProvider.extractTokenId(token);
-        if (invalidatedTokenRepository.existsById(jwtId)) {
-            throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
-        }
+        log.info("LOGOUT REQUEST RECEIVED");
 
-        Date expirationDate = jwtProvider.extractExpiration(token);
-        LocalDateTime expirationTime = expirationDate.toInstant()
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-        invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
+        try {
+            String jwtId = jwtProvider.extractTokenId(token);
+            Date expirationDate = jwtProvider.extractExpiration(token);
+            boolean expired = jwtProvider.isTokenExpired(token);
+            boolean alreadyBlacklisted = invalidatedTokenRepository.existsById(jwtId);
+
+            log.info("token = {}", token);
+            log.info("jwtId = {}", jwtId);
+            log.info("expired = {}", expired);
+            log.info("expirationDate = {}", expirationDate);
+            log.info("alreadyBlacklisted = {}", alreadyBlacklisted);
+
+            // ❗ token hết hạn
+            if (expired) {
+                log.warn("Logout failed: token already expired");
+                throw new VsException(HttpStatus.UNAUTHORIZED,
+                        ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
+            }
+
+            // ❗ token đã bị logout trước đó
+            if (alreadyBlacklisted) {
+                log.warn("Logout failed: token already invalidated (blacklisted)");
+                throw new VsException(HttpStatus.BAD_REQUEST,
+                        ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
+            }
+
+            LocalDateTime expirationTime = expirationDate.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+
+            invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
+
+            log.info("Logout success → token blacklisted, jwtId = {}", jwtId);
+
+        } catch (Exception e) {
+            log.error("Logout error: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override

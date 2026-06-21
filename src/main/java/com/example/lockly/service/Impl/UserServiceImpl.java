@@ -122,14 +122,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
-
+        
         User requester = userRepository
-                .findById(request.requester().id())
-                .orElseThrow(() -> new BadRequestException("requester id", request.requester().id()));
+                .findById(request.requesterId())
+                .orElseThrow(() -> new BadRequestException("requester id", request.requesterId()));
 
         User receiver = userRepository
-                .findById(request.receiver().id())
-                .orElseThrow(() -> new BadRequestException("receiver id", request.receiver().id()));
+                .findById(request.receiverId())
+                .orElseThrow(() -> new BadRequestException("receiver id", request.receiverId()));
 
         if (friendshipsRepository.existsByRequesterAndReceiver(requester, receiver)
         || friendshipsRepository.existsByReceiverAndRequester(receiver, requester))
