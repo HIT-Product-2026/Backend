@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
-        
+
         User requester = userRepository
                 .findById(request.requesterId())
                 .orElseThrow(() -> new BadRequestException("requester id", request.requesterId()));

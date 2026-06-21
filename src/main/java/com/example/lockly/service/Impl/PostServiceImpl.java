@@ -12,6 +12,7 @@ import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
