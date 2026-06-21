@@ -42,7 +42,7 @@ public class User {
     private Double longitude;
 
     // Địa chỉ của thiết bị, giúp fe biết cần gửi thông báo đến đâu
-    @Column(name = "fcm_token", nullable = false)
+    @Column(name = "fcm_token")
     private String fcmToken;
 
     @Column(name = "created_at")
