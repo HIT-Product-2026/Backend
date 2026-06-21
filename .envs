@@ -1,0 +1,12 @@
+DB_URL=jdbc:mysql://mysql:3306/lockly_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+DB_USERNAME=root
+DB_PASSWORD=Khanh0365631904@
+
+jwt.secret=...
+jwt.access.expiration_time=900000
+jwt.refresh.expiration_time=900000
+
+MINIO_ENDPOINT=http://minio:9000
+MINIO_ACCESS_KEY=admin
+MINIO_SECRET_KEY=password123
+MINIO_BUCKET_NAME=images

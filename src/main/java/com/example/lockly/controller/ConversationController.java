@@ -7,6 +7,7 @@ import com.example.lockly.domain.dto.request.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.ConversationResponseDto;
 import com.example.lockly.service.ConversationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AccessLevel;
@@ -22,6 +23,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/conversations")
 @Tag(name = "Conversation Controller", description = "API quản lý hội thoại")
