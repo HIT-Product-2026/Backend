@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotNull;
 public record CreateFriendshipRequestDto (
 
     @NotNull(message = "Người gửi lời mời không được để trống")
-    UserResponseDto requester,
+    String requesterId,
 
     @NotNull(message = "Người nhận lời mời không được để trống")
-    UserResponseDto receiver,
+    String receiverId,
 
     @NotNull(message = "Trạng thái không được để trống")
     FriendshipStatus status
