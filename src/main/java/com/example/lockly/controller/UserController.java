@@ -49,7 +49,7 @@ public class UserController {
             @PathVariable("user_id") String userId
     ) {
         List<UserResponseDto> listFriend =
-                userService.findAllListFriendByUserId(userId);
+                userService.findFriendByUserId(userId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -62,7 +62,7 @@ public class UserController {
             @Parameter(description = "ID của user")
             @PathVariable("user_id") String userId
     ) {
-        List<FriendshipsResponseDto> result = userService.findAllFriendshipsByUserId(userId);
+        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(userId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
