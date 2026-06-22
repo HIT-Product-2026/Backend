@@ -2,6 +2,7 @@ package com.example.lockly.service;
 
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
+import com.example.lockly.domain.entity.PostModeLocation;
 
 import java.io.InputStream;
 import java.util.List;
@@ -11,4 +12,5 @@ public interface PostService {
     InputStream getPostImage(String postId) throws Exception;
     PostResponseDto getPostById(String postId);
     List<PostResponseDto> getPostByUserId(String userId);
+    public void updateModeLocationPostById(String postId, PostModeLocation modeLocation);
 }

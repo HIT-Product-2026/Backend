@@ -34,6 +34,9 @@ public class Post {
     @Column(name = "content_type")
     private String contentType;
 
+    @Column(name = "mode_location")
+    private PostModeLocation modeLocation;
+
     @Column
     private Double latitude;
 

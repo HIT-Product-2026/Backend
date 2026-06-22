@@ -1,25 +1,48 @@
 package com.example.lockly.domain.dto.response;
 
 import com.example.lockly.domain.entity.Post;
+import com.example.lockly.domain.entity.PostModeLocation;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-public record PostResponseDto(
-        String id,
-        UserResponseDto user,
-        String caption,
-        String imageUrl,
-        String contentType,
-        Double latitude,
-        Double longitude
-) {
-    public static PostResponseDto from(Post posts, String imageUrl){
+@Getter
+@Setter
+@AllArgsConstructor
+public class PostResponseDto {
+
+    private String id;
+    private UserResponseDto user;
+    private String caption;
+    private String imageUrl;
+    private String contentType;
+    private Double latitude;
+    private Double longitude;
+    private PostModeLocation modeLocation;
+
+    public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
         return new PostResponseDto(
-                posts.getId(),
-                UserResponseDto.from(posts.getUser()),
-                posts.getCaption(),
+                post.getId(),
+                UserResponseDto.from(post.getUser()),
+                post.getCaption(),
                 imageUrl,
-                posts.getContentType(),
-                posts.getLatitude(),
-                posts.getLongitude()
+                post.getContentType(),
+                latitude,
+                longitude,
+                post.getModeLocation()
+        );
+    }
+
+    public static PostResponseDto from(Post post, String imageUrl) {
+        return new PostResponseDto(
+                post.getId(),
+                UserResponseDto.from(post.getUser()),
+                post.getCaption(),
+                imageUrl,
+                post.getContentType(),
+                post.getLatitude(),
+                post.getLongitude(),
+                post.getModeLocation()
         );
     }
 }

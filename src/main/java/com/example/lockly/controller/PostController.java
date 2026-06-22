@@ -6,6 +6,7 @@ import com.example.lockly.domain.dto.request.CreatePostRequestDto;
 import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.FcmService;
 import com.example.lockly.service.Impl.PostServiceImpl;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/posts")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
@@ -51,25 +54,26 @@ public class PostController {
             @Parameter(description = "Kinh độ")
             @RequestParam("longitude") Double longitude,
 
-            @Parameter(description = "Kinh độ")
-            @RequestParam("longitude") Double latitude
+            @Parameter(description = "Vĩ độ")
+            @RequestParam("latitude") Double latitude
+
     ) throws Exception {
-        CreatePostRequestDto request = new CreatePostRequestDto(file, userId, caption, null, null);
+
+        CreatePostRequestDto request = new CreatePostRequestDto(
+                file,
+                userId,
+                caption,
+                latitude,
+                longitude
+        );
 
         PostResponseDto post = postService.createPost(request);
 
         // Gửi thông báo
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(userId);
-        FcmPostResponseDto data = fcmService.createFcmPostResponse(userId, post.id());
+        FcmPostResponseDto data = fcmService.createFcmPostResponse(userId, post.getId());
         fcmService.sendToManySilent(fcmTokens, data);
 
-        //Lưu vị trí
-        UserResponseDto user = userService.findUserById(userId);
-        if (user.mode() == UserMode.PUBLIC){
-            //Sửa lại vị trí
-        } else{
-            // Trả null
-        }
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -98,5 +102,20 @@ public class PostController {
                 .ok()
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(inputStream.readAllBytes());
+    }
+
+    @PatchMapping("/mode")
+    @Operation(summary = "Thay đổi mode location", description = "Quyết định có chia sẻ vị trí của bài post không")
+    public ResponseEntity<ApiResponse<Void>> updateModeLocationPost(
+            @Parameter(description = "ID bài post")
+            @RequestParam("post_id") String postId,
+
+            @Parameter(description = "Mode muốn đổi")
+            @RequestParam("mode_location") PostModeLocation modeLocation
+    ){
+        postService.updateModeLocationPostById(postId, modeLocation);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công"));
     }
 }

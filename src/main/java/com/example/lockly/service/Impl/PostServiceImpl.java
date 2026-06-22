@@ -5,7 +5,9 @@ import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.entity.Post;
+import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.PostsRepository;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
 
@@ -56,6 +60,11 @@ public class PostServiceImpl implements PostService {
                     .findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+            // Set mode cho bài post
+            PostModeLocation mode = PostModeLocation.PUBLIC;
+            if (user.getMode() == UserMode.PRIVATE)
+                mode = PostModeLocation.PRIVATE;
+
             Post post = Post.builder()
                     .id(postId)
                     .user(user)
@@ -63,6 +72,9 @@ public class PostServiceImpl implements PostService {
                     .objectName(objectName)
                     .caption(caption)
                     .contentType(file.getContentType())
+                    .longitude(request.longitude())
+                    .latitude(request.latitude())
+                    .modeLocation(mode)
                     .build();
 
             postsRepository.save(post);
@@ -90,7 +102,13 @@ public class PostServiceImpl implements PostService {
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, postId));
+        String imageUrl = FileUtil.getImageUrlApi(prefix, postId);
+
+        // Public mới trả tọa độ, không thì null
+        if (post.getModeLocation() == PostModeLocation.PRIVATE){
+            return PostResponseDto.from(post, imageUrl, null, null);
+        }
+        return PostResponseDto.from(post, imageUrl);
     }
 
     @Override
@@ -109,5 +127,15 @@ public class PostServiceImpl implements PostService {
                 .toList();
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public void updateModeLocationPostById(String postId, PostModeLocation modeLocation){
+        Post post = postsRepository
+                .findById(postId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy post với id", postId));
+
+        post.setModeLocation(modeLocation);
     }
 }

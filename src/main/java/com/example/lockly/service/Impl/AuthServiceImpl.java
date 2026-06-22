@@ -9,6 +9,7 @@ import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
 import com.example.lockly.domain.entity.OtpPurpose;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ResourceNotFoundException;
@@ -72,6 +73,8 @@ public class AuthServiceImpl implements AuthService {
                 .displayName(request.displayName())
                 .email(request.email())
                 .passwordHash(passwordUtil.hash(request.password()))
+                .mode(UserMode.PUBLIC)
+                .fcmToken(request.fcm_token())
                 .build();
 
         userRepository.save(user);
