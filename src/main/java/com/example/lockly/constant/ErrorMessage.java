@@ -28,7 +28,7 @@ public class ErrorMessage {
         // Bổ sung các hằng số lỗi cho OTP & Reset Password
         public static final String ERR_INVALID_OTP = "exception.auth.invalid.otp";
         public static final String ERR_EXPIRED_OTP = "exception.auth.expired.otp";
-        public static final String ERR_PASSWORD_NOT_MATCH = "exception.auth.password.not.match";
+        public static final String ERR_PASSWORD_NOT_MATCH = "Mật khẩu xác thực không chính xác";
     }
 
     public static class User {

@@ -9,15 +9,15 @@ import java.lang.annotation.*;
 
 @NotBlank(message = "Email không được để trống")
 @Pattern(
-        regexp = "^$|^[a-z0-9.]{6,30}@[a-z0-9]+\\.[a-z]{2,}$",
-        message = "Email không hợp lệ. Phần tên tài khoản chỉ dùng chữ thường (a-z), số (0-9), dấu chấm (.) và từ 6 đến 30 ký tự"
+        regexp = "^$|^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9\\-]+(\\.[a-zA-Z]{2,})+$",
+        message = "Email sai định dạng."
 )
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = {})
 public @interface ValidEmail {
-    String message() default "Email không hợp lệ";
+    String message() default "Email sai định dạng.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
