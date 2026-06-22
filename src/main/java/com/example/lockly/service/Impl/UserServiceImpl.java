@@ -15,6 +15,7 @@ import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     FriendshipsRepository friendshipsRepository;
     MinioClient minioClient;
     MinioProperties props;
+    RedisService redisService;
     String prefix = "users/avatar";
 
     @Override
@@ -146,7 +148,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(String id) {
+    public UserResponseDto findUserById(String id) {
 
         User user = userRepository
                 .findById(id)
@@ -193,8 +195,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        user.setLatitude(latitude);
-        user.setLongitude(longitude);
+        redisService.saveUserLocation(userId, latitude, longitude);
 
         userRepository.save(user);
     }
@@ -206,12 +207,16 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if (user.getLastActiveAt() == null)
+        LocalDateTime lastActiveAt = redisService
+                .getUserLocation(userId)
+                .lastActiveAt();
+
+        if (lastActiveAt == null)
             return false;
 
         LocalDateTime now = LocalDateTime.now();
 
-        return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
+        return !lastActiveAt.isBefore(now.minusMinutes(3));
     }
 
     @Override

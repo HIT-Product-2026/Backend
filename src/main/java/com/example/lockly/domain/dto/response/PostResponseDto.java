@@ -7,7 +7,9 @@ public record PostResponseDto(
         UserResponseDto user,
         String caption,
         String imageUrl,
-        String contentType
+        String contentType,
+        Double latitude,
+        Double longitude
 ) {
     public static PostResponseDto from(Post posts, String imageUrl){
         return new PostResponseDto(
@@ -15,7 +17,9 @@ public record PostResponseDto(
                 UserResponseDto.from(posts.getUser()),
                 posts.getCaption(),
                 imageUrl,
-                posts.getContentType()
+                posts.getContentType(),
+                posts.getLatitude(),
+                posts.getLongitude()
         );
     }
 }
