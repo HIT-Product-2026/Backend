@@ -24,7 +24,8 @@ public class FcmServiceImpl implements FcmService {
     @Override
     public void sendToManySilent(List<String> fcmTokens, FcmPostResponseDto response){
         if (fcmTokens == null || fcmTokens.isEmpty()) {
-            throw new RuntimeException("List token is empty");
+            // Không có bạn bè thì không gửi
+            return;
         }
         try {
             MulticastMessage message =
