@@ -3,8 +3,12 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
+import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.service.FcmService;
 import com.example.lockly.service.Impl.PostServiceImpl;
+import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +32,8 @@ import java.util.List;
 public class PostController {
 
     PostServiceImpl postService;
+    UserService userService;
+    FcmService fcmService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId để tạo post")
@@ -43,9 +49,17 @@ public class PostController {
     ) throws Exception {
         CreatePostRequestDto request = new CreatePostRequestDto(file, userId, caption);
 
+        PostResponseDto post = postService.createPost(request);
+
+        // Gửi thông báo
+        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(userId);
+        FcmPostResponseDto data = fcmService.createFcmPostResponse(userId, post.id());
+        fcmService.sendToManySilent(fcmTokens, data);
+
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Tạo bài viết thành công", postService.createPost(request)));
+                .body(ApiResponse.created("Tạo bài viết thành công", post));
     }
 
     @GetMapping("/{post_id}")

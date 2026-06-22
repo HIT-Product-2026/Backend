@@ -11,13 +11,14 @@ import java.util.List;
 
 public interface UserService {
 
-    public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id);
+    public List<FriendshipsResponseDto> findFriendshipsByUserId(String id);
     public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request);
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request);
-    public List<UserResponseDto> findAllListFriendByUserId(String id);
+    public List<UserResponseDto> findFriendByUserId(String id);
     public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
     UserResponseDto getUserById(String id);
     void updateAvatar(String userId, MultipartFile file) throws Exception;
     public boolean isUserOnline(String userId);
     public void updateUserLocation(String userId, Double latitude, Double longitude);
+    public List<String> findFcmTokenOfFriendsByUserId(String userId);
 }

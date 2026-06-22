@@ -28,10 +28,7 @@
         AuthService authService;
 
         @PostMapping("/register/send-otp")
-        @Operation(
-                summary = "Đăng ký — Bước 1/2",
-                description = "Nhập thông tin và gửi OTP về Gmail"
-        )
+        @Operation(summary = "Đăng ký — Bước 1/2", description = "Nhập thông tin và gửi OTP về Gmail")
         public ResponseEntity<ApiResponse<Void>> sendOtpForRegister(
                 @Valid @RequestBody RegisterRequestDto request
         ) {
@@ -42,10 +39,7 @@
         }
 
         @PostMapping("/register/verify-otp")
-        @Operation(
-                summary = "Đăng ký — Bước 2/2",
-                description = "Xác thực OTP và tạo tài khoản"
-        )
+        @Operation(summary = "Đăng ký — Bước 2/2", description = "Xác thực OTP và tạo tài khoản")
         public ResponseEntity<ApiResponse<UserResponseDto>> verifyOtpAndRegister(
                 @Valid @RequestBody VerifyOtpRegisterRequestDto request
         ) {
@@ -58,10 +52,7 @@
         }
 
         @PostMapping("/login")
-        @Operation(
-                summary = "Đăng nhập",
-                description = "Gmail + Password → nhận JWT"
-        )
+        @Operation(summary = "Đăng nhập", description = "Gmail + Password → nhận JWT")
         public ResponseEntity<ApiResponse<LoginResponseDto>> login(
                 @Valid @RequestBody LoginRequestDto request
         ) {
@@ -73,10 +64,7 @@
         }
 
         @PostMapping("/logout")
-        @Operation(
-                summary = "Đăng xuất",
-                description = "Blacklist token hiện tại"
-        )
+        @Operation(summary = "Đăng xuất", description = "Blacklist token hiện tại")
         public ResponseEntity<ApiResponse<Void>> logout(
                 @Valid @RequestBody LogoutRequestDto request
         ) {

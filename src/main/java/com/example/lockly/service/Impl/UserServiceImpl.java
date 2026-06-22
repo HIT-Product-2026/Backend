@@ -2,9 +2,9 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
+import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
@@ -27,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -42,7 +41,7 @@ public class UserServiceImpl implements UserService {
     String prefix = "users/avatar";
 
     @Override
-    public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id){
+    public List<FriendshipsResponseDto> findFriendshipsByUserId(String id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -95,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findAllListFriendByUserId(String id){
+    public List<UserResponseDto> findFriendByUserId(String id){
         User user = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -213,5 +212,14 @@ public class UserServiceImpl implements UserService {
         LocalDateTime now = LocalDateTime.now();
 
         return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
+    }
+
+    @Override
+    public List<String> findFcmTokenOfFriendsByUserId(String userId){
+        List<UserResponseDto> friends = findFriendByUserId(userId);
+
+        return friends.stream()
+                .map(UserResponseDto::fcmToken)
+                .toList();
     }
 }
