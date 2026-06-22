@@ -6,6 +6,7 @@ import com.example.lockly.domain.dto.request.CreatePostRequestDto;
 import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.FcmService;
 import com.example.lockly.service.Impl.PostServiceImpl;
 import com.example.lockly.service.UserService;
@@ -36,7 +37,7 @@ public class PostController {
     FcmService fcmService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId để tạo post")
+    @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId, kinh độ, vĩ độ để tạo post")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
             @Parameter(description = "File image")
             @RequestParam("file") MultipartFile file,
@@ -45,9 +46,15 @@ public class PostController {
             @RequestParam("userId") String userId,
 
             @Parameter(description = "Nội dung bài viết")
-            @RequestParam("caption") String caption
+            @RequestParam("caption") String caption,
+
+            @Parameter(description = "Kinh độ")
+            @RequestParam("longitude") Double longitude,
+
+            @Parameter(description = "Kinh độ")
+            @RequestParam("longitude") Double latitude
     ) throws Exception {
-        CreatePostRequestDto request = new CreatePostRequestDto(file, userId, caption);
+        CreatePostRequestDto request = new CreatePostRequestDto(file, userId, caption, null, null);
 
         PostResponseDto post = postService.createPost(request);
 
@@ -56,6 +63,13 @@ public class PostController {
         FcmPostResponseDto data = fcmService.createFcmPostResponse(userId, post.id());
         fcmService.sendToManySilent(fcmTokens, data);
 
+        //Lưu vị trí
+        UserResponseDto user = userService.findUserById(userId);
+        if (user.mode() == UserMode.PUBLIC){
+            //Sửa lại vị trí
+        } else{
+            // Trả null
+        }
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

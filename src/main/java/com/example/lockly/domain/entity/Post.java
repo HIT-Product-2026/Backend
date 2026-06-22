@@ -34,6 +34,12 @@ public class Post {
     @Column(name = "content_type")
     private String contentType;
 
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

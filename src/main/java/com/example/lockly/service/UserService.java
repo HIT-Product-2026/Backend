@@ -16,7 +16,7 @@ public interface UserService {
     public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request);
     public List<UserResponseDto> findFriendByUserId(String id);
     public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
-    UserResponseDto getUserById(String id);
+    UserResponseDto findUserById(String id);
     void updateAvatar(String userId, MultipartFile file) throws Exception;
     public boolean isUserOnline(String userId);
     public void updateUserLocation(String userId, Double latitude, Double longitude);
