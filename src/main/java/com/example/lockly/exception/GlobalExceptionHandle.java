@@ -38,24 +38,34 @@ public class GlobalExceptionHandle {
     public ResponseEntity<ApiResponse<Void>> handValidationError(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
 
+        // Pass 1: ưu tiên lỗi chi tiết (Pattern, Size, ...)
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             String field = error.getField();
-            String code = error.getCode(); // tên annotation: NotBlank, NotNull, Size, Pattern...
+            String code = error.getCode();
             boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
-
-            if (!errors.containsKey(field) || isEmptyCheck) {
+            if (!isEmptyCheck && !errors.containsKey(field)) {
                 errors.put(field, error.getDefaultMessage());
             }
         });
 
-        String combinedMessage = String.join(", ", errors.values());
+        // Pass 2: lấy NotBlank/NotNull cho field chưa có lỗi
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String field = error.getField();
+            String code = error.getCode();
+            boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
+            if (isEmptyCheck && !errors.containsKey(field)) {
+                errors.put(field, error.getDefaultMessage());
+            }
+        });
+
+        // Trả về message lỗi đầu tiên
+        String firstMessage = errors.values().stream().findFirst().orElse("Dữ liệu không hợp lệ.");
 
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.error(400, combinedMessage));
+                .body(ApiResponse.error(400, firstMessage));
     }
 
-    // Exception chung
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handGenericException(Exception ex) {
         return ResponseEntity

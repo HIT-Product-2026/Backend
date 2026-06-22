@@ -36,21 +36,20 @@ public class OtpServiceImpl implements OtpService {
     @Value("${otp.resend-cooldown-seconds:60}")
     int resendCooldownSeconds;
 
+    @NonFinal
+    @Value("${otp.max-attempts:5}")
+    int maxOtpAttempts;
+
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Override
     @Transactional
     public void sendOtp(String email, OtpPurpose purpose) {
-        // 1. Kiểm tra cooldown
         checkResendCooldown(email, purpose);
-
-        // 2. Xóa OTP cũ
         otpRepository.deleteAllByEmailAndPurpose(email, purpose);
 
-        // 3. Sinh OTP 6 số
         String otpCode = generateOtp();
 
-        // 4. Lưu vào DB
         OtpCode entity = OtpCode.builder()
                 .email(email)
                 .otp(otpCode)
@@ -60,7 +59,6 @@ public class OtpServiceImpl implements OtpService {
                 .build();
         otpRepository.save(entity);
 
-        // 5. Gửi về Gmail
         String purposeText = (purpose == OtpPurpose.REGISTER) ? "đăng ký" : "đặt lại mật khẩu";
         emailService.sendOtpEmail(email, otpCode, purposeText);
 
@@ -75,18 +73,38 @@ public class OtpServiceImpl implements OtpService {
                 .findValidOtp(email, purpose, LocalDateTime.now())
                 .orElseThrow(() -> new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn."));
 
-        // 2. So sánh mã
-        if (!entity.getOtp().equals(inputOtp)) {
-            throw new BadRequestException("Mã OTP không chính xác.");
+        // 2. Kiểm tra đã vượt giới hạn chưa
+        if (entity.getAttemptCount() >= maxOtpAttempts) {
+            entity.setUsed(true);
+            otpRepository.save(entity);
+            throw new BadRequestException(
+                    String.format("Bạn đã nhập sai OTP quá %d lần. Vui lòng yêu cầu mã mới.", maxOtpAttempts)
+            );
         }
 
-        // 3. Đánh dấu đã dùng
+        // 3. So sánh mã
+        if (!entity.getOtp().equals(inputOtp)) {
+            entity.setAttemptCount(entity.getAttemptCount() + 1);
+            otpRepository.save(entity);
+            int attemptsLeft = maxOtpAttempts - entity.getAttemptCount();
+            if (attemptsLeft <= 0) {
+                entity.setUsed(true);
+                otpRepository.save(entity);
+                throw new BadRequestException(
+                        String.format("Mã OTP không chính xác. Bạn đã nhập sai quá %d lần. Vui lòng yêu cầu mã mới.", maxOtpAttempts)
+                );
+            }
+            throw new BadRequestException(
+                    String.format("Mã OTP không chính xác. Còn %d lần thử.", attemptsLeft)
+            );
+        }
+
+        // 4. Đánh dấu đã dùng
         entity.setUsed(true);
         otpRepository.save(entity);
 
         log.info("[OTP] Xác thực thành công {} OTP cho {}", purpose, email);
     }
-
 
     private void checkResendCooldown(String email, OtpPurpose purpose) {
         otpRepository.findValidOtp(email, purpose, LocalDateTime.now())

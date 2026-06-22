@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void sendOtpForRegister(RegisterRequestDto request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new DuplicateResourceException("User", "email", request.email());
+            throw new BadRequestException("Email đã tồn tại/ Email đã được đăng ký.");
         }
         otpService.sendOtp(request.email(), OtpPurpose.REGISTER);
     }
@@ -62,14 +62,19 @@ public class AuthServiceImpl implements AuthService {
         if (!request.password().equals(request.confirmPassword())) {
             throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
         }
-        if (userRepository.existsByUsername(request.username())) {
-            throw new DuplicateResourceException("User", "username", request.username());
-        }
         otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
 
+        // Tự sinh username từ phần local của email
+        String baseUsername = request.email().split("@")[0];
+        String username = baseUsername;
+        int suffix = 1;
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + suffix++;
+        }
+
         User user = User.builder()
-                .username(request.username())
-                .displayName(request.displayName())
+                .username(username)
+                .displayName(username)
                 .email(request.email())
                 .passwordHash(passwordUtil.hash(request.password()))
                 .build();
@@ -93,11 +98,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(LogoutRequestDto request) {
-
         String token = request.token();
-
         log.info("LOGOUT REQUEST RECEIVED");
-
         try {
             String jwtId = jwtProvider.extractTokenId(token);
             Date expirationDate = jwtProvider.extractExpiration(token);
@@ -110,26 +112,19 @@ public class AuthServiceImpl implements AuthService {
             log.info("expirationDate = {}", expirationDate);
             log.info("alreadyBlacklisted = {}", alreadyBlacklisted);
 
-            // ❗ token hết hạn
             if (expired) {
                 log.warn("Logout failed: token already expired");
-                throw new VsException(HttpStatus.UNAUTHORIZED,
-                        ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
+                throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
             }
-
-            // ❗ token đã bị logout trước đó
             if (alreadyBlacklisted) {
                 log.warn("Logout failed: token already invalidated (blacklisted)");
-                throw new VsException(HttpStatus.BAD_REQUEST,
-                        ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
+                throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
             }
 
             LocalDateTime expirationTime = expirationDate.toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
-
             invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
-
             log.info("Logout success → token blacklisted, jwtId = {}", jwtId);
 
         } catch (Exception e) {
@@ -161,7 +156,6 @@ public class AuthServiceImpl implements AuthService {
         }
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
-
         user.setPasswordHash(passwordUtil.hash(request.newPassword()));
         userRepository.save(user);
     }

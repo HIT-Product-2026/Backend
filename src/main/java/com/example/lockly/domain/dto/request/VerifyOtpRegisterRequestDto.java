@@ -14,14 +14,6 @@ public record VerifyOtpRegisterRequestDto(
         @Size(min = 6, max = 6, message = "OTP phải đúng 6 chữ số")
         String otp,
 
-        @NotBlank(message = "Username không được để trống")
-        @Size(min = 3, max = 50, message = "Username từ 3 đến 50 ký tự")
-        String username,
-
-        @NotBlank(message = "Tên hiển thị không được để trống")
-        @Size(min = 2, max = 100, message = "Tên hiển thị từ 2 đến 100 ký tự")
-        String displayName,
-
         @ValidPassword
         String password,
 
