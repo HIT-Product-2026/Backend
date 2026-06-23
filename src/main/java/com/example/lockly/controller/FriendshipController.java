@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/friendships")
+@RequestMapping(ApiPath.API_V1 + "/friendship")
 @Tag(name = "Friendship Controller", description = "API quản lý kết bạn")
 public class FriendshipController {
 
