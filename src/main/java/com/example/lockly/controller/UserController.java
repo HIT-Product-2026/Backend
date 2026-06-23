@@ -35,7 +35,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/users/me")
+@RequestMapping(ApiPath.API_V1 + "/user/me")
 @Tag(name = "User Controller", description = "API quản lý user và friend system")
 public class UserController {
 
@@ -116,27 +116,24 @@ public class UserController {
                 .body(ApiResponse.success("Thành công", isOnline));
     }
 
-    @GetMapping("/{user_id}/conversations")
+    @GetMapping("/conversations")
     @Operation(summary = "Lấy danh sách hội thoại của user")
-    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getConversationsByUser(
-            @PathVariable("user_id") String userId
+    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getAllConversations(
     ) {
 
-        List<ConversationResponseDto> result = conversationService.findByUserId(userId);
+        List<ConversationResponseDto> result = conversationService.findAll();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
-    @GetMapping("/{user_id}/posts")
+    @GetMapping("/posts")
     @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
     public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostsByUser(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId(userId)));
+                .body(ApiResponse.success("Thành công", postService.getPostByUserId()));
     }
 }

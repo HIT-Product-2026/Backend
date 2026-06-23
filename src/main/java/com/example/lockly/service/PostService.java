@@ -11,6 +11,6 @@ public interface PostService {
     PostResponseDto createPost(CreatePostRequestDto request) throws Exception;
     InputStream getPostImage(String postId) throws Exception;
     PostResponseDto getPostById(String postId);
-    List<PostResponseDto> getPostByUserId(String userId);
+    List<PostResponseDto> getPostByUserId();
     public void updateModeLocationPostById(String postId, PostModeLocation modeLocation);
 }

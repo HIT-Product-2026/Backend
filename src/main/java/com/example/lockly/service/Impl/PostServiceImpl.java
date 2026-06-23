@@ -112,10 +112,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(String userId){
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+    public List<PostResponseDto> getPostByUserId(){
+        User user = authService.getCurrentUser();
 
 
         List<PostResponseDto> response = postsRepository

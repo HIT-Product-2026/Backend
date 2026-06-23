@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/messages")
+@RequestMapping(ApiPath.API_V1 + "/message")
 @Tag(name = "Message Controller", description = "API quản lý tin nhắn")
 public class MessageController {
 
