@@ -2,9 +2,9 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
+import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
@@ -12,9 +12,12 @@ import com.example.lockly.domain.entity.Friendship;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.AuthService;
+import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -27,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -39,10 +41,12 @@ public class UserServiceImpl implements UserService {
     FriendshipsRepository friendshipsRepository;
     MinioClient minioClient;
     MinioProperties props;
+    AuthService authService;
+    RedisService redisService;
     String prefix = "users/avatar";
 
     @Override
-    public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id){
+    public List<FriendshipsResponseDto> findFriendshipsByUserId(String id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -58,34 +62,45 @@ public class UserServiceImpl implements UserService {
         return friendshipsDtoList;
     }
 
-    @Override
-    @Transactional
-    public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request){
-        Friendship friendship = friendshipsRepository
-                .findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", request.id()));
+        @Override
+        @Transactional
+        public FriendshipsResponseDto acceptAddFriendRequest(String friendshipId){
+            Friendship friendship = friendshipsRepository
+                    .findById(friendshipId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
-        // Lời mời kết bạn phải ở trạng thái PEDDING mới có thể đồng ý
-        if (friendship.getStatus() != FriendshipStatus.PENDING)
-            throw new BadRequestException("status", request.status().name());
+            // Lời mời kết bạn phải ở trạng thái PENDING mới có thể đồng ý
+            if (friendship.getStatus() != FriendshipStatus.PENDING)
+                throw new BadRequestException("status", friendship.getStatus().name());
 
-        friendship.setStatus(FriendshipStatus.ACCEPTED);
+            User user = authService.getCurrentUser();
 
-        return FriendshipsResponseDto.from(
-                friendshipsRepository.save(friendship)
-        );
+            // Chỉ người nhận lời mời mới có thể chấp nhận lời mời
+            if (!friendship.getReceiver().getId().equals(user.getId()))
+                throw new ForbiddenException("You are not allowed to accept this friend request");
+
+            friendship.setStatus(FriendshipStatus.ACCEPTED);
+
+            return FriendshipsResponseDto.from(friendship);
     }
 
     @Override
     @Transactional
-    public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request){
+    public FriendshipsResponseDto rejectAddFriendRequest(String friendshipId){
         Friendship friendship = friendshipsRepository
-                .findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", request.id()));
+                .findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
         // Từ chối kết bạn phải ở trạng thái PEDDING mới có thể từ chối
         if (friendship.getStatus() != FriendshipStatus.PENDING)
             throw new BadRequestException("Friendship is not PENDING");
+
+        User user = authService.getCurrentUser();
+
+        if (!friendship.getReceiver().getId().equals(user.getId())
+        && friendship.getRequester().getId().equals(user.getId())){
+            throw new ForbiddenException("You are not allowed to accept this friend request");
+        }
 
         friendship.setStatus(FriendshipStatus.REJECTED);
 
@@ -95,7 +110,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findAllListFriendByUserId(String id){
+    public List<UserResponseDto> findFriendByUserId(String id){
         User user = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -147,7 +162,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(String id) {
+    public UserResponseDto findUserById(String id) {
 
         User user = userRepository
                 .findById(id)
@@ -158,7 +173,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatar(String userId, MultipartFile file) throws Exception {
+    public void updateAvatar(MultipartFile file) throws Exception {
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
@@ -166,11 +181,9 @@ public class UserServiceImpl implements UserService {
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty())
             throw new IllegalArgumentException("Original filename is missing");
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = authService.getCurrentUser();
 
-        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
+        String objectName = FileUtil.getObjectNameFile(prefix, user.getId(), file);
 
         minioClient.putObject(
                 PutObjectArgs.builder()
@@ -188,30 +201,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserLocation(String userId, Double latitude, Double longitude) {
+    public void updateUserLocation(Double latitude, Double longitude) {
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = authService.getCurrentUser();
 
-        user.setLatitude(latitude);
-        user.setLongitude(longitude);
+        redisService.saveUserLocation(user.getId(), latitude, longitude);
 
         userRepository.save(user);
     }
 
     @Override
-    public boolean isUserOnline(String userId) {
+    public boolean isUserOnline() {
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = authService.getCurrentUser();
 
-        if (user.getLastActiveAt() == null)
+        LocalDateTime lastActiveAt = redisService
+                .getUserLocation(user.getId())
+                .lastActiveAt();
+
+        if (lastActiveAt == null)
             return false;
 
         LocalDateTime now = LocalDateTime.now();
 
-        return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
+        return !lastActiveAt.isBefore(now.minusMinutes(3));
+    }
+
+    @Override
+    public List<String> findFcmTokenOfFriendsByUserId(){
+        User user = authService.getCurrentUser();
+
+        List<UserResponseDto> friends = findFriendByUserId(user.getId());
+
+        return friends.stream()
+                .map(UserResponseDto::fcmToken)
+                .toList();
     }
 }

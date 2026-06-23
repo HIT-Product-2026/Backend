@@ -29,4 +29,13 @@ public class MessageResponseDto {
                 message.getCreatedAt()
         );
     }
+
+    public static MessageResponseDto from(Message message, String imageUrl) {
+        return new MessageResponseDto(
+                UserResponseDto.from(message.getSender()),
+                imageUrl,
+                message.getType(),
+                message.getCreatedAt()
+        );
+    }
 }

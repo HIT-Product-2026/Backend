@@ -8,6 +8,7 @@ import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.repository.ConversationRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,11 @@ public class ConversationServiceImpl implements ConversationService {
 
     ConversationRepository conversationRepository;
     UserRepository userRepository;
+    AuthService authService;
 
     @Override
-    public List<ConversationResponseDto> findByUserId(String userId){
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id ", userId));
+    public List<ConversationResponseDto> findAll(){
+        User user = authService.getCurrentUser();
 
         return conversationRepository
                 .findByUser(user)

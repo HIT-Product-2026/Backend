@@ -1,7 +1,7 @@
 package com.example.lockly.domain.dto.request;
 
-public record SendTextMessageRequestDto(
+public record SendImageMessageSocketRequestDto(
         String conversationId,
-        String content
+        String imageUrl
 ) {
 }

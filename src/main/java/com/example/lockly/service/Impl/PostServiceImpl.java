@@ -3,19 +3,25 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
+import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.entity.Post;
+import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,12 +32,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
 
     MinioProperties props;
     UserRepository userRepository;
     PostsRepository postsRepository;
+    AuthService authService;
     MinIOService minIOService;
     String prefix = "post";
 
@@ -42,8 +50,9 @@ public class PostServiceImpl implements PostService {
         if (request.file() == null || request.file().isEmpty())
             throw new BadRequestException("File is empty");
 
+        User user = authService.getCurrentUser();
+
         MultipartFile file = request.file();
-        String userId = request.userId();
         String caption = request.caption();
 
         String postId = UUID.randomUUID().toString();
@@ -52,9 +61,10 @@ public class PostServiceImpl implements PostService {
         try {
             minIOService.saveFile(file, objectName);
 
-            User user = userRepository
-                    .findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+            // Set mode cho bài post
+            PostModeLocation mode = (user.getMode() == UserMode.PRIVATE)
+                    ? PostModeLocation.PRIVATE
+                    : PostModeLocation.PUBLIC;
 
             Post post = Post.builder()
                     .id(postId)
@@ -63,6 +73,9 @@ public class PostServiceImpl implements PostService {
                     .objectName(objectName)
                     .caption(caption)
                     .contentType(file.getContentType())
+                    .longitude(request.longitude())
+                    .latitude(request.latitude())
+                    .modeLocation(mode)
                     .build();
 
             postsRepository.save(post);
@@ -90,14 +103,18 @@ public class PostServiceImpl implements PostService {
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, postId));
+        String imageUrl = FileUtil.getImageUrlApi(prefix, postId);
+
+        // Public mới trả tọa độ, không thì null
+        if (post.getModeLocation() == PostModeLocation.PRIVATE){
+            return PostResponseDto.from(post, imageUrl, null, null);
+        }
+        return PostResponseDto.from(post, imageUrl);
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(String userId){
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+    public List<PostResponseDto> getPostByUserId(){
+        User user = authService.getCurrentUser();
 
 
         List<PostResponseDto> response = postsRepository
@@ -110,4 +127,33 @@ public class PostServiceImpl implements PostService {
 
         return response;
     }
+
+    @Override
+    @Transactional
+    public void updateModeLocationPostById(String postId, PostModeLocation modeLocation){
+        User user = authService.getCurrentUser();
+
+        Post post = postsRepository
+                .findById(postId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy post với id", postId));
+
+        if (!post.getUser().getId().equals(user.getId()))
+            throw new ForbiddenException("User id", user.getId());
+
+        post.setModeLocation(modeLocation);
+    }
+
+    @Override
+    public LocationPostResponseDto getLocationPost(String postId){
+        Post post = postsRepository
+                .findById(postId)
+                .orElseThrow(() -> new BadRequestException("post_id", postId));
+
+        if (post.getModeLocation() == PostModeLocation.PUBLIC){
+            return new LocationPostResponseDto(post.getLatitude(), post.getLongitude());
+        } else {
+            return new LocationPostResponseDto(null, null);
+        }
+    }
+
 }

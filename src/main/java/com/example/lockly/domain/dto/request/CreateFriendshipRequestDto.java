@@ -10,9 +10,6 @@ public record CreateFriendshipRequestDto (
     String requesterId,
 
     @NotNull(message = "Người nhận lời mời không được để trống")
-    String receiverId,
-
-    @NotNull(message = "Trạng thái không được để trống")
-    FriendshipStatus status
+    String receiverId
 ) {
     }

@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/messages")
+@RequestMapping(ApiPath.API_V1 + "/message")
 @Tag(name = "Message Controller", description = "API quản lý tin nhắn")
 public class MessageController {
 
@@ -54,16 +54,12 @@ public class MessageController {
             @RequestParam("conversationId")
             String conversationId,
 
-            @Parameter(description = "ID sender")
-            @RequestParam("senderId")
-            String senderId,
-
             @Parameter(description = "File ảnh")
             @RequestParam("file")
             MultipartFile file
 
     ) throws Exception {
-        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, senderId, file);
+        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

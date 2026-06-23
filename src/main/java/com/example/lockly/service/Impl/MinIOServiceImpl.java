@@ -6,11 +6,13 @@ import io.minio.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -20,20 +22,18 @@ public class MinIOServiceImpl implements MinIOService {
     MinioProperties props;
 
     public void saveFile(MultipartFile file, String objectName) throws Exception {
-
         try {
+            InputStream is = file.getInputStream();
+
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(props.getBucketName())
                             .object(objectName)
-                            .stream(
-                                    file.getInputStream(),
-                                    file.getSize(),
-                                    -1
-                            )
+                            .stream(is, file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build()
             );
+
 
         } catch (Exception e) {
             // chỉ throw lại để service phía trên quyết định rollback DB nếu cần
