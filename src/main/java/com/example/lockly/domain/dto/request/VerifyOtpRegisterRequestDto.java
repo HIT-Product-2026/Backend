@@ -26,9 +26,6 @@ public record VerifyOtpRegisterRequestDto(
         String password,
 
         @NotBlank(message = "Xác nhận mật khẩu không được để trống")
-        String confirmPassword,
-
-        @NotBlank(message = "fcm token không được để trống")
-        String fcm_token
+        String confirmPassword
 
 ) {}

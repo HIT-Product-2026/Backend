@@ -7,7 +7,9 @@ import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
+import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
 import com.example.lockly.service.Impl.PostServiceImpl;
 import com.example.lockly.service.UserService;
@@ -38,15 +40,13 @@ public class PostController {
     PostServiceImpl postService;
     UserService userService;
     FcmService fcmService;
+    AuthService authService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId, kinh độ, vĩ độ để tạo post")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
             @Parameter(description = "File image")
             @RequestParam("file") MultipartFile file,
-
-            @Parameter(description = "ID user")
-            @RequestParam("userId") String userId,
 
             @Parameter(description = "Nội dung bài viết")
             @RequestParam("caption") String caption,
@@ -61,7 +61,6 @@ public class PostController {
 
         CreatePostRequestDto request = new CreatePostRequestDto(
                 file,
-                userId,
                 caption,
                 latitude,
                 longitude
@@ -69,9 +68,11 @@ public class PostController {
 
         PostResponseDto post = postService.createPost(request);
 
+        User user = authService.getCurrentUser();
+
         // Gửi thông báo
-        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(userId);
-        FcmPostResponseDto data = fcmService.createFcmPostResponse(userId, post.getId());
+        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId();
+        FcmPostResponseDto data = fcmService.createFcmPostResponse(user.getId(), post.getId());
         fcmService.sendToManySilent(fcmTokens, data);
 
 

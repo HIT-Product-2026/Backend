@@ -16,6 +16,7 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.InvalidatedTokenRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.OtpService;
@@ -26,6 +27,8 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +77,6 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.email())
                 .passwordHash(passwordUtil.hash(request.password()))
                 .mode(UserMode.PUBLIC)
-                .fcmToken(request.fcm_token())
                 .build();
 
         userRepository.save(user);
@@ -178,5 +180,22 @@ public class AuthServiceImpl implements AuthService {
                 .id(user.getId())
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
+    }
+
+    @Override
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getUser();
+        }
+
+        throw new RuntimeException("Invalid authentication principal");
     }
 }

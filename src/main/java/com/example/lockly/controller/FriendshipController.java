@@ -41,27 +41,27 @@ public class FriendshipController {
     }
 
 
-    @PostMapping("/accept")
+    @PostMapping("/accept/{friendships_id}")
     @Operation(summary = "Chấp nhận lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
-            @RequestBody @Valid FriendshipsRequestDto request
+            @PathVariable @Valid String friendshipsId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.acceptAddFriendRequest(request)));
+                        userService.acceptAddFriendRequest(friendshipsId)));
     }
 
 
-    @PostMapping("/reject")
+    @PostMapping("/reject/{friendships_id}")
     @Operation(summary = "Từ chối lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
-            @RequestBody @Valid FriendshipsRequestDto request
+            @PathVariable @Valid String friendshipId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.rejectAddFriendRequest(request)));
+                        userService.rejectAddFriendRequest(friendshipId)));
     }
 
 }

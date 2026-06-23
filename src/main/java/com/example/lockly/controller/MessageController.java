@@ -54,16 +54,12 @@ public class MessageController {
             @RequestParam("conversationId")
             String conversationId,
 
-            @Parameter(description = "ID sender")
-            @RequestParam("senderId")
-            String senderId,
-
             @Parameter(description = "File ảnh")
             @RequestParam("file")
             MultipartFile file
 
     ) throws Exception {
-        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, senderId, file);
+        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -9,9 +9,11 @@ import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -36,6 +38,7 @@ public class PostServiceImpl implements PostService {
     MinioProperties props;
     UserRepository userRepository;
     PostsRepository postsRepository;
+    AuthService authService;
     MinIOService minIOService;
     String prefix = "post";
 
@@ -46,8 +49,9 @@ public class PostServiceImpl implements PostService {
         if (request.file() == null || request.file().isEmpty())
             throw new BadRequestException("File is empty");
 
+        User user = authService.getCurrentUser();
+
         MultipartFile file = request.file();
-        String userId = request.userId();
         String caption = request.caption();
 
         String postId = UUID.randomUUID().toString();
@@ -56,14 +60,10 @@ public class PostServiceImpl implements PostService {
         try {
             minIOService.saveFile(file, objectName);
 
-            User user = userRepository
-                    .findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
             // Set mode cho bài post
-            PostModeLocation mode = PostModeLocation.PUBLIC;
-            if (user.getMode() == UserMode.PRIVATE)
-                mode = PostModeLocation.PRIVATE;
+            PostModeLocation mode = (user.getMode() == UserMode.PRIVATE)
+                    ? PostModeLocation.PRIVATE
+                    : PostModeLocation.PUBLIC;
 
             Post post = Post.builder()
                     .id(postId)
@@ -132,9 +132,14 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void updateModeLocationPostById(String postId, PostModeLocation modeLocation){
+        User user = authService.getCurrentUser();
+
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy post với id", postId));
+
+        if (!post.getUser().getId().equals(user.getId()))
+            throw new ForbiddenException("User id", user.getId());
 
         post.setModeLocation(modeLocation);
     }
