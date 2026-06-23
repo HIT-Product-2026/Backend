@@ -3,6 +3,7 @@ package com.example.lockly.service;
 import com.example.lockly.domain.dto.request.*;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.User;
 
 public interface AuthService {
     void sendOtpForRegister(RegisterRequestDto request);
@@ -12,5 +13,5 @@ public interface AuthService {
     void sendOtpForForgotPassword(ForgotPasswordRequestDto request);
     void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request);
     void resetPassword(ResetPasswordRequestDto request);
-
+    public User getCurrentUser();
 }
