@@ -3,6 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
+import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.PostModeLocation;
@@ -141,4 +142,18 @@ public class PostServiceImpl implements PostService {
 
         post.setModeLocation(modeLocation);
     }
+
+    @Override
+    public LocationPostResponseDto getLocationPost(String postId){
+        Post post = postsRepository
+                .findById(postId)
+                .orElseThrow(() -> new BadRequestException("post_id", postId));
+
+        if (post.getModeLocation() == PostModeLocation.PUBLIC){
+            return new LocationPostResponseDto(post.getLatitude(), post.getLongitude());
+        } else {
+            return new LocationPostResponseDto(null, null);
+        }
+    }
+
 }
