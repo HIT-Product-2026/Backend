@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     JwtProvider jwtProvider;
     UserDetailsService userDetailsService;
+    ObjectMapper objectMapper;
 
     // FIX: bỏ InvalidatedTokenRepository khỏi đây
     // — việc check blacklist đã có sẵn bên trong JwtProvider.isTokenValid()
@@ -140,7 +141,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(status);
-        new ObjectMapper().writeValue(response.getOutputStream(),
+        objectMapper.writeValue(response.getOutputStream(),
                 ApiResponse.error(status, message));
     }
 }

@@ -8,6 +8,8 @@ import com.example.lockly.domain.dto.response.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
@@ -33,36 +35,37 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping(ApiPath.API_V1 + "/users")
+@RequestMapping(ApiPath.API_V1 + "/user/me")
 @Tag(name = "User Controller", description = "API quản lý user và friend system")
 public class UserController {
 
     UserService userService;
     ConversationService conversationService;
     PostService postService;
+    AuthService authService;
 
-    @GetMapping("/{user_id}/friends")
+    @GetMapping("/friends")
     @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id"
     )
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
-            @Parameter(description = "ID của user")
-            @PathVariable("user_id") String userId
     ) {
+        User user = authService.getCurrentUser();
+
         List<UserResponseDto> listFriend =
-                userService.findAllListFriendByUserId(userId);
+                userService.findFriendByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
     }
 
-    @GetMapping("/{user_id}/friendships")
+    @GetMapping("/friendships")
     @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách friend request (PENDING)")
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests(
-            @Parameter(description = "ID của user")
-            @PathVariable("user_id") String userId
     ) {
-        List<FriendshipsResponseDto> result = userService.findAllFriendshipsByUserId(userId);
+        User user = authService.getCurrentUser();
+
+        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -70,78 +73,67 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/{user_id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Cập nhật avatar", description = "Upload ảnh avatar lên MinIO và update user.avatarUrl")
     public ResponseEntity<ApiResponse<Void>> updateAvatar(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId,
-
             @Parameter(description = "File ảnh avatar")
             @RequestParam("file") MultipartFile file
     ) throws Exception {
 
-        userService.updateAvatar(userId, file);
+        userService.updateAvatar(file);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Cập nhật avatar thành công", null));
     }
 
-    @PostMapping("/{user_id}/location")
+    @PostMapping("/location")
     @Operation(summary = "Cập nhật vị trí user", description = "Lưu latitude (vĩ độ) và longitude (kinh độ) của user")
     public ResponseEntity<ApiResponse<Void>> updateUserLocation(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId,
-
             @RequestParam("latitude") Double latitude,
 
             @RequestParam("longitude") Double longitude
     ) {
 
-        userService.updateUserLocation(userId, latitude, longitude);
+        userService.updateUserLocation(latitude, longitude);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Cập nhật vị trí thành công", null));
     }
 
-    @GetMapping("/{user_id}/online")
+    @GetMapping("/online")
     @Operation(summary = "Kiểm tra trạng thái online",
             description = "Trả về true nếu user hoạt động trong 5 phút gần nhất"
     )
     public ResponseEntity<ApiResponse<Boolean>> isUserOnline(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId
     ) {
 
-        boolean isOnline = userService.isUserOnline(userId);
+        boolean isOnline = userService.isUserOnline();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", isOnline));
     }
 
-    @GetMapping("/{user_id}/conversations")
+    @GetMapping("/conversations")
     @Operation(summary = "Lấy danh sách hội thoại của user")
-    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getConversationsByUser(
-            @PathVariable("user_id") String userId
+    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getAllConversations(
     ) {
 
-        List<ConversationResponseDto> result = conversationService.findByUserId(userId);
+        List<ConversationResponseDto> result = conversationService.findAll();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
-    @GetMapping("/{user_id}/posts")
+    @GetMapping("/posts")
     @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
     public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostsByUser(
-            @Parameter(description = "ID user")
-            @PathVariable("user_id") String userId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId(userId)));
+                .body(ApiResponse.success("Thành công", postService.getPostByUserId()));
     }
 }
