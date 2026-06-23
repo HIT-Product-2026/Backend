@@ -4,6 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
 import com.example.lockly.domain.dto.response.FcmPostResponseDto;
+import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
@@ -12,6 +13,7 @@ import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
 import com.example.lockly.service.Impl.PostServiceImpl;
+import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,7 +40,7 @@ import java.util.List;
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 
-    PostServiceImpl postService;
+    PostService postService;
     UserService userService;
     FcmService fcmService;
     AuthService authService;
@@ -119,5 +121,16 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công"));
+    }
+
+    @GetMapping("/location")
+    @Operation(summary = "lấy location của post", description = "Post để mode public mới có thể lấy")
+    public ResponseEntity<ApiResponse<LocationPostResponseDto>> getLocationPost(
+            @Parameter(description = "ID bài post")
+            @RequestParam("post_id") String postId
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", postService.getLocationPost(postId)));
     }
 }
