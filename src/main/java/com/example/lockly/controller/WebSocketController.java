@@ -6,6 +6,7 @@ import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.MessageResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,6 +77,9 @@ public class WebSocketController {
         // Lưu vào redis
         redisService.saveUserLocation(user.getId(), latitude, longitude);
         LocationUserResponseDto response = redisService.getUserLocation(user.getId());
+
+        if (user.getMode() == UserMode.PRIVATE)
+            return;
 
         // Lấy bạn bè
         List<UserResponseDto> friends = userService.findFriends();
