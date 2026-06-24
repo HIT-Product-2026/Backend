@@ -50,8 +50,7 @@ public class AuthServiceImpl implements AuthService {
     PasswordUtil passwordUtil;
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
-
-    // register:{otpCode} → RegisterPendingData {email, passwordHash}  TTL 5p
+    
     static final String REGISTER_PREFIX = "register:";
     static final Duration REGISTER_TTL  = Duration.ofMinutes(5);
 
@@ -60,11 +59,6 @@ public class AuthServiceImpl implements AuthService {
     @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
     @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
 
-    // =========================================================
-    // ĐĂNG KÝ — Bước 1
-    // Nhận: email + password + confirmPassword
-    // Xử lý: validate → sinh OTP → lưu {email, passwordHash} vào Redis với key=OTP → gửi OTP về Gmail
-    // =========================================================
     @Override
     public void sendOtpForRegister(RegisterRequestDto request) {
 
