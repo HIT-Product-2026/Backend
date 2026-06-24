@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 
 @NotBlank(message = "Email không được để trống")
 @Pattern(
-        regexp = "^$|^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9\\-]+(\\.[a-zA-Z]{2,})+$",
+        regexp = "^[a-zA-Z0-9._%+\\-]+@gmail\\.com$",
         message = "Email sai định dạng."
 )
 @Target({ElementType.FIELD})
