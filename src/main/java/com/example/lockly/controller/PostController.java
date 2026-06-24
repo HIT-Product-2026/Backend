@@ -3,6 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
+import com.example.lockly.domain.dto.request.EmojiPostRequestDto;
 import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
@@ -18,6 +19,7 @@ import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -74,8 +76,8 @@ public class PostController {
         User user = authService.getCurrentUser();
 
         // Gửi thông báo
-        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId();
-        FcmPostResponseDto data = fcmService.createFcmPostResponse(user.getId(), post.getId());
+        List<String> fcmTokens = userService.findFcmTokenOfFriends();
+        FcmPostResponseDto data = fcmService.createFcmPostResponse(user.getId(), post.id());
         fcmService.sendToManySilent(fcmTokens, data);
 
 
@@ -124,7 +126,7 @@ public class PostController {
     }
 
     @GetMapping("/location")
-    @Operation(summary = "lấy location của post", description = "Post để mode public mới có thể lấy")
+    @Operation(summary = "Lấy location của post", description = "Post để mode public mới có thể lấy")
     public ResponseEntity<ApiResponse<LocationPostResponseDto>> getLocationPost(
             @Parameter(description = "ID bài post")
             @RequestParam("post_id") String postId
@@ -132,5 +134,31 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", postService.getLocationPost(postId)));
+    }
+
+    @PostMapping("/emoji")
+    @Operation(summary = "Thả càm xúc", description = "Người dùng thả cảm xúc vào bài viết")
+    public ResponseEntity<ApiResponse<Void>> sendEmojiToPost(
+            @Parameter(description = "ID bài post và loại cảm xúc được thả")
+            @Valid @RequestBody EmojiPostRequestDto request
+    ){
+        postService.sendEmoji(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công"));
+    }
+
+    @GetMapping("/posts")
+    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
+    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPosts(
+            @Parameter(description = "Số trang")
+            @RequestParam(name = "pageNumber") int pageNumber
+    ) {
+        User user = authService.getCurrentUser();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", postService.getPostByUserId(user, pageNumber)));
     }
 }

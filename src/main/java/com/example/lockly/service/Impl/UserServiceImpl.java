@@ -10,6 +10,7 @@ import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
 import com.example.lockly.domain.entity.Friendship;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ForbiddenException;
@@ -110,10 +111,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findFriendByUserId(String id){
-        User user = userRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+    public List<UserResponseDto> findFriends(){
+        User user = authService.getCurrentUser();
 
         // Lấy tất cả lời mời đã chấp thuận với user là người gửi
         List<UserResponseDto> fromRequester = friendshipsRepository
@@ -132,6 +131,17 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return Stream.concat(fromRequester.stream(), fromReceiver.stream()).toList();
+    }
+
+    @Override
+    public boolean isFriend(String friendId) {
+        List<UserResponseDto> friends = findFriends();
+
+        for (UserResponseDto friend : friends){
+            if (friend.id().equals(friendId))
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -228,13 +238,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> findFcmTokenOfFriendsByUserId(){
-        User user = authService.getCurrentUser();
+    public List<String> findFcmTokenOfFriends(){
 
-        List<UserResponseDto> friends = findFriendByUserId(user.getId());
+        List<UserResponseDto> friends = findFriends();
 
         return friends.stream()
                 .map(UserResponseDto::fcmToken)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void updateDisplayName(String displayName) {
+
+        if (displayName == null || displayName.trim().isEmpty())
+            throw new BadRequestException("displayName", displayName);
+
+        User user = authService.getCurrentUser();
+
+        user.setDisplayName(displayName);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateMode(UserMode  mode) {
+
+        if (mode == null)
+            throw new BadRequestException("mode", null);
+
+        User user = authService.getCurrentUser();
+
+        user.setMode(mode);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateFcmToken(String fcmToken) {
+
+        if (fcmToken == null || fcmToken.trim().isEmpty())
+            throw new BadRequestException("fcmToken", fcmToken);
+
+        User user = authService.getCurrentUser();
+
+        user.setFcmToken(fcmToken);
+
+        userRepository.save(user);
     }
 }
