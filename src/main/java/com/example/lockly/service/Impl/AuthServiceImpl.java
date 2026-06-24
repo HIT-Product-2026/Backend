@@ -10,24 +10,28 @@ import com.example.lockly.domain.entity.InvalidatedToken;
 import com.example.lockly.domain.entity.OtpPurpose;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
-import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.InvalidatedTokenRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
+import com.example.lockly.service.EmailService;
 import com.example.lockly.service.OtpService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -42,30 +46,57 @@ public class AuthServiceImpl implements AuthService {
     JwtProvider jwtProvider;
     InvalidatedTokenRepository invalidatedTokenRepository;
     OtpService otpService;
+    EmailService emailService;
     PasswordUtil passwordUtil;
+    RedisTemplate<String, Object> redisTemplate;
+    ObjectMapper objectMapper;
+
+    // register:{otpCode} → RegisterPendingData {email, passwordHash}  TTL 5p
+    static final String REGISTER_PREFIX = "register:";
+    static final Duration REGISTER_TTL  = Duration.ofMinutes(5);
+
+    static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
     @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
 
+    // =========================================================
+    // ĐĂNG KÝ — Bước 1
+    // Nhận: email + password + confirmPassword
+    // Xử lý: validate → sinh OTP → lưu {email, passwordHash} vào Redis với key=OTP → gửi OTP về Gmail
+    // =========================================================
     @Override
-    @Transactional
     public void sendOtpForRegister(RegisterRequestDto request) {
+
         if (userRepository.existsByEmail(request.email())) {
-            throw new BadRequestException("Email đã tồn tại/ Email đã được đăng ký.");
+            throw new BadRequestException("Email đã tồn tại / Email đã được đăng ký.");
         }
-        otpService.sendOtp(request.email(), OtpPurpose.REGISTER);
+
+        String otpCode    = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
+        String redisKey   = REGISTER_PREFIX + otpCode;
+        RegisterPendingData pendingData = new RegisterPendingData(
+                request.email(),
+                passwordUtil.hash(request.password())
+        );
+
+        redisTemplate.opsForValue().set(redisKey, pendingData, REGISTER_TTL);
+        log.info("[Register Bước 1] Lưu Redis key={}, email={}", redisKey, request.email());
+
+        emailService.sendOtpEmail(request.email(), otpCode, "đăng ký");
     }
 
     @Override
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
-        if (!request.password().equals(request.confirmPassword())) {
-            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
-        }
-        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.REGISTER);
 
-        // Tự sinh username từ phần local của email
-        String baseUsername = request.email().split("@")[0];
+        String redisKey  = REGISTER_PREFIX + request.otp();
+        Object raw = redisTemplate.opsForValue().get(redisKey);
+        if (raw == null) {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+        RegisterPendingData pendingData = objectMapper.convertValue(raw, RegisterPendingData.class);
+
+        String baseUsername = pendingData.email().split("@")[0];
         String username = baseUsername;
         int suffix = 1;
         while (userRepository.existsByUsername(username)) {
@@ -75,11 +106,15 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(username)
                 .displayName(username)
-                .email(request.email())
-                .passwordHash(passwordUtil.hash(request.password()))
+                .email(pendingData.email())
+                .passwordHash(pendingData.passwordHash())
                 .build();
-
         userRepository.save(user);
+        log.info("[Register Bước 2] Đã tạo user mới, email={}", pendingData.email());
+
+        redisTemplate.delete(redisKey);
+        log.info("[Register Bước 2] Đã xóa Redis key={}", redisKey);
+
         return UserResponseDto.from(user);
     }
 
@@ -137,7 +172,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void sendOtpForForgotPassword(ForgotPasswordRequestDto request) {
         if (!userRepository.existsByEmail(request.email())) {
-            throw new BadRequestException("Nếu email tồn tại, mã OTP sẽ được gửi tới Gmail của bạn.");
+            throw new BadRequestException("Email chưa được đăng ký.");
         }
         otpService.sendOtp(request.email(), OtpPurpose.FORGOT_PASSWORD);
     }

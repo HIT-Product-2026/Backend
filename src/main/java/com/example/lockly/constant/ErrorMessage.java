@@ -16,7 +16,7 @@ public class ErrorMessage {
     public static final String INVALID_FORMAT_PASSWORD = "invalid.password-format";
 
     public static class Auth {
-        public static final String ERR_INVALID_CREDENTIALS = "exception.auth.username.or.password.wrong";
+        public static final String ERR_INVALID_CREDENTIALS = "Email hoặc mật khẩu không chính xác";
         public static final String INVALID_REFRESH_TOKEN = "exception.auth.invalid.refresh.token";
         public static final String EXPIRED_REFRESH_TOKEN = "exception.auth.expired.refresh.token";
         public static final String ERR_LOGIN_FAIL = "exception.auth.login.fail";
