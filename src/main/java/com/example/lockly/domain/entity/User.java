@@ -50,6 +50,9 @@ public class User {
         if (id == null){
             id = UUID.randomUUID().toString();
         }
+        if (displayName == null){
+            displayName = email.substring(0, email.indexOf("@"));
+        }
         createdAt = LocalDateTime.now();
     }
 }
