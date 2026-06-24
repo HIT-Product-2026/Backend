@@ -2,9 +2,11 @@ package com.example.lockly.controller;
 
 import com.example.lockly.domain.dto.request.SendImageMessageSocketRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.MessageResponseDto;
-import com.example.lockly.service.MessageService;
-import com.example.lockly.service.WebSocketService;
+import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +18,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 @Validated
 @Controller
 @RequiredArgsConstructor
@@ -25,6 +29,9 @@ public class WebSocketController {
 
     WebSocketService webSocketService;
     MessageService messageService;
+    RedisService redisService;
+    AuthService authService;
+    UserService userService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -58,6 +65,24 @@ public class WebSocketController {
     @MessageMapping("/share.location")
     @Operation(summary = "Chia sẻ vị trí của người dùng", description = "Chia sẻ vị trí của bản thân đến mọi người")
     public void shareLocation(
+            @Parameter(description = "Kinh độ")
+            Double longitude,
 
-    )
+            @Parameter(description = "Vĩ độ")
+            Double latitude
+    ){
+        User user = authService.getCurrentUser();
+
+        // Lưu vào redis
+        redisService.saveUserLocation(user.getId(), latitude, longitude);
+        LocationUserResponseDto response = redisService.getUserLocation(user.getId());
+
+        // Lấy bạn bè
+        List<UserResponseDto> friends = userService.findFriends();
+
+        // Chuyển dến bạn bè
+        for (UserResponseDto friend : friends){
+            webSocketService.shareLocationToFriend(friend.id(), response);
+        }
+    }
 }

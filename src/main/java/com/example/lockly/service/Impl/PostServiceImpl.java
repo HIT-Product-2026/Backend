@@ -3,25 +3,27 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.CreatePostRequestDto;
+import com.example.lockly.domain.dto.request.EmojiPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
-import com.example.lockly.domain.entity.Post;
-import com.example.lockly.domain.entity.PostModeLocation;
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.domain.entity.*;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.repository.EmojiPostRepository;
 import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
+import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,11 +39,13 @@ import java.util.UUID;
 public class PostServiceImpl implements PostService {
 
     MinioProperties props;
-    UserRepository userRepository;
+    UserService userService;
     PostsRepository postsRepository;
     AuthService authService;
+    EmojiPostRepository emojiPostRepository;
     MinIOService minIOService;
     String prefix = "post";
+    int pageSize = 10;
 
     @Override
     @Transactional
@@ -80,6 +84,9 @@ public class PostServiceImpl implements PostService {
 
             postsRepository.save(post);
 
+            if (mode == PostModeLocation.PRIVATE)
+                return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
+
             return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()));
         } catch (Exception e){
             minIOService.deleteFile(objectName);
@@ -113,12 +120,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(){
-        User user = authService.getCurrentUser();
-
+    public List<PostResponseDto> getPostByUserId(User user, int pageNumber){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         List<PostResponseDto> response = postsRepository
-                .findByUserOrderByCreatedAtDesc(user)
+                .findByUserOrderByCreatedAtDesc(user, pageable)
                 .stream()
                 .map(post -> PostResponseDto
                         .from(post, FileUtil.getImageUrlApi(prefix, post.getId()))
@@ -154,6 +160,28 @@ public class PostServiceImpl implements PostService {
         } else {
             return new LocationPostResponseDto(null, null);
         }
+    }
+
+    @Override
+    @Transactional
+    public void sendEmoji(EmojiPostRequestDto request){
+        Post post = postsRepository
+                .findById(request.postId())
+                .orElseThrow(() -> new BadRequestException("Post id", request.postId()));
+
+        User user = authService.getCurrentUser();
+        User postAuthor = post.getUser();
+
+        if (!userService.isFriend(postAuthor.getId()))
+            throw new ForbiddenException("User và chủ post không phải bạn bè");
+
+        EmojiPost emojiPost = EmojiPost.builder()
+                .post(post)
+                .sender(user)
+                .emoji(request.emoji())
+                .build();
+
+        emojiPostRepository.save(emojiPost);
     }
 
 }

@@ -2,6 +2,8 @@ package com.example.lockly.repository;
 
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +18,8 @@ public interface PostsRepository extends JpaRepository<Post, String> {
     WHERE p.user = :user
     ORDER BY p.createdAt DESC
 """)
-    List<Post> findByUserOrderByCreatedAtDesc(
-            @Param("user") User user
+    Page<Post> findByUserOrderByCreatedAtDesc(
+            @Param("user") User user,
+            Pageable pageable
     );
 }

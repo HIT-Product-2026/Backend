@@ -9,6 +9,7 @@ import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.PostResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import com.example.lockly.service.PostService;
@@ -41,7 +42,6 @@ public class UserController {
 
     UserService userService;
     ConversationService conversationService;
-    PostService postService;
     AuthService authService;
 
     @GetMapping("/friends")
@@ -49,10 +49,7 @@ public class UserController {
     )
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
     ) {
-        User user = authService.getCurrentUser();
-
-        List<UserResponseDto> listFriend =
-                userService.findFriendByUserId(user.getId());
+        List<UserResponseDto> listFriend = userService.findFriends();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -128,12 +125,35 @@ public class UserController {
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
-    @GetMapping("/posts")
-    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
-    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostsByUser(
+    @PutMapping("/display-name")
+    @Operation(
+            summary = "Cập nhật display name",
+            description = "Cập nhật tên hiển thị của user hiện tại"
+    )
+    public ResponseEntity<ApiResponse<Void>> updateDisplayName(
+            @RequestParam("displayName") String displayName
     ) {
+
+        userService.updateDisplayName(displayName);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId()));
+                .body(ApiResponse.success("Cập nhật display name thành công", null));
+    }
+
+    @PutMapping("/mode")
+    @Operation(
+            summary = "Cập nhật chế độ người dùng",
+            description = "Cập nhật UserMode (ví dụ: PUBLIC / PRIVATE / etc)"
+    )
+    public ResponseEntity<ApiResponse<Void>> updateMode(
+            @RequestParam("mode") UserMode mode
+    ) {
+
+        userService.updateMode(mode);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Cập nhật mode thành công", null));
     }
 }
