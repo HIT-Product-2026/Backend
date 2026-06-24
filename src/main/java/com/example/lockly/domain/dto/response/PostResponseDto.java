@@ -2,23 +2,18 @@ package com.example.lockly.domain.dto.response;
 
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.PostModeLocation;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class PostResponseDto {
+public record PostResponseDto (
 
-    private String id;
-    private UserResponseDto user;
-    private String caption;
-    private String imageUrl;
-    private String contentType;
-    private Double latitude;
-    private Double longitude;
-    private PostModeLocation modeLocation;
+    String id,
+    UserResponseDto user,
+    String caption,
+    String imageUrl,
+    String contentType,
+    Double latitude,
+    Double longitude,
+    PostModeLocation modeLocation
+){
 
     public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
         return new PostResponseDto(

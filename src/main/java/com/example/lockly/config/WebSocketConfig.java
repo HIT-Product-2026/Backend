@@ -18,6 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+        log.debug("Connect WebSocket");
     }
 
     @Override
@@ -28,10 +29,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 "/queue"
         );
         registry.setUserDestinationPrefix("/user");
-    }
-
-    @Bean
-    public void testConnect(){
-        log.debug("Connect to websocket");
     }
 }

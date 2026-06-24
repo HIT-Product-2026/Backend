@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.domain.entity.User;
 import com.example.lockly.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,33 +34,15 @@ public class WebSocketServiceImpl implements WebSocketService {
         );
     }
 
-
-//     Send queue
-
-    public void sendToQueue(
-            String queue,
+//     Send private message
+    public void shareLocationToFriend(
+            String friendId,
             Object payload
     ) {
 
         messagingTemplate.convertAndSend(
-                "/queue/" + queue,
+                "/topic/location/" + friendId,
                 payload
         );
-
-    }
-
-
-//     Send private message
-    public void sendToUser(
-            String username,
-            Object payload
-    ) {
-
-        messagingTemplate.convertAndSendToUser(
-                username,
-                "/queue/messages",
-                payload
-        );
-
     }
 }

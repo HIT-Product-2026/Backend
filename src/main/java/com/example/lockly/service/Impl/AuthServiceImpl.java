@@ -20,6 +20,7 @@ import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.OtpService;
+import com.example.lockly.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -47,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
     InvalidatedTokenRepository invalidatedTokenRepository;
     OtpService otpService;
     PasswordUtil passwordUtil;
+    UserService userService;
 
     @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
     @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
@@ -92,6 +94,10 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordUtil.verify(request.password(), user.getPasswordHash())) {
             throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
         }
+
+        // Cập nhật fcm token
+        userService.updateFcmToken(request.fcmToken());
+
         return buildLoginResponse(user);
     }
 
