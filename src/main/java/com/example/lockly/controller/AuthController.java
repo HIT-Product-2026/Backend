@@ -40,15 +40,15 @@
 
         @PostMapping("/register/verify-otp")
         @Operation(summary = "Đăng ký — Bước 2/2", description = "Xác thực OTP và tạo tài khoản")
-        public ResponseEntity<ApiResponse<UserResponseDto>> verifyOtpAndRegister(
+        public ResponseEntity<ApiResponse<Void>> verifyOtpAndRegister(
                 @Valid @RequestBody VerifyOtpRequestDto request
         ) {
+            authService.verifyOtpAndRegister(request);
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(ApiResponse.created(
-                            SuccessMessage.Auth.REGISTER_SUCCESS,
-                            authService.verifyOtpAndRegister(request))
-                    );
+                    .body(ApiResponse.success(
+                            SuccessMessage.Auth.REGISTER_SUCCESS));
         }
 
         @PostMapping("/login")

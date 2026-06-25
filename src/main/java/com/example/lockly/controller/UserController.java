@@ -41,8 +41,7 @@ public class UserController {
     AuthService authService;
 
     @GetMapping("/friends")
-    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id"
-    )
+    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id")
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
     ) {
         User user = authService.getCurrentUser();
