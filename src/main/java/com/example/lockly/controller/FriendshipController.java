@@ -6,6 +6,8 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class FriendshipController {
 
     UserService userService;
+    AuthService authService;
 
     @PostMapping("/request")
     @Operation(summary = "Gửi lời mời kết bạn")
@@ -46,10 +49,12 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
             @PathVariable @Valid String friendshipsId
     ) {
+        User user = authService.getCurrentUser();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.acceptAddFriendRequest(friendshipsId)));
+                        userService.acceptAddFriendRequest(user.getId(), friendshipsId)));
     }
 
 
@@ -58,10 +63,12 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
             @PathVariable @Valid String friendshipId
     ) {
+        User user = authService.getCurrentUser();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.rejectAddFriendRequest(friendshipId)));
+                        userService.rejectAddFriendRequest(user.getId(), friendshipId)));
     }
 
 }

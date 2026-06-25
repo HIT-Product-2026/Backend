@@ -82,7 +82,7 @@ public class WebSocketController {
             return;
 
         // Lấy bạn bè
-        List<UserResponseDto> friends = userService.findFriends();
+        List<UserResponseDto> friends = userService.findFriendsByUserId(user.getId());
 
         // Chuyển dến bạn bè
         for (UserResponseDto friend : friends){

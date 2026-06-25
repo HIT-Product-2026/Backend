@@ -49,7 +49,8 @@ public class UserController {
     )
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
     ) {
-        List<UserResponseDto> listFriend = userService.findFriends();
+        User user = authService.getCurrentUser();
+        List<UserResponseDto> listFriend = userService.findFriendsByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -76,8 +77,9 @@ public class UserController {
             @Parameter(description = "File ảnh avatar")
             @RequestParam("file") MultipartFile file
     ) throws Exception {
+        User user = authService.getCurrentUser();
 
-        userService.updateAvatar(file);
+        userService.updateAvatarByUserId(user.getId(), file);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -91,8 +93,9 @@ public class UserController {
 
             @RequestParam("longitude") Double longitude
     ) {
+        User user = authService.getCurrentUser();
 
-        userService.updateUserLocation(latitude, longitude);
+        userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -106,7 +109,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Boolean>> isUserOnline(
     ) {
 
-        boolean isOnline = userService.isUserOnline();
+        User user = authService.getCurrentUser();
+        boolean isOnline = userService.isUserOnlineByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -133,8 +137,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> updateDisplayName(
             @RequestParam("displayName") String displayName
     ) {
-
-        userService.updateDisplayName(displayName);
+        User user = authService.getCurrentUser();
+        userService.updateDisplayNameByUserId(user.getId(), displayName);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -149,8 +153,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> updateMode(
             @RequestParam("mode") UserMode mode
     ) {
-
-        userService.updateMode(mode);
+        User user = authService.getCurrentUser();
+        userService.updateModeByUserId(user.getId(), mode);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

@@ -172,7 +172,7 @@ public class PostServiceImpl implements PostService {
         User user = authService.getCurrentUser();
         User postAuthor = post.getUser();
 
-        if (!userService.isFriend(postAuthor.getId()))
+        if (!userService.isFriendByUserId(user.getId(), postAuthor.getId()))
             throw new ForbiddenException("User và chủ post không phải bạn bè");
 
         EmojiPost emojiPost = EmojiPost.builder()
