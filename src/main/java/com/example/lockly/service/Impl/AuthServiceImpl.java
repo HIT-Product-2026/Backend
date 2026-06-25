@@ -7,7 +7,6 @@ import com.example.lockly.domain.dto.request.*;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
-import com.example.lockly.domain.entity.OtpPurpose;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ResourceNotFoundException;
@@ -17,8 +16,6 @@ import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
-import com.example.lockly.service.OtpService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,14 +42,17 @@ public class AuthServiceImpl implements AuthService {
     UserRepository userRepository;
     JwtProvider jwtProvider;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    OtpService otpService;
     EmailService emailService;
     PasswordUtil passwordUtil;
     RedisTemplate<String, Object> redisTemplate;
-    ObjectMapper objectMapper;
-    
-    static final String REGISTER_PREFIX = "register:";
-    static final Duration REGISTER_TTL  = Duration.ofMinutes(5);
+
+    static final String REGISTER_PREFIX        = "register:";
+    static final Duration REGISTER_TTL         = Duration.ofMinutes(5);
+
+    static final String FORGOT_PREFIX          = "forgot:";
+    static final String FORGOT_VERIFIED_PREFIX = "forgot:verified:";
+    static final Duration FORGOT_OTP_TTL       = Duration.ofMinutes(5);
+    static final Duration FORGOT_VERIFIED_TTL  = Duration.ofMinutes(10);
 
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -83,12 +83,12 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
 
-        String redisKey  = REGISTER_PREFIX + request.otp();
+        String redisKey = REGISTER_PREFIX + request.otp();
         Object raw = redisTemplate.opsForValue().get(redisKey);
         if (raw == null) {
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
-        RegisterPendingData pendingData = objectMapper.convertValue(raw, RegisterPendingData.class);
+        RegisterPendingData pendingData = (RegisterPendingData) raw;
 
         String baseUsername = pendingData.email().split("@")[0];
         String username = baseUsername;
@@ -168,13 +168,24 @@ public class AuthServiceImpl implements AuthService {
         if (!userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("Email chưa được đăng ký.");
         }
-        otpService.sendOtp(request.email(), OtpPurpose.FORGOT_PASSWORD);
+        String otpCode = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
+        String redisKey = FORGOT_PREFIX + request.email();
+        redisTemplate.opsForValue().set(redisKey, otpCode, FORGOT_OTP_TTL);
+        log.info("[ForgotPassword Bước 1] Lưu Redis key={}", redisKey);
+        emailService.sendOtpEmail(request.email(), otpCode, "đặt lại mật khẩu");
     }
 
     @Override
     @Transactional
     public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request) {
-        otpService.verifyOtp(request.email(), request.otp(), OtpPurpose.FORGOT_PASSWORD);
+        String redisKey = FORGOT_PREFIX + request.email();
+        Object raw = redisTemplate.opsForValue().get(redisKey);
+        if (raw == null || !raw.toString().equals(request.otp())) {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+        redisTemplate.delete(redisKey);
+        redisTemplate.opsForValue().set(FORGOT_VERIFIED_PREFIX + request.email(), "true", FORGOT_VERIFIED_TTL);
+        log.info("[ForgotPassword Bước 2] Xác thực OTP thành công, email={}", request.email());
     }
 
     @Override
@@ -183,10 +194,17 @@ public class AuthServiceImpl implements AuthService {
         if (!request.newPassword().equals(request.confirmPassword())) {
             throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
         }
+        String verifiedKey = FORGOT_VERIFIED_PREFIX + request.email();
+        Object verified = redisTemplate.opsForValue().get(verifiedKey);
+        if (verified == null) {
+            throw new BadRequestException("Phiên xác thực đã hết hạn. Vui lòng gửi lại OTP.");
+        }
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
         user.setPasswordHash(passwordUtil.hash(request.newPassword()));
         userRepository.save(user);
+        redisTemplate.delete(verifiedKey);
+        log.info("[ForgotPassword Bước 3] Đặt lại mật khẩu thành công, email={}", request.email());
     }
 
     private LoginResponseDto buildLoginResponse(User user) {
