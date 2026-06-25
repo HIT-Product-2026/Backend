@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.request;
+package com.example.lockly.domain.dto.request.auth;
 
 import java.io.Serializable;
 

@@ -1,7 +1,7 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.domain.dto.request.CreateConversationRequestDto;
-import com.example.lockly.domain.dto.response.ConversationResponseDto;
+import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
+import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.entity.Conversation;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;

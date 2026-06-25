@@ -3,9 +3,9 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.PasswordUtil;
 import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
-import com.example.lockly.domain.dto.request.*;
+import com.example.lockly.domain.dto.request.auth.*;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
@@ -76,15 +76,16 @@ public class AuthServiceImpl implements AuthService {
                 request.email(),
                 passwordUtil.hash(request.password())
         );
-
+        log.debug("Redis chưa có");
         redisTemplate.opsForValue().set(redisKey, pendingData, REGISTER_TTL);
+        log.debug("Redis có");
         log.info("[Register Bước 1] Lưu Redis key={}, email={}", redisKey, request.email());
         emailService.sendOtpEmail(request.email(), otpCode, "đăng ký");
     }
 
     @Override
     @Transactional
-    public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
+    public UserResponseDto verifyOtpAndRegister(VerifyOtpRequestDto request) {
         String redisKey = REGISTER_PREFIX + request.otp();
         Object raw = redisTemplate.opsForValue().get(redisKey);
         if (raw == null) {
@@ -183,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request) {
+    public void verifyOtpForgotPassword(VerifyOtpRequestDto request) {
         String redisKey = FORGOT_PREFIX + request.email();
         Object raw = redisTemplate.opsForValue().get(redisKey);
         if (raw == null || !raw.toString().equals(request.otp())) {

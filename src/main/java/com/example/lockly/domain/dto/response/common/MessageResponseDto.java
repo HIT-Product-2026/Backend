@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.response;
+package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.Message;
 import com.example.lockly.domain.entity.MessageType;
