@@ -3,22 +3,18 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
-import com.example.lockly.domain.dto.response.ConversationResponseDto;
-import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
-import com.example.lockly.domain.dto.response.PostResponseDto;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
-import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,8 +41,7 @@ public class UserController {
     AuthService authService;
 
     @GetMapping("/friends")
-    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id"
-    )
+    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id")
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
     ) {
         User user = authService.getCurrentUser();
@@ -159,5 +154,18 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Cập nhật mode thành công", null));
+    }
+
+    @PutMapping("/fcm-token")
+    @Operation(summary = "Cập nhật fcm token")
+    public ResponseEntity<ApiResponse<Void>> updateFcmToken(
+            @RequestParam("fcm_token") String fcmToken
+    ){
+        User user = authService.getCurrentUser();
+        userService.updateFcmTokenByUserId(user.getId(), fcmToken);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công"));
     }
 }

@@ -3,9 +3,9 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.PasswordUtil;
 import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
-import com.example.lockly.domain.dto.request.*;
+import com.example.lockly.domain.dto.request.auth.*;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.InvalidatedToken;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
@@ -127,8 +127,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Cập nhật fcm token
-        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
-
+//        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
         return buildLoginResponse(user);
     }
 
@@ -185,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void verifyOtpForgotPassword(VerifyOtpForgotPasswordRequestDto request) {
+    public void verifyOtpForgotPassword(VerifyOtpRequestDto request) {
         String redisKey = FORGOT_PREFIX + request.email();
         Object raw = redisTemplate.opsForValue().get(redisKey);
         if (raw == null || !raw.toString().equals(request.otp())) {
@@ -199,6 +198,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
+        }
         String verifiedKey = FORGOT_VERIFIED_PREFIX + request.email();
         Object verified = redisTemplate.opsForValue().get(verifiedKey);
         if (verified == null) {

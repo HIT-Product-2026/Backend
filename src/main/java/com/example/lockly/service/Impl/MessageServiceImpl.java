@@ -1,10 +1,9 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
-import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
-import com.example.lockly.domain.dto.response.MessageResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.Conversation;
 import com.example.lockly.domain.entity.Message;
 import com.example.lockly.domain.entity.MessageType;
@@ -18,7 +17,6 @@ import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
-import com.example.lockly.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

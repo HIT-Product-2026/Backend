@@ -1,7 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.constant.ErrorMessage;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
@@ -9,8 +9,6 @@ import com.example.lockly.service.CustomUserDetailsService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

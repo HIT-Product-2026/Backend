@@ -4,7 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
-import com.example.lockly.domain.dto.response.MessageResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

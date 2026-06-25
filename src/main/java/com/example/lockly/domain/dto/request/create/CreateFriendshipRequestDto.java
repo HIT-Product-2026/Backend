@@ -1,7 +1,5 @@
-package com.example.lockly.domain.dto.request;
+package com.example.lockly.domain.dto.request.create;
 
-import com.example.lockly.domain.dto.response.UserResponseDto;
-import com.example.lockly.domain.entity.FriendshipStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateFriendshipRequestDto (
