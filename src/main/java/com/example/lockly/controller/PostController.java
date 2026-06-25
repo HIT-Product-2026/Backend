@@ -76,7 +76,7 @@ public class PostController {
         User user = authService.getCurrentUser();
 
         // Gửi thông báo
-        List<String> fcmTokens = userService.findFcmTokenOfFriends();
+        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
         FcmPostResponseDto data = fcmService.createFcmPostResponse(user.getId(), post.id());
         fcmService.sendToManySilent(fcmTokens, data);
 
