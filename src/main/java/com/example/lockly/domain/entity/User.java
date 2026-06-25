@@ -36,10 +36,7 @@ public class User {
     private String avatarUrl;
 
     @Column
-    private Double latitude;
-
-    @Column
-    private Double longitude;
+    private UserMode mode;
 
     // Địa chỉ của thiết bị, giúp fe biết cần gửi thông báo đến đâu
     @Column(name = "fcm_token")
@@ -48,19 +45,14 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "last_active_at")
-    private LocalDateTime lastActiveAt;
-
     @PrePersist
     void prePersist(){
         if (id == null){
             id = UUID.randomUUID().toString();
         }
+        if (displayName == null){
+            displayName = email.substring(0, email.indexOf("@"));
+        }
         createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    void preUpdate(){
-        lastActiveAt = LocalDateTime.now();
     }
 }

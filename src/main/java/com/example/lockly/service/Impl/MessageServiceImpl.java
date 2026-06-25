@@ -10,12 +10,15 @@ import com.example.lockly.domain.entity.Message;
 import com.example.lockly.domain.entity.MessageType;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.BadRequestException;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.ConversationRepository;
 import com.example.lockly.repository.MessageRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
+import com.example.lockly.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +37,7 @@ public class MessageServiceImpl implements MessageService {
     ConversationRepository conversationRepository;
     UserRepository userRepository;
     MessageRepository messageRepository;
+    AuthService authService;
     MinIOService minIOService;
     String prefix = "message";
 
@@ -41,8 +45,8 @@ public class MessageServiceImpl implements MessageService {
         if(!conversation.getUser1().getId().equals(sender.getId())
                 && !conversation.getUser2().getId().equals(sender.getId())
         ){
-            throw new BadRequestException(
-                    "Người gửi không thuộc về đoạn chat này"
+            throw new ForbiddenException("You are not allowed to send message to this conversation_id: ",
+                    conversation.getId()
             );
 
         }
@@ -52,6 +56,8 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessageResponseDto sendTextMessage(SendTextMessageRequestDto request){
+        User user = authService.getCurrentUser();
+
         Conversation conversation = conversationRepository
                 .findById(request.conversationId())
                 .orElseThrow(() -> new BadRequestException("Conversation id", request.conversationId()));
@@ -60,40 +66,34 @@ public class MessageServiceImpl implements MessageService {
             throw new BadRequestException("Message content cannot be empty", request.content());
         }
 
-        User sender = userRepository
-                .findById(request.senderId())
-                .orElseThrow(() -> new BadRequestException("User id", request.senderId()));
-
         //Kiểm tra người gửi có thuộc về đoạn chat không
-        validateSender(conversation, sender);
+        validateSender(conversation, user);
 
         Message message = Message.builder()
                 .conversation(conversation)
-                .sender(sender)
+                .sender(user)
                 .type(MessageType.TEXT)
                 .content(request.content().trim())
                 .build();
 
-        return MessageResponseDto.from(messageRepository.save(message));
+        return MessageResponseDto.from(message);
     }
 
     @Override
     @Transactional
     public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request) throws Exception{
+        User user = authService.getCurrentUser();
+
         Conversation conversation = conversationRepository
                 .findById(request.conversationId())
                 .orElseThrow(() -> new BadRequestException("Conversation id", request.conversationId()));
-
-        User sender = userRepository
-                .findById(request.senderId())
-                .orElseThrow(() -> new BadRequestException("User id", request.senderId()));
 
         if (request.file() == null || request.file().isEmpty()) {
             throw new BadRequestException("File is empty");
         }
 
         //Kiểm tra người gửi có thuộc về đoạn chat không
-        validateSender(conversation, sender);
+        validateSender(conversation, user);
 
         String messageId = UUID.randomUUID().toString();
 
@@ -106,7 +106,7 @@ public class MessageServiceImpl implements MessageService {
             Message message = Message.builder()
                     .id(messageId)
                     .conversation(conversation)
-                    .sender(sender)
+                    .sender(user)
                     .type(MessageType.IMAGE)
                     .content(objectName)
                     .build();
@@ -126,6 +126,10 @@ public class MessageServiceImpl implements MessageService {
                 .findById(conversationId)
                 .orElseThrow(() -> new BadRequestException("conversation id", conversationId));
 
+        User user = authService.getCurrentUser();
+
+        validateSender(conversation, user);
+
         List<Message> messageList = messageRepository.findByConversationId(conversation.getId());
 
         // content lưu trong message là đường dẫn trong minIO, nhưng trả về thì phải trả về url api để fe gọi
@@ -144,9 +148,7 @@ public class MessageServiceImpl implements MessageService {
                                 )
                         );
                     }
-
                     return dto;
-
                 })
                 .toList();
     }

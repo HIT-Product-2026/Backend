@@ -38,38 +38,35 @@ public class GlobalExceptionHandle {
     public ResponseEntity<ApiResponse<Void>> handValidationError(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
 
-        // Pass 1: ưu tiên lỗi chi tiết (Pattern, Size, ...)
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             String field = error.getField();
-            String code = error.getCode();
+            String code = error.getCode(); // tên annotation: NotBlank, NotNull, Size, Pattern...
             boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
-            if (!isEmptyCheck && !errors.containsKey(field)) {
+
+            if (!errors.containsKey(field) || isEmptyCheck) {
                 errors.put(field, error.getDefaultMessage());
             }
         });
 
-        // Pass 2: lấy NotBlank/NotNull cho field chưa có lỗi
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            String field = error.getField();
-            String code = error.getCode();
-            boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
-            if (isEmptyCheck && !errors.containsKey(field)) {
-                errors.put(field, error.getDefaultMessage());
-            }
-        });
-
-        // Trả về message lỗi đầu tiên
-        String firstMessage = errors.values().stream().findFirst().orElse("Dữ liệu không hợp lệ.");
+        String combinedMessage = String.join(", ", errors.values());
 
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.error(400, firstMessage));
+                .body(ApiResponse.error(400, combinedMessage));
+    }
+
+    // Exception chung
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuntime(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(400, ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handGenericException(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "Lỗi hệ thống, vui lòng thử lại sau"));
+                .body(ApiResponse.error(500, "Lỗi hệ thống"));
     }
 }

@@ -6,7 +6,7 @@ import com.example.lockly.domain.dto.response.ConversationResponseDto;
 import java.util.List;
 
 public interface ConversationService {
-    public List<ConversationResponseDto> findByUserId(String userId);
+    public List<ConversationResponseDto> findAll();
     public ConversationResponseDto createConversation(CreateConversationRequestDto request);
     public ConversationResponseDto findById(String id);
 }

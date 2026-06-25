@@ -13,9 +13,11 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.InvalidatedTokenRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
+import com.example.lockly.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     EmailService emailService;
     PasswordUtil passwordUtil;
     RedisTemplate<String, Object> redisTemplate;
+    UserService userService;
 
     static final String REGISTER_PREFIX        = "register:";
     static final Duration REGISTER_TTL         = Duration.ofMinutes(5);
@@ -61,13 +66,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendOtpForRegister(RegisterRequestDto request) {
-
         if (userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("Email đã tồn tại / Email đã được đăng ký.");
         }
 
-        String otpCode    = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
-        String redisKey   = REGISTER_PREFIX + otpCode;
+        String otpCode  = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
+        String redisKey = REGISTER_PREFIX + otpCode;
         RegisterPendingData pendingData = new RegisterPendingData(
                 request.email(),
                 passwordUtil.hash(request.password())
@@ -75,14 +79,12 @@ public class AuthServiceImpl implements AuthService {
 
         redisTemplate.opsForValue().set(redisKey, pendingData, REGISTER_TTL);
         log.info("[Register Bước 1] Lưu Redis key={}, email={}", redisKey, request.email());
-
         emailService.sendOtpEmail(request.email(), otpCode, "đăng ký");
     }
 
     @Override
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
-
         String redisKey = REGISTER_PREFIX + request.otp();
         Object raw = redisTemplate.opsForValue().get(redisKey);
         if (raw == null) {
@@ -121,6 +123,10 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordUtil.verify(request.password(), user.getPasswordHash())) {
             throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
         }
+
+        // Cập nhật fcm token
+        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
+
         return buildLoginResponse(user);
     }
 
@@ -168,7 +174,7 @@ public class AuthServiceImpl implements AuthService {
         if (!userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("Email chưa được đăng ký.");
         }
-        String otpCode = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
+        String otpCode  = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
         String redisKey = FORGOT_PREFIX + request.email();
         redisTemplate.opsForValue().set(redisKey, otpCode, FORGOT_OTP_TTL);
         log.info("[ForgotPassword Bước 1] Lưu Redis key={}", redisKey);
@@ -216,5 +222,18 @@ public class AuthServiceImpl implements AuthService {
                 .id(user.getId())
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
+    }
+
+    @Override
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getUser();
+        }
+        throw new RuntimeException("Invalid authentication principal");
     }
 }
