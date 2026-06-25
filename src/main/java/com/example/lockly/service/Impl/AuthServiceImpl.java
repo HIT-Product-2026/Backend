@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
+    public UserResponseDto verifyOtpAndRegister(VerifyOtpRequestDto request) {
         String otpKey = REGISTER_PREFIX + request.email();
         String pwdKey = REGISTER_PREFIX + "pwd:" + request.email();
 
@@ -198,9 +198,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
-        if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
-        }
         String verifiedKey = FORGOT_VERIFIED_PREFIX + request.email();
         Object verified = redisTemplate.opsForValue().get(verifiedKey);
         if (verified == null) {
