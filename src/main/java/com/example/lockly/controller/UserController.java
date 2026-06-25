@@ -156,4 +156,17 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Cập nhật mode thành công", null));
     }
+
+    @PutMapping("/fcm-token")
+    @Operation(summary = "Cập nhật fcm token")
+    public ResponseEntity<ApiResponse<Void>> updateFcmToken(
+            @RequestParam("fcm_token") String fcmToken
+    ){
+        User user = authService.getCurrentUser();
+        userService.updateFcmTokenByUserId(user.getId(), fcmToken);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công"));
+    }
 }

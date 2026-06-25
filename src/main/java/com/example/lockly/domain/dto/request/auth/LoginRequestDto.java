@@ -10,9 +10,5 @@ public record LoginRequestDto(
         String email,
 
         @ValidPassword
-        String password,
-
-        @NotBlank
-        String fcmToken
-
+        String password
 ) {}

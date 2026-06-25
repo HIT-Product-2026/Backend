@@ -126,8 +126,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Cập nhật fcm token
-        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
-
+//        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
         return buildLoginResponse(user);
     }
 
