@@ -1,9 +1,9 @@
 package com.example.lockly.service;
 
-import com.example.lockly.domain.dto.request.CreatePostRequestDto;
-import com.example.lockly.domain.dto.request.EmojiPostRequestDto;
+import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
+import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
-import com.example.lockly.domain.dto.response.PostResponseDto;
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
 
@@ -17,5 +17,5 @@ public interface PostService {
     List<PostResponseDto> getPostByUserId(User user, int pageNumber);
     void updateModeLocationPostById(String postId, PostModeLocation modeLocation);
     LocationPostResponseDto getLocationPost(String postId);
-    void sendEmoji(EmojiPostRequestDto request);
+    void sendEmoji(ReactEmojiToPostRequestDto request);
 }

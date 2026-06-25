@@ -2,22 +2,20 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.domain.dto.request.CreatePostRequestDto;
-import com.example.lockly.domain.dto.request.EmojiPostRequestDto;
+import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
+import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
-import com.example.lockly.domain.dto.response.PostResponseDto;
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.*;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.EmojiPostRepository;
 import com.example.lockly.repository.PostsRepository;
-import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -164,7 +162,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void sendEmoji(EmojiPostRequestDto request){
+    public void sendEmoji(ReactEmojiToPostRequestDto request){
         Post post = postsRepository
                 .findById(request.postId())
                 .orElseThrow(() -> new BadRequestException("Post id", request.postId()));

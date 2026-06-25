@@ -2,9 +2,9 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
-import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
+import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
 import com.example.lockly.domain.entity.Friendship;
 import com.example.lockly.domain.entity.User;
