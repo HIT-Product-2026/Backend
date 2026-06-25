@@ -35,4 +35,5 @@ build/
 
 .env
 minIO_db/
+src/main/resources/lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json
 

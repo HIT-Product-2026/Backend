@@ -10,13 +10,7 @@ public record FriendshipsRequestDto(
         @Null(message = "Id phải để trống khi tạo lời mời kết bạn")
         String id,
 
-        @NotNull(message = "Người gửi lời mời không được để trống")
-        UserResponseDto requester,
-
-        @NotNull(message = "Người nhận lời mời không được để trống")
-        UserResponseDto receiver,
-
-        @NotNull(message = "Trạng thái không được để trống")
-        FriendshipStatus status
+        @NotNull(message = "Người chấp nhận lời mời không được để trống")
+        String receiverId
 ) {
 }

@@ -4,7 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public record SendImageMessageRequestDto(
         String conversationId,
-        String senderId,
         MultipartFile file
 ) {
 }

@@ -2,19 +2,20 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
-import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
 import com.example.lockly.domain.entity.Friendship;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -27,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService {
     FriendshipsRepository friendshipsRepository;
     MinioClient minioClient;
     MinioProperties props;
+    RedisService redisService;
     String prefix = "users/avatar";
 
     @Override
-    public List<FriendshipsResponseDto> findAllFriendshipsByUserId(String id){
+    public List<FriendshipsResponseDto> findFriendshipsByUserId(String id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -58,34 +59,49 @@ public class UserServiceImpl implements UserService {
         return friendshipsDtoList;
     }
 
-    @Override
-    @Transactional
-    public FriendshipsResponseDto acceptAddFriendRequest(FriendshipsRequestDto request){
-        Friendship friendship = friendshipsRepository
-                .findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", request.id()));
+        @Override
+        @Transactional
+        public FriendshipsResponseDto acceptAddFriendRequest(String userId, String friendshipId){
+            Friendship friendship = friendshipsRepository
+                    .findById(friendshipId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
-        // Lời mời kết bạn phải ở trạng thái PEDDING mới có thể đồng ý
-        if (friendship.getStatus() != FriendshipStatus.PENDING)
-            throw new BadRequestException("status", request.status().name());
+            // Lời mời kết bạn phải ở trạng thái PENDING mới có thể đồng ý
+            if (friendship.getStatus() != FriendshipStatus.PENDING)
+                throw new BadRequestException("status", friendship.getStatus().name());
 
-        friendship.setStatus(FriendshipStatus.ACCEPTED);
+            User user = userRepository
+                    .findById(userId)
+                    .orElseThrow(() -> new BadRequestException("User id", userId));
 
-        return FriendshipsResponseDto.from(
-                friendshipsRepository.save(friendship)
-        );
+            // Chỉ người nhận lời mời mới có thể chấp nhận lời mời
+            if (!friendship.getReceiver().getId().equals(user.getId()))
+                throw new ForbiddenException("You are not allowed to accept this friend request");
+
+            friendship.setStatus(FriendshipStatus.ACCEPTED);
+
+            return FriendshipsResponseDto.from(friendship);
     }
 
     @Override
     @Transactional
-    public FriendshipsResponseDto rejectAddFriendRequest(FriendshipsRequestDto request){
+    public FriendshipsResponseDto rejectAddFriendRequest(String userId ,String friendshipId){
         Friendship friendship = friendshipsRepository
-                .findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", request.id()));
+                .findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
         // Từ chối kết bạn phải ở trạng thái PEDDING mới có thể từ chối
         if (friendship.getStatus() != FriendshipStatus.PENDING)
             throw new BadRequestException("Friendship is not PENDING");
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
+
+        if (!friendship.getReceiver().getId().equals(user.getId())
+        && friendship.getRequester().getId().equals(user.getId())){
+            throw new ForbiddenException("You are not allowed to accept this friend request");
+        }
 
         friendship.setStatus(FriendshipStatus.REJECTED);
 
@@ -95,10 +111,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findAllListFriendByUserId(String id){
+    public List<UserResponseDto> findFriendsByUserId(String userId){
         User user = userRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         // Lấy tất cả lời mời đã chấp thuận với user là người gửi
         List<UserResponseDto> fromRequester = friendshipsRepository
@@ -117,6 +133,17 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return Stream.concat(fromRequester.stream(), fromReceiver.stream()).toList();
+    }
+
+    @Override
+    public boolean isFriendByUserId(String userId, String friendId) {
+        List<UserResponseDto> friends = findFriendsByUserId(userId);
+
+        for (UserResponseDto friend : friends){
+            if (friend.id().equals(friendId))
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -147,7 +174,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(String id) {
+    public UserResponseDto findUserById(String id) {
 
         User user = userRepository
                 .findById(id)
@@ -158,7 +185,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatar(String userId, MultipartFile file) throws Exception {
+    public void updateAvatarByUserId(String userId, MultipartFile file) throws Exception {
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
@@ -168,9 +195,9 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
-        String objectName = FileUtil.getObjectNameFile(prefix, userId, file);
+        String objectName = FileUtil.getObjectNameFile(prefix, user.getId(), file);
 
         minioClient.putObject(
                 PutObjectArgs.builder()
@@ -188,30 +215,91 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserLocation(String userId, Double latitude, Double longitude) {
+    public void updateUserLocationByUserId(String userId, Double latitude, Double longitude) {
 
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
-        user.setLatitude(latitude);
-        user.setLongitude(longitude);
+        redisService.saveUserLocation(user.getId(), latitude, longitude);
 
         userRepository.save(user);
     }
 
     @Override
-    public boolean isUserOnline(String userId) {
+    public boolean isUserOnlineByUserId(String userId) {
 
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
-        if (user.getLastActiveAt() == null)
+        LocalDateTime lastActiveAt = redisService
+                .getUserLocation(user.getId())
+                .lastActiveAt();
+
+        if (lastActiveAt == null)
             return false;
 
         LocalDateTime now = LocalDateTime.now();
 
-        return !user.getLastActiveAt().isBefore(now.minusMinutes(5));
+        return !lastActiveAt.isBefore(now.minusMinutes(3));
+    }
+
+    @Override
+    public List<String> findFcmTokenOfFriendsByUserId(String userId){
+
+        List<UserResponseDto> friends = findFriendsByUserId(userId);
+
+        return friends.stream()
+                .map(UserResponseDto::fcmToken)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void updateDisplayNameByUserId(String userId, String displayName) {
+
+        if (displayName == null || displayName.trim().isEmpty())
+            throw new BadRequestException("displayName", displayName);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
+
+        user.setDisplayName(displayName);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateModeByUserId(String userId, UserMode mode) {
+
+        if (mode == null)
+            throw new BadRequestException("mode", null);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
+
+        user.setMode(mode);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateFcmTokenByUserId(String userId, String fcmToken) {
+
+        if (fcmToken == null || fcmToken.trim().isEmpty())
+            throw new BadRequestException("fcmToken", fcmToken);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
+
+        user.setFcmToken(fcmToken);
+
+        userRepository.save(user);
     }
 }
