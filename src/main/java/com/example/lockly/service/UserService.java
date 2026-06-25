@@ -13,18 +13,18 @@ import java.util.List;
 public interface UserService {
 
     List<FriendshipsResponseDto> findFriendshipsByUserId(String id);
-    FriendshipsResponseDto acceptAddFriendRequest(String friendshipId);
-    FriendshipsResponseDto rejectAddFriendRequest(String friendshipId);
-    List<UserResponseDto> findFriends();
+    FriendshipsResponseDto acceptAddFriendRequest(String userId, String friendshipId);
+    FriendshipsResponseDto rejectAddFriendRequest( String userId, String friendshipId);
+    List<UserResponseDto> findFriendsByUserId(String userId);
     FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
     UserResponseDto findUserById(String id);
-    boolean isUserOnline();
-    void updateUserLocation(Double latitude, Double longitude);
-    List<String> findFcmTokenOfFriends();
-    boolean isFriend(String friendId);
+    boolean isUserOnlineByUserId(String userId);
+    void updateUserLocationByUserId(String userId, Double latitude, Double longitude);
+    List<String> findFcmTokenOfFriendsByUserId(String userId);
+    boolean isFriendByUserId(String userId, String friendId);
 
-    void updateDisplayName(String displayName);
-    void updateAvatar(MultipartFile file) throws Exception;
-    void updateMode(UserMode mode);
-    void updateFcmToken(String fcmToken);
+    void updateDisplayNameByUserId(String userId, String displayName);
+    void updateAvatarByUserId(String userId, MultipartFile file) throws Exception;
+    void updateModeByUserId(String userId, UserMode mode);
+    void updateFcmTokenByUserId(String userId, String fcmToken);
 }

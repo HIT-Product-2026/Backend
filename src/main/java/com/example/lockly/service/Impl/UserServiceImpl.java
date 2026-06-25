@@ -3,8 +3,6 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.CreateFriendshipRequestDto;
-import com.example.lockly.domain.dto.request.FriendshipsRequestDto;
-import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.UserResponseDto;
 import com.example.lockly.domain.entity.FriendshipStatus;
@@ -17,7 +15,6 @@ import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
-import com.example.lockly.service.AuthService;
 import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
@@ -42,7 +39,6 @@ public class UserServiceImpl implements UserService {
     FriendshipsRepository friendshipsRepository;
     MinioClient minioClient;
     MinioProperties props;
-    AuthService authService;
     RedisService redisService;
     String prefix = "users/avatar";
 
@@ -65,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
         @Override
         @Transactional
-        public FriendshipsResponseDto acceptAddFriendRequest(String friendshipId){
+        public FriendshipsResponseDto acceptAddFriendRequest(String userId, String friendshipId){
             Friendship friendship = friendshipsRepository
                     .findById(friendshipId)
                     .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -74,7 +70,9 @@ public class UserServiceImpl implements UserService {
             if (friendship.getStatus() != FriendshipStatus.PENDING)
                 throw new BadRequestException("status", friendship.getStatus().name());
 
-            User user = authService.getCurrentUser();
+            User user = userRepository
+                    .findById(userId)
+                    .orElseThrow(() -> new BadRequestException("User id", userId));
 
             // Chỉ người nhận lời mời mới có thể chấp nhận lời mời
             if (!friendship.getReceiver().getId().equals(user.getId()))
@@ -87,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto rejectAddFriendRequest(String friendshipId){
+    public FriendshipsResponseDto rejectAddFriendRequest(String userId ,String friendshipId){
         Friendship friendship = friendshipsRepository
                 .findById(friendshipId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -96,7 +94,9 @@ public class UserServiceImpl implements UserService {
         if (friendship.getStatus() != FriendshipStatus.PENDING)
             throw new BadRequestException("Friendship is not PENDING");
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         if (!friendship.getReceiver().getId().equals(user.getId())
         && friendship.getRequester().getId().equals(user.getId())){
@@ -111,8 +111,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findFriends(){
-        User user = authService.getCurrentUser();
+    public List<UserResponseDto> findFriendsByUserId(String userId){
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         // Lấy tất cả lời mời đã chấp thuận với user là người gửi
         List<UserResponseDto> fromRequester = friendshipsRepository
@@ -134,8 +136,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isFriend(String friendId) {
-        List<UserResponseDto> friends = findFriends();
+    public boolean isFriendByUserId(String userId, String friendId) {
+        List<UserResponseDto> friends = findFriendsByUserId(userId);
 
         for (UserResponseDto friend : friends){
             if (friend.id().equals(friendId))
@@ -183,7 +185,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatar(MultipartFile file) throws Exception {
+    public void updateAvatarByUserId(String userId, MultipartFile file) throws Exception {
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
@@ -191,7 +193,9 @@ public class UserServiceImpl implements UserService {
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty())
             throw new IllegalArgumentException("Original filename is missing");
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         String objectName = FileUtil.getObjectNameFile(prefix, user.getId(), file);
 
@@ -211,9 +215,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserLocation(Double latitude, Double longitude) {
+    public void updateUserLocationByUserId(String userId, Double latitude, Double longitude) {
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         redisService.saveUserLocation(user.getId(), latitude, longitude);
 
@@ -221,9 +227,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isUserOnline() {
+    public boolean isUserOnlineByUserId(String userId) {
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         LocalDateTime lastActiveAt = redisService
                 .getUserLocation(user.getId())
@@ -238,9 +246,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> findFcmTokenOfFriends(){
+    public List<String> findFcmTokenOfFriendsByUserId(String userId){
 
-        List<UserResponseDto> friends = findFriends();
+        List<UserResponseDto> friends = findFriendsByUserId(userId);
 
         return friends.stream()
                 .map(UserResponseDto::fcmToken)
@@ -249,12 +257,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateDisplayName(String displayName) {
+    public void updateDisplayNameByUserId(String userId, String displayName) {
 
         if (displayName == null || displayName.trim().isEmpty())
             throw new BadRequestException("displayName", displayName);
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setDisplayName(displayName);
 
@@ -263,12 +273,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateMode(UserMode  mode) {
+    public void updateModeByUserId(String userId, UserMode mode) {
 
         if (mode == null)
             throw new BadRequestException("mode", null);
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setMode(mode);
 
@@ -277,12 +289,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateFcmToken(String fcmToken) {
+    public void updateFcmTokenByUserId(String userId, String fcmToken) {
 
         if (fcmToken == null || fcmToken.trim().isEmpty())
             throw new BadRequestException("fcmToken", fcmToken);
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setFcmToken(fcmToken);
 
