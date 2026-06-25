@@ -2,18 +2,15 @@ package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.CreatePostRequestDto;
-import com.example.lockly.domain.dto.request.EmojiPostRequestDto;
+import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
+import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
-import com.example.lockly.domain.dto.response.PostResponseDto;
-import com.example.lockly.domain.dto.response.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
-import com.example.lockly.service.Impl.PostServiceImpl;
 import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +21,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -140,7 +136,7 @@ public class PostController {
     @Operation(summary = "Thả càm xúc", description = "Người dùng thả cảm xúc vào bài viết")
     public ResponseEntity<ApiResponse<Void>> sendEmojiToPost(
             @Parameter(description = "ID bài post và loại cảm xúc được thả")
-            @Valid @RequestBody EmojiPostRequestDto request
+            @Valid @RequestBody ReactEmojiToPostRequestDto request
     ){
         postService.sendEmoji(request);
 

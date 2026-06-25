@@ -2,7 +2,7 @@ package com.example.lockly.service;
 
 import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
-import com.example.lockly.domain.dto.response.MessageResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 
 import java.io.InputStream;
 import java.util.List;

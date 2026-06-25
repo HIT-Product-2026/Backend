@@ -2,9 +2,9 @@
 
     import com.example.lockly.common.response.ApiResponse;
     import com.example.lockly.constant.SuccessMessage;
-    import com.example.lockly.domain.dto.request.*;
+    import com.example.lockly.domain.dto.request.auth.*;
     import com.example.lockly.domain.dto.response.LoginResponseDto;
-    import com.example.lockly.domain.dto.response.UserResponseDto;
+    import com.example.lockly.domain.dto.response.common.UserResponseDto;
     import com.example.lockly.service.AuthService;
     import io.swagger.v3.oas.annotations.Operation;
     import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,7 +41,7 @@
         @PostMapping("/register/verify-otp")
         @Operation(summary = "Đăng ký — Bước 2/2", description = "Xác thực OTP và tạo tài khoản")
         public ResponseEntity<ApiResponse<UserResponseDto>> verifyOtpAndRegister(
-                @Valid @RequestBody VerifyOtpRegisterRequestDto request
+                @Valid @RequestBody VerifyOtpRequestDto request
         ) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -86,7 +86,7 @@
         @PostMapping("/forgot-password/verify-otp")
         @Operation(summary = "[Quên MK] Bước 2/3 — Xác thực OTP")
         public ResponseEntity<ApiResponse<Void>> verifyOtpForgotPassword(
-                @Valid @RequestBody VerifyOtpForgotPasswordRequestDto request) {
+                @Valid @RequestBody VerifyOtpRequestDto request) {
             authService.verifyOtpForgotPassword(request);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.VERIFY_OTP_SUCCESS));

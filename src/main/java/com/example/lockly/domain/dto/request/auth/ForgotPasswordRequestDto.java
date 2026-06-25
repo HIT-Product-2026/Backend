@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.request;
+package com.example.lockly.domain.dto.request.auth;
 
 import com.example.lockly.common.validator.ValidEmail;
 

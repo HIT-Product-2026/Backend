@@ -1,15 +1,13 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
-import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.CreateConversationRequestDto;
-import com.example.lockly.domain.dto.response.ConversationResponseDto;
+import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
+import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.service.ConversationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController

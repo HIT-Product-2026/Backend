@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.response;
+package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.PostModeLocation;
