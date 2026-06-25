@@ -9,10 +9,7 @@ import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.FcmService;
-import com.example.lockly.service.PostService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -42,6 +40,7 @@ public class PostController {
     UserService userService;
     FcmService fcmService;
     AuthService authService;
+    AIService aiService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId, kinh độ, vĩ độ để tạo post")
@@ -156,5 +155,27 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", postService.getPostByUserId(user, pageNumber)));
+    }
+
+    @PostMapping(value = "/nsfw", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Kiểm tra ảnh NSFW", description = "Upload ảnh để kiểm tra nội dung nhạy cảm"
+    )
+    public ResponseEntity<ApiResponse<Boolean>> detectNsfw(
+
+            @Parameter(description = "File ảnh cần kiểm tra")
+            @RequestParam("file") MultipartFile file
+
+    ) throws IOException {
+
+        Boolean isNsfw = aiService.detectNsfw(file);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        ApiResponse.success(
+                                "Kiểm tra thành công",
+                                isNsfw
+                        )
+                );
     }
 }
