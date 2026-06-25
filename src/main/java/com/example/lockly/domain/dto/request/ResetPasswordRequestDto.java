@@ -11,9 +11,5 @@ public record ResetPasswordRequestDto(
         String email,
 
         @ValidPassword
-        String newPassword,
-
-        @NotBlank(message = "Xác nhận mật khẩu không được để trống")
-        String confirmPassword
-
+        String newPassword
 ) {}

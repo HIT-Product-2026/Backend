@@ -70,29 +70,30 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Email đã tồn tại / Email đã được đăng ký.");
         }
 
-        String otpCode  = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
-        String redisKey = REGISTER_PREFIX + otpCode;
-        RegisterPendingData pendingData = new RegisterPendingData(
-                request.email(),
-                passwordUtil.hash(request.password())
-        );
-
-        redisTemplate.opsForValue().set(redisKey, pendingData, REGISTER_TTL);
-        log.info("[Register Bước 1] Lưu Redis key={}, email={}", redisKey, request.email());
+        String otpCode = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
+        redisTemplate.opsForValue().set(REGISTER_PREFIX + request.email(), otpCode, REGISTER_TTL);
+        redisTemplate.opsForValue().set(REGISTER_PREFIX + "pwd:" + request.email(), passwordUtil.hash(request.password()), REGISTER_TTL);
+        log.info("[Register Bước 1] Lưu Redis email={}", request.email());
         emailService.sendOtpEmail(request.email(), otpCode, "đăng ký");
     }
 
     @Override
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRegisterRequestDto request) {
-        String redisKey = REGISTER_PREFIX + request.otp();
-        Object raw = redisTemplate.opsForValue().get(redisKey);
-        if (raw == null) {
+        String otpKey = REGISTER_PREFIX + request.email();
+        String pwdKey = REGISTER_PREFIX + "pwd:" + request.email();
+
+        Object rawOtp = redisTemplate.opsForValue().get(otpKey);
+        if (rawOtp == null || !rawOtp.toString().equals(request.otp())) {
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
-        RegisterPendingData pendingData = (RegisterPendingData) raw;
 
-        String baseUsername = pendingData.email().split("@")[0];
+        Object rawPwd = redisTemplate.opsForValue().get(pwdKey);
+        if (rawPwd == null) {
+            throw new BadRequestException("Phiên đăng ký đã hết hạn. Vui lòng thử lại.");
+        }
+
+        String baseUsername = request.email().split("@")[0];
         String username = baseUsername;
         int suffix = 1;
         while (userRepository.existsByUsername(username)) {
@@ -102,14 +103,15 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(username)
                 .displayName(username)
-                .email(pendingData.email())
-                .passwordHash(pendingData.passwordHash())
+                .email(request.email())
+                .passwordHash(rawPwd.toString())
                 .build();
         userRepository.save(user);
-        log.info("[Register Bước 2] Đã tạo user mới, email={}", pendingData.email());
+        log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
 
-        redisTemplate.delete(redisKey);
-        log.info("[Register Bước 2] Đã xóa Redis key={}", redisKey);
+        redisTemplate.delete(otpKey);
+        redisTemplate.delete(pwdKey);
+        log.info("[Register Bước 2] Đã xóa Redis key email={}", request.email());
 
         return UserResponseDto.from(user);
     }
@@ -197,9 +199,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
-        if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new BadRequestException(ErrorMessage.Auth.ERR_PASSWORD_NOT_MATCH);
-        }
         String verifiedKey = FORGOT_VERIFIED_PREFIX + request.email();
         Object verified = redisTemplate.opsForValue().get(verifiedKey);
         if (verified == null) {
