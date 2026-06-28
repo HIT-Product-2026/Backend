@@ -33,8 +33,8 @@ public class FcmServiceImpl implements FcmService {
 
                             .addAllTokens(fcmTokens)
 
-                            .putData("sender_id", response.senderId())
-                            .putData("post_id", response.postId())
+                            .putData("sender_id", response.senderId().toString())
+                            .putData("post_id", response.postId().toString())
                             .putData("type", response.type().name())
 
                             .build();

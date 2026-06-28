@@ -20,12 +20,11 @@
     @Validated
     @RestController
     @RequiredArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     @RequestMapping("/api/v1/auth")
     @Tag(name = "Auth Controller", description = "Đăng ký, Đăng nhập Gmail, Quên mật khẩu")
     public class AuthController {
 
-        AuthService authService;
+        private final AuthService authService;
 
         @PostMapping("/register/send-otp")
         @Operation(summary = "Đăng ký — Bước 1/2", description = "Nhập thông tin và gửi OTP về Gmail")

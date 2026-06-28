@@ -4,13 +4,18 @@ import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.UserMode;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
+    UserDetails loadUserByUsername(String username);
+    UserResponseDto getMyInfo(String username) throws UsernameNotFoundException;
     List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id);
     FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
     FriendshipsResponseDto rejectAddFriendRequest( UUID userId, UUID friendshipId);

@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Friendship {
 
     @Id
-    @Column(length = 36, name = "id", nullable = false, updatable = false)
+    @Column(columnDefinition = "BINARY(16)", name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

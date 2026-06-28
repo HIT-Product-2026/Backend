@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Conversation {
 
     @Id
-    @Column(length = 36, nullable = false, updatable = false)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     // Quy ước user1 là người có id nhỏ hơn
