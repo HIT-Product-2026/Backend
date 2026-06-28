@@ -2,9 +2,11 @@ package com.example.lockly.domain.dto.response;
 
 import com.example.lockly.domain.entity.FcmMessageType;
 
+import java.util.UUID;
+
 public record FcmPostResponseDto(
-        String senderId,
-        String postId,
+        UUID senderId,
+        UUID postId,
         FcmMessageType type
 ) {
 }

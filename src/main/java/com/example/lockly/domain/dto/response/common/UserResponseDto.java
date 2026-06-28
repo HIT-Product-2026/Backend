@@ -4,9 +4,11 @@ import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record UserResponseDto(
-    String id,
+    UUID id,
     String username,
     String email,
     String displayName,

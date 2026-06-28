@@ -9,8 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface FriendshipsRepository extends JpaRepository<Friendship, String> {
+public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   > {
     @Query("""
     SELECT f
     FROM Friendship f
@@ -23,7 +24,7 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, String>
             @Param("status") FriendshipStatus status
     );
     List<Friendship> findByReceiverAndStatus(User receiver, FriendshipStatus status);
-    Optional<Friendship> findById(String id);
+    Optional<Friendship> findById(UUID id);
     boolean existsByRequesterAndReceiver(User Requester, User Receiver);
     boolean existsByReceiverAndRequester(User receiver, User requester);
 }

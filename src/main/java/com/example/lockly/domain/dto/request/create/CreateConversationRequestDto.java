@@ -1,7 +1,9 @@
 package com.example.lockly.domain.dto.request.create;
 
+import java.util.UUID;
+
 public record CreateConversationRequestDto(
-        String userId1,
-        String userId2
+        UUID userId1,
+        UUID userId2
 ) {
 }

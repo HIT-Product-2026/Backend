@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @Validated
 @RestController
@@ -45,7 +47,7 @@ public class FriendshipController {
     @PostMapping("/accept/{friendships_id}")
     @Operation(summary = "Chấp nhận lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
-            @PathVariable @Valid String friendshipsId
+            @PathVariable @Valid UUID friendshipsId
     ) {
         User user = authService.getCurrentUser();
 
@@ -59,7 +61,7 @@ public class FriendshipController {
     @PostMapping("/reject/{friendships_id}")
     @Operation(summary = "Từ chối lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
-            @PathVariable @Valid String friendshipId
+            @PathVariable @Valid UUID friendshipId
     ) {
         User user = authService.getCurrentUser();
 

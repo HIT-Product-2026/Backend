@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -55,7 +56,7 @@ public class FcmServiceImpl implements FcmService {
 
 
     @Override
-    public FcmPostResponseDto createFcmPostResponse(String senderId, String postId){
+    public FcmPostResponseDto createFcmPostResponse(UUID senderId, UUID postId){
         return new FcmPostResponseDto(
                 senderId,
                 postId,

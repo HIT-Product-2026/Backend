@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class WebSocketServiceImpl implements WebSocketService {
@@ -13,7 +15,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void sendTextMessage(
-            String conversationId,
+            UUID conversationId,
             Object payload
     ) {
 
@@ -24,7 +26,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     }
 
     public void sendImageMessage(
-            String conversationId,
+            UUID conversationId,
             Object payload
     ) {
 
@@ -36,7 +38,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
 //     Send private message
     public void shareLocationToFriend(
-            String friendId,
+            UUID friendId,
             Object payload
     ) {
 

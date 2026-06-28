@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class MessageController {
     public ResponseEntity<ApiResponse<MessageResponseDto>> sendImageMessage(
             @Parameter(description = "ID conversation")
             @RequestParam("conversationId")
-            String conversationId,
+            UUID conversationId,
 
             @Parameter(description = "File ảnh")
             @RequestParam("file")
@@ -72,7 +73,7 @@ public class MessageController {
     public ResponseEntity<ApiResponse<List<MessageResponseDto>>> findMessagesByConversationId(
             @Parameter(description = "ID conversation")
             @PathVariable("conversation_id")
-            String conversationId
+            UUID conversationId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -87,7 +88,7 @@ public class MessageController {
     public ResponseEntity<ApiResponse<MessageResponseDto>> findMessageById(
             @Parameter(description = "ID message")
             @PathVariable("message_id")
-            String messageId
+            UUID messageId
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -100,7 +101,7 @@ public class MessageController {
     public ResponseEntity<byte[]> getImage(
             @Parameter(description = "ID message")
             @PathVariable("message_id")
-            String messageId
+            UUID messageId
 
     ) throws Exception {
         InputStream inputStream = messageService.findImageMessageById(messageId);

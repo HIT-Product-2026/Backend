@@ -7,22 +7,23 @@ import com.example.lockly.domain.entity.UserMode;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserService {
 
-    List<FriendshipsResponseDto> findFriendshipsByUserId(String id);
-    FriendshipsResponseDto acceptAddFriendRequest(String userId, String friendshipId);
-    FriendshipsResponseDto rejectAddFriendRequest( String userId, String friendshipId);
-    List<UserResponseDto> findFriendsByUserId(String userId);
+    List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id);
+    FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
+    FriendshipsResponseDto rejectAddFriendRequest( UUID userId, UUID friendshipId);
+    List<UserResponseDto> findFriendsByUserId(UUID userId);
     FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
-    UserResponseDto findUserById(String id);
-    boolean isUserOnlineByUserId(String userId);
-    void updateUserLocationByUserId(String userId, Double latitude, Double longitude);
-    List<String> findFcmTokenOfFriendsByUserId(String userId);
-    boolean isFriendByUserId(String userId, String friendId);
+    UserResponseDto findUserById(UUID id);
+    boolean isUserOnlineByUserId(UUID userId);
+    void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude);
+    List<String> findFcmTokenOfFriendsByUserId(UUID userId);
+    boolean isFriendByUserId(UUID userId, UUID friendId);
 
-    void updateDisplayNameByUserId(String userId, String displayName);
-    void updateAvatarByUserId(String userId, MultipartFile file) throws Exception;
-    void updateModeByUserId(String userId, UserMode mode);
-    void updateFcmTokenByUserId(String userId, String fcmToken);
+    void updateDisplayNameByUserId(UUID userId, String displayName);
+    void updateAvatarByUserId(UUID userId, MultipartFile file) throws Exception;
+    void updateModeByUserId(UUID userId, UserMode mode);
+    void updateFcmTokenByUserId(UUID userId, String fcmToken);
 }

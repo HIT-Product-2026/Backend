@@ -1,5 +1,6 @@
 package com.example.lockly.domain.entity;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class User {
 
     @Id
     @Column(name = "id", length = 36, updatable = false, nullable = false)
-    private String id;
+    private UUID id;
 
 
     @Column(length = 100, nullable = false, unique = true)
@@ -48,7 +49,7 @@ public class User {
     @PrePersist
     void prePersist(){
         if (id == null){
-            id = UUID.randomUUID().toString();
+            id = UuidCreator.getTimeOrderedEpoch();
         }
         if (displayName == null){
             displayName = email.substring(0, email.indexOf("@"));

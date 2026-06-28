@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     String prefix = "users/avatar";
 
     @Override
-    public List<FriendshipsResponseDto> findFriendshipsByUserId(String id){
+    public List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
         @Override
         @Transactional
-        public FriendshipsResponseDto acceptAddFriendRequest(String userId, String friendshipId){
+        public FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId){
             Friendship friendship = friendshipsRepository
                     .findById(friendshipId)
                     .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto rejectAddFriendRequest(String userId ,String friendshipId){
+    public FriendshipsResponseDto rejectAddFriendRequest(UUID userId ,UUID friendshipId){
         Friendship friendship = friendshipsRepository
                 .findById(friendshipId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -111,7 +112,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> findFriendsByUserId(String userId){
+    public List<UserResponseDto> findFriendsByUserId(UUID userId){
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new BadRequestException("User id", userId));
@@ -136,7 +137,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isFriendByUserId(String userId, String friendId) {
+    public boolean isFriendByUserId(UUID userId, UUID friendId) {
         List<UserResponseDto> friends = findFriendsByUserId(userId);
 
         for (UserResponseDto friend : friends){
@@ -174,7 +175,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto findUserById(String id) {
+    public UserResponseDto findUserById(UUID id) {
 
         User user = userRepository
                 .findById(id)
@@ -185,7 +186,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatarByUserId(String userId, MultipartFile file) throws Exception {
+    public void updateAvatarByUserId(UUID userId, MultipartFile file) throws Exception {
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
@@ -215,7 +216,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserLocationByUserId(String userId, Double latitude, Double longitude) {
+    public void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude) {
 
         User user = userRepository
                 .findById(userId)
@@ -227,7 +228,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isUserOnlineByUserId(String userId) {
+    public boolean isUserOnlineByUserId(UUID userId) {
 
         User user = userRepository
                 .findById(userId)
@@ -246,7 +247,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> findFcmTokenOfFriendsByUserId(String userId){
+    public List<String> findFcmTokenOfFriendsByUserId(UUID userId){
 
         List<UserResponseDto> friends = findFriendsByUserId(userId);
 
@@ -257,7 +258,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateDisplayNameByUserId(String userId, String displayName) {
+    public void updateDisplayNameByUserId(UUID userId, String displayName) {
 
         if (displayName == null || displayName.trim().isEmpty())
             throw new BadRequestException("displayName", displayName);
@@ -273,7 +274,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateModeByUserId(String userId, UserMode mode) {
+    public void updateModeByUserId(UUID userId, UserMode mode) {
 
         if (mode == null)
             throw new BadRequestException("mode", null);
@@ -289,7 +290,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateFcmTokenByUserId(String userId, String fcmToken) {
+    public void updateFcmTokenByUserId(UUID userId, String fcmToken) {
 
         if (fcmToken == null || fcmToken.trim().isEmpty())
             throw new BadRequestException("fcmToken", fcmToken);

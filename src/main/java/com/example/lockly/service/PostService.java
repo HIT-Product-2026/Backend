@@ -9,13 +9,14 @@ import com.example.lockly.domain.entity.User;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 public interface PostService {
     PostResponseDto createPost(CreatePostRequestDto request) throws Exception;
-    InputStream getPostImage(String postId) throws Exception;
-    PostResponseDto getPostById(String postId);
+    InputStream getPostImage(UUID postId) throws Exception;
+    PostResponseDto getPostById(UUID postId);
     List<PostResponseDto> getPostByUserId(User user, int pageNumber);
-    void updateModeLocationPostById(String postId, PostModeLocation modeLocation);
-    LocationPostResponseDto getLocationPost(String postId);
+    void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation);
+    LocationPostResponseDto getLocationPost(UUID postId);
     void sendEmoji(ReactEmojiToPostRequestDto request);
 }

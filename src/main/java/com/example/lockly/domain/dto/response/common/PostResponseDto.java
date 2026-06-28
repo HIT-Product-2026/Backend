@@ -3,9 +3,11 @@ package com.example.lockly.domain.dto.response.common;
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.PostModeLocation;
 
+import java.util.UUID;
+
 public record PostResponseDto (
 
-    String id,
+    UUID id,
     UserResponseDto user,
     String caption,
     String imageUrl,
