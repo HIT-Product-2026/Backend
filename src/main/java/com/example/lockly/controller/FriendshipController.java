@@ -24,13 +24,12 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/friendship")
 @Tag(name = "Friendship Controller", description = "API quản lý kết bạn")
 public class FriendshipController {
 
-    UserService userService;
-    AuthService authService;
+    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/request")
     @Operation(summary = "Gửi lời mời kết bạn")

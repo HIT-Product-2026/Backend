@@ -17,9 +17,7 @@ import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
 import com.github.f4b6a3.uuid.UuidCreator;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,17 +32,16 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
 
-    MinioProperties props;
-    UserService userService;
-    PostsRepository postsRepository;
-    AuthService authService;
-    EmojiPostRepository emojiPostRepository;
-    MinIOService minIOService;
-    String prefix = "post";
-    int pageSize = 10;
+    private final MinioProperties props;
+    private final UserService userService;
+    private final PostsRepository postsRepository;
+    private final AuthService authService;
+    private final EmojiPostRepository emojiPostRepository;
+    private final MinIOService minIOService;
+    private final String prefix = "post";
+    private final int pageSize = 10;
 
     @Override
     @Transactional
@@ -162,7 +159,6 @@ public InputStream getPostImage(UUID postId) throws Exception {
     }
 
     @Override
-    @Transactional
     public void sendEmoji(ReactEmojiToPostRequestDto request){
         Post post = postsRepository
                 .findById(request.postId())

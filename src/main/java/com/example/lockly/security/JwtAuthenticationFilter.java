@@ -2,6 +2,7 @@ package com.example.lockly.security;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -33,7 +34,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     JwtProvider jwtProvider;
-    UserDetailsService userDetailsService;
+    UserService userService;
     ObjectMapper objectMapper;
 
     // FIX: bỏ InvalidatedTokenRepository khỏi đây
@@ -77,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("No existing authentication in SecurityContext, loading user: {}", username);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userService.loadUserByUsername(username);
                 log.debug("UserDetails loaded: {}", userDetails.getUsername());
                 log.debug("Authorities from DB: {}", userDetails.getAuthorities());
 

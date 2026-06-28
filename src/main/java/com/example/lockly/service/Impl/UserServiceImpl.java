@@ -2,6 +2,7 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
+import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -15,13 +16,14 @@ import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
+import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,15 +35,31 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
 
-    UserRepository userRepository;
-    FriendshipsRepository friendshipsRepository;
-    MinioClient minioClient;
-    MinioProperties props;
-    RedisService redisService;
-    String prefix = "users/avatar";
+    private final UserRepository userRepository;
+    private final FriendshipsRepository friendshipsRepository;
+    private final MinioClient minioClient;
+    private final MinioProperties props;
+    private final RedisService redisService;
+    private final String prefix = "users/avatar";
+
+    @Override
+    public UserResponseDto getMyInfo(String username) throws UsernameNotFoundException {
+        User user = userRepository
+                .findUserDetailByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+        return UserResponseDto.from(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository
+                .findUserDetailByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+        return new CustomUserDetails(user);
+    }
 
     @Override
     public List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id){
@@ -50,7 +68,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         List<Friendship> friendshipList = friendshipsRepository
-                .findByRequesterAndStatus(requester, FriendshipStatus.PENDING);
+                .findByRequesterAndStatus(requester, FriendshipStatus.SENT);
 
         List<FriendshipsResponseDto> friendshipsDtoList = friendshipList
                 .stream()
@@ -61,14 +79,13 @@ public class UserServiceImpl implements UserService {
     }
 
         @Override
-        @Transactional
         public FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId){
             Friendship friendship = friendshipsRepository
                     .findById(friendshipId)
                     .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
             // Lời mời kết bạn phải ở trạng thái PENDING mới có thể đồng ý
-            if (friendship.getStatus() != FriendshipStatus.PENDING)
+            if (friendship.getStatus() != FriendshipStatus.SENT)
                 throw new BadRequestException("status", friendship.getStatus().name());
 
             User user = userRepository
@@ -81,18 +98,19 @@ public class UserServiceImpl implements UserService {
 
             friendship.setStatus(FriendshipStatus.ACCEPTED);
 
+            friendshipsRepository.save(friendship);
+
             return FriendshipsResponseDto.from(friendship);
     }
 
     @Override
-    @Transactional
     public FriendshipsResponseDto rejectAddFriendRequest(UUID userId ,UUID friendshipId){
         Friendship friendship = friendshipsRepository
                 .findById(friendshipId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
 
         // Từ chối kết bạn phải ở trạng thái PEDDING mới có thể từ chối
-        if (friendship.getStatus() != FriendshipStatus.PENDING)
+        if (friendship.getStatus() != FriendshipStatus.SENT)
             throw new BadRequestException("Friendship is not PENDING");
 
         User user = userRepository
@@ -100,7 +118,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BadRequestException("User id", userId));
 
         if (!friendship.getReceiver().getId().equals(user.getId())
-        && friendship.getRequester().getId().equals(user.getId())){
+        && !friendship.getRequester().getId().equals(user.getId())){
             throw new ForbiddenException("You are not allowed to accept this friend request");
         }
 
@@ -166,7 +184,7 @@ public class UserServiceImpl implements UserService {
         Friendship friendship = Friendship.builder()
                 .requester(requester)
                 .receiver(receiver)
-                .status(FriendshipStatus.PENDING)
+                .status(FriendshipStatus.SENT)
                 .build();
 
         return FriendshipsResponseDto.from(

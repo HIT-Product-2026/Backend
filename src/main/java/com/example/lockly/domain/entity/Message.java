@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Message {
 
     @Id
-    @Column(length = 36, nullable = false, updatable = false)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

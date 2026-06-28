@@ -24,12 +24,11 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/message")
 @Tag(name = "Message Controller", description = "API quản lý tin nhắn")
 public class MessageController {
 
-    MessageService messageService;
+    private final MessageService messageService;
 
     @PostMapping("/send-text")
     @Operation(summary = "Gửi text message", description = "Gửi tin nhắn văn bản")

@@ -24,15 +24,14 @@ import java.util.List;
 @Validated
 @Controller
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(name = "WebSockets", description = "Quản lý chức năng realtime")
 public class WebSocketController {
 
-    WebSocketService webSocketService;
-    MessageService messageService;
-    RedisService redisService;
-    AuthService authService;
-    UserService userService;
+    private final WebSocketService webSocketService;
+    private final MessageService messageService;
+    private final RedisService redisService;
+    private final AuthService authService;
+    private final UserService userService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(

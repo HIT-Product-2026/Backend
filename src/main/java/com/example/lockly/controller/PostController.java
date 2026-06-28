@@ -32,16 +32,15 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/post")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 
-    PostService postService;
-    UserService userService;
-    FcmService fcmService;
-    AuthService authService;
-    AIService aiService;
+    private final PostService postService;
+    private final UserService userService;
+    private final FcmService fcmService;
+    private final AuthService authService;
+    private final AIService aiService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId, kinh độ, vĩ độ để tạo post")

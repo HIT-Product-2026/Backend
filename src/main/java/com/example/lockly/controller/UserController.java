@@ -31,14 +31,13 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/user/me")
 @Tag(name = "User Controller", description = "API quản lý user và friend system")
 public class UserController {
 
-    UserService userService;
-    ConversationService conversationService;
-    AuthService authService;
+    private final UserService userService;
+    private final ConversationService conversationService;
+    private final AuthService authService;
 
     @GetMapping("/friends")
     @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id")

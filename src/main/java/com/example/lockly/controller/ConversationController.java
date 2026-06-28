@@ -22,12 +22,11 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping(ApiPath.API_V1 + "/conversations")
 @Tag(name = "Conversation Controller", description = "API quản lý hội thoại")
 public class ConversationController {
 
-    ConversationService conversationService;
+    private final ConversationService conversationService;
 
     @GetMapping("/{conversation_id}")
     @Operation(summary = "Lấy conversation theo id")
