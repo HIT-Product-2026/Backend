@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class ConversationController {
     @GetMapping("/{conversation_id}")
     @Operation(summary = "Lấy conversation theo id")
     public ResponseEntity<ApiResponse<ConversationResponseDto>> getConversationById(
-            @PathVariable("conversation_id") String conversationId
+            @PathVariable("conversation_id") UUID conversationId
     ) {
 
         return ResponseEntity

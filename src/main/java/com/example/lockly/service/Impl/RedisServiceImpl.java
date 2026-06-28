@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -22,7 +23,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     @Transactional
-    public void saveUserLocation(String userId, Double latitude, Double longitude){
+    public void saveUserLocation(UUID userId, Double latitude, Double longitude){
         String key = userLocationKey + userId;
 
         redisTemplate.opsForHash().put(key, "latitude", latitude);
@@ -34,7 +35,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public LocationUserResponseDto getUserLocation(String userId){
+    public LocationUserResponseDto getUserLocation(UUID userId){
         String key = userLocationKey + userId;
 
         Double latitude = (Double) redisTemplate.opsForHash().get(key, "latitude");

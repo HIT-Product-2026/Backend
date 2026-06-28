@@ -9,8 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface PostsRepository extends JpaRepository<Post, String> {
+public interface PostsRepository extends JpaRepository<Post, UUID> {
     @Query("""
     SELECT p
     FROM Post p

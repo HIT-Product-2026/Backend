@@ -1,5 +1,6 @@
 package com.example.lockly.domain.entity;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class Message {
 
     @Id
     @Column(length = 36, nullable = false, updatable = false)
-    private String id;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id")
@@ -39,7 +40,7 @@ public class Message {
     @PrePersist
     void prePersist(){
         if (id == null){
-            id = UUID.randomUUID().toString();
+            id = UuidCreator.getTimeOrderedEpoch();
         }
         createdAt = LocalDateTime.now();
     }

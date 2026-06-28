@@ -4,6 +4,8 @@ import com.example.lockly.constant.CommonConstant;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -13,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class LoginResponseDto{
         String accessToken;
         String refreshToken;
-        String id;
+        UUID id;
 
         @Builder.Default
         String tokenType = CommonConstant.BEARER_TOKEN;

@@ -8,8 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface ConversationRepository extends JpaRepository<Conversation, String> {
+public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
     @Query("""
     select c
     from Conversation c
@@ -23,5 +24,5 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
 
     boolean existsByUser1AndUser2(User user1, User user2);
 
-    Optional<Conversation> findById(String id);
+    Optional<Conversation> findById(UUID id);
 }

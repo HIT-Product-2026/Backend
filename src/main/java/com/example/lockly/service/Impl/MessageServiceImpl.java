@@ -17,6 +17,7 @@ import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +35,6 @@ import java.util.UUID;
 public class MessageServiceImpl implements MessageService {
 
     ConversationRepository conversationRepository;
-    UserRepository userRepository;
     MessageRepository messageRepository;
     AuthService authService;
     MinIOService minIOService;
@@ -74,6 +75,8 @@ public class MessageServiceImpl implements MessageService {
                 .content(request.content().trim())
                 .build();
 
+        conversation.setLastMessageTime(LocalDateTime.now());
+
         return MessageResponseDto.from(message);
     }
 
@@ -93,7 +96,7 @@ public class MessageServiceImpl implements MessageService {
         //Kiểm tra người gửi có thuộc về đoạn chat không
         validateSender(conversation, user);
 
-        String messageId = UUID.randomUUID().toString();
+        UUID messageId = UuidCreator.getTimeOrderedEpoch();
 
         String objectName = FileUtil.getObjectNameFile(prefix, messageId, request.file());
 
@@ -109,6 +112,9 @@ public class MessageServiceImpl implements MessageService {
                     .content(objectName)
                     .build();
 
+            // Cập nhật thời gian của tin nhắn cuối
+            conversation.setLastMessageTime(LocalDateTime.now());
+
             return MessageResponseDto.from(messageRepository.save(message));
         } catch (Exception e) {
             minIOService.deleteFile(objectName);
@@ -119,7 +125,7 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public List<MessageResponseDto> findMessagesByConversationId(String conversationId){
+    public List<MessageResponseDto> findMessagesByConversationId(UUID conversationId){
         Conversation conversation = conversationRepository
                 .findById(conversationId)
                 .orElseThrow(() -> new BadRequestException("conversation id", conversationId));
@@ -152,7 +158,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public MessageResponseDto findMessageById(String id){
+    public MessageResponseDto findMessageById(UUID id){
         Message message = messageRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message", "id", id));
@@ -166,7 +172,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public InputStream findImageMessageById(String id) throws Exception{
+    public InputStream findImageMessageById(UUID id) throws Exception{
         Message message = messageRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message", "id", id));

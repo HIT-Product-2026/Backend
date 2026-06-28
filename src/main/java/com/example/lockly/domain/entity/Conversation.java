@@ -1,5 +1,6 @@
 package com.example.lockly.domain.entity;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class Conversation {
 
     @Id
     @Column(length = 36, nullable = false, updatable = false)
-    private String id;
+    private UUID id;
 
     // Quy ước user1 là người có id nhỏ hơn
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,13 +45,9 @@ public class Conversation {
     @PrePersist
     void prePersist(){
         if (id == null){
-            id = UUID.randomUUID().toString();
+            id = UuidCreator.getTimeOrderedEpoch();
         }
         createdAt = LocalDateTime.now();
     }
 
-    @PreUpdate
-    void preUpdate(){
-        lastMessageTime = LocalDateTime.now();
-    }
 }

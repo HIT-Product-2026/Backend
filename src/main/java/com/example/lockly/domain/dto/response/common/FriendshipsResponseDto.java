@@ -4,9 +4,10 @@ import com.example.lockly.domain.entity.FriendshipStatus;
 import com.example.lockly.domain.entity.Friendship;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record FriendshipsResponseDto(
-        String id,
+        UUID id,
         UserResponseDto requester,
         UserResponseDto receiver,
         FriendshipStatus status,

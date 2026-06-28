@@ -8,8 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface MessageRepository extends JpaRepository<Message, String> {
+public interface MessageRepository extends JpaRepository<Message, UUID> {
     @Query("""
     SELECT m
     FROM Message m
@@ -19,8 +20,8 @@ public interface MessageRepository extends JpaRepository<Message, String> {
 """)
     List<Message> findByConversationId(
             @Param("conversationId")
-            String conversationId
+            UUID conversationId
     );
 
-    Optional<Message> findById(String id);
+    Optional<Message> findById(UUID id);
 }

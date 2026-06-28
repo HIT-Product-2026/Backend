@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,7 +86,7 @@ public class PostController {
     @Operation(summary = "Lấy bài viết theo ID", description = "Trả về thông tin post")
     public ResponseEntity<ApiResponse<PostResponseDto>> getPost(
             @Parameter(description = "ID bài viết")
-            @PathVariable("post_id") String postId
+            @PathVariable("post_id") UUID postId
     ) {
         return ResponseEntity
                 .ok(ApiResponse.success("Thành công", postService.getPostById(postId)));
@@ -95,7 +96,7 @@ public class PostController {
     @Operation(summary = "Lấy ảnh bài viết", description = "Trả về image binary từ MinIO")
     public ResponseEntity<byte[]> getImage(
             @Parameter(description = "ID bài viết")
-            @PathVariable("post_id") String postId
+            @PathVariable("post_id") UUID postId
     ) throws Exception {
         InputStream inputStream = postService.getPostImage(postId);
 
@@ -109,7 +110,7 @@ public class PostController {
     @Operation(summary = "Thay đổi mode location", description = "Quyết định có chia sẻ vị trí của bài post không")
     public ResponseEntity<ApiResponse<Void>> updateModeLocationPost(
             @Parameter(description = "ID bài post")
-            @RequestParam("post_id") String postId,
+            @RequestParam("post_id") UUID postId,
 
             @Parameter(description = "Mode muốn đổi")
             @RequestParam("mode_location") PostModeLocation modeLocation
@@ -124,7 +125,7 @@ public class PostController {
     @Operation(summary = "Lấy location của post", description = "Post để mode public mới có thể lấy")
     public ResponseEntity<ApiResponse<LocationPostResponseDto>> getLocationPost(
             @Parameter(description = "ID bài post")
-            @RequestParam("post_id") String postId
+            @RequestParam("post_id") UUID postId
     ){
         return ResponseEntity
                 .status(HttpStatus.OK)

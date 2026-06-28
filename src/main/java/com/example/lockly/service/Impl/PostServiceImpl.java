@@ -16,6 +16,7 @@ import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
 import com.example.lockly.service.UserService;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -57,7 +58,7 @@ public class PostServiceImpl implements PostService {
         MultipartFile file = request.file();
         String caption = request.caption();
 
-        String postId = UUID.randomUUID().toString();
+        UUID postId = UuidCreator.getTimeOrderedEpoch();
         String objectName = FileUtil.getObjectNameFile(prefix, postId, file);
 
         try {
@@ -93,7 +94,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public InputStream getPostImage(String postId) throws Exception {
+public InputStream getPostImage(UUID postId) throws Exception {
 
         Post post = postsRepository
                 .findById(postId)
@@ -103,7 +104,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto getPostById(String postId){
+    public PostResponseDto getPostById(UUID postId){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
@@ -134,7 +135,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void updateModeLocationPostById(String postId, PostModeLocation modeLocation){
+    public void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation){
         User user = authService.getCurrentUser();
 
         Post post = postsRepository
@@ -148,7 +149,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public LocationPostResponseDto getLocationPost(String postId){
+    public LocationPostResponseDto getLocationPost(UUID postId){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new BadRequestException("post_id", postId));

@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponseDto findById(String id){
+    public ConversationResponseDto findById(UUID id){
         Conversation conversation = conversationRepository
                 .findById(id)
                 .orElseThrow(() -> new BadRequestException("Conversation id", id));
