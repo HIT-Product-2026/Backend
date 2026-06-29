@@ -10,3 +10,5 @@ Dockerfile
 *.log
 src/test/
 README.md
+.env
+docker-compose.yml
