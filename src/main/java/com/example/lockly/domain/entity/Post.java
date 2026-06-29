@@ -45,6 +45,9 @@ public class Post {
     @Column
     private Double longitude;
 
+    @Column
+    private NsfwStatus nfws;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -52,6 +55,9 @@ public class Post {
     void prePersist(){
         if (id == null){
             id = UuidCreator.getTimeOrderedEpoch();
+        }
+        if (nfws == null){
+            nfws = NsfwStatus.PROCESSING;
         }
         createdAt = LocalDateTime.now();
     }
