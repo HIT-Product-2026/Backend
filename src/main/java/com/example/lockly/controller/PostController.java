@@ -2,9 +2,9 @@ package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
-import com.example.lockly.domain.dto.response.FcmPostResponseDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
@@ -14,9 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,9 +36,9 @@ public class PostController {
 
     private final PostService postService;
     private final UserService userService;
-    private final FcmService fcmService;
     private final AuthService authService;
     private final AIService aiService;
+    private final RabbitMQService rabbitMQService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Tạo bài viết", description = "Upload image + caption + userId, kinh độ, vĩ độ để tạo post")
@@ -70,11 +68,13 @@ public class PostController {
 
         User user = authService.getCurrentUser();
 
-        // Gửi thông báo
+        // Tạo message (Cần sửa)
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
-        FcmPostResponseDto data = fcmService.createFcmPostResponse(user.getId(), post.id());
-        fcmService.sendToManySilent(fcmTokens, data);
 
+        // Gửi thông báo (đẩy vào queue)
+        rabbitMQService.sendFcmNotification(
+                FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -167,6 +167,7 @@ public class PostController {
 
     ) throws IOException {
 
+        // Cần đẩy vào queue
         Boolean isNsfw = aiService.detectNsfw(file);
 
         return ResponseEntity
