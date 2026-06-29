@@ -1,5 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
+import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
+import com.example.lockly.domain.entity.NsfwStatus;
 import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.PostModeLocation;
 
@@ -14,7 +16,8 @@ public record PostResponseDto (
     String contentType,
     Double latitude,
     Double longitude,
-    PostModeLocation modeLocation
+    PostModeLocation modeLocation,
+    NsfwStatus nfws
 ){
 
     public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
@@ -26,7 +29,8 @@ public record PostResponseDto (
                 post.getContentType(),
                 latitude,
                 longitude,
-                post.getModeLocation()
+                post.getModeLocation(),
+                NsfwStatus.PROCESSING
         );
     }
 
@@ -39,7 +43,22 @@ public record PostResponseDto (
                 post.getContentType(),
                 post.getLatitude(),
                 post.getLongitude(),
-                post.getModeLocation()
+                post.getModeLocation(),
+                NsfwStatus.PROCESSING
+        );
+    }
+
+    public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw){
+        return new PostResponseDto(
+                dto.id(),
+                dto.user(),
+                dto.caption(),
+                dto.imageUrl(),
+                dto.contentType(),
+                dto.latitude(),
+                dto.longitude(),
+                dto.modeLocation(),
+                nsfw
         );
     }
 }

@@ -68,13 +68,15 @@ public class PostController {
 
         User user = authService.getCurrentUser();
 
-        // Tạo message (Cần sửa)
+        // Lấy danh sách fcm của bạn bè
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
 
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
                 FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
         );
+
+
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
