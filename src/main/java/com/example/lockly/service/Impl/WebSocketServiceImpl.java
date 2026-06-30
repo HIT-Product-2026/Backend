@@ -38,12 +38,12 @@ public class WebSocketServiceImpl implements WebSocketService {
 
 //     Send private message
     public void shareLocationToFriend(
-            UUID friendId,
+            UUID userId,
             Object payload
     ) {
 
         messagingTemplate.convertAndSend(
-                "/topic/location/" + friendId,
+                "/topic/location/" + userId,
                 payload
         );
     }
