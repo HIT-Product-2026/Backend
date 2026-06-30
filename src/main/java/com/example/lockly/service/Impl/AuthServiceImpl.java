@@ -40,16 +40,15 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
-    UserRepository userRepository;
-    JwtProvider jwtProvider;
-    InvalidatedTokenRepository invalidatedTokenRepository;
-    EmailService emailService;
-    PasswordUtil passwordUtil;
-    RedisTemplate<String, Object> redisTemplate;
-    UserService userService;
+    private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
+    private final EmailService emailService;
+    private final PasswordUtil passwordUtil;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final UserService userService;
 
     static final String REGISTER_PREFIX        = "register:";
     static final Duration REGISTER_TTL         = Duration.ofMinutes(5);

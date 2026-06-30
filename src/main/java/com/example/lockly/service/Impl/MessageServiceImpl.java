@@ -31,14 +31,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MessageServiceImpl implements MessageService {
 
-    ConversationRepository conversationRepository;
-    MessageRepository messageRepository;
-    AuthService authService;
-    MinIOService minIOService;
-    String prefix = "message";
+    private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
+    private final AuthService authService;
+    private final MinIOService minIOService;
+    private final String prefix = "message";
 
     private void validateSender(Conversation conversation, User sender){
         if(!conversation.getUser1().getId().equals(sender.getId())

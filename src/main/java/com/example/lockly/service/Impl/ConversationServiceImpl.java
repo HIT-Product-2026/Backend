@@ -20,12 +20,11 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConversationServiceImpl implements ConversationService {
 
-    ConversationRepository conversationRepository;
-    UserRepository userRepository;
-    AuthService authService;
+    private final ConversationRepository conversationRepository;
+    private final UserRepository userRepository;
+    private final AuthService authService;
 
     @Override
     public List<ConversationResponseDto> findAll(){

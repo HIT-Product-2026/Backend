@@ -15,11 +15,10 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RedisServiceImpl implements RedisService {
 
-    RedisTemplate<String,Object> redisTemplate;
-    String userLocationKey = "user:location:";
+    private final RedisTemplate<String,Object> redisTemplate;
+    private final String userLocationKey = "user:location:";
 
     @Override
     @Transactional
