@@ -50,7 +50,7 @@ public record PostResponseDto (
 
     public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw){
         return new PostResponseDto(
-                dto.id(),
+                dto.postId(),
                 dto.user(),
                 dto.caption(),
                 dto.imageUrl(),

@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public record DetectNsfwPostRequestDto(
-        UUID id,
+        UUID postId,
         UserResponseDto user,
         String caption,
         String imageUrl,
