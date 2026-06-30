@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FcmService {
-    public void sendToManySilent(FcmNotificationRequestDto data);
-    public FcmNotificationRequestDto createFcmNotificationRequest(UUID senderId, UUID postId, List<String> fcmTokens);
+    void sendToManySilent(FcmNotificationRequestDto data);
+    FcmNotificationRequestDto createFcmNotificationRequest(UUID senderId, UUID postId, List<String> fcmTokens);
 }

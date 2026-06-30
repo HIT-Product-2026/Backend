@@ -1,7 +1,5 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.service.AuthService;
 import com.example.lockly.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,11 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SseServiceImpl implements SseService {
 
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final AuthService authService;
 
     @Override
-    public SseEmitter subscribeDetectNsfw(UUID taskId) {
-        String id = taskId.toString();
+    public SseEmitter subscribeDetectNsfw(UUID userId) {
+        String id = userId.toString();
 
         SseEmitter emitter = new SseEmitter(0L);
 
@@ -34,7 +31,7 @@ public class SseServiceImpl implements SseService {
     }
 
     @Override
-    public void push(String userId, Object message) {
+    public void push(String userId, String eventType, Object response) {
 
         SseEmitter emitter = emitters.get(userId);
 
@@ -43,10 +40,23 @@ public class SseServiceImpl implements SseService {
         }
 
         try {
-            emitter.send(message);
+            emitter.send(
+                    SseEmitter.event()
+                            .name(eventType)
+                            .data(response)
+            );
+
         } catch (Exception e) {
             emitter.complete();
             emitters.remove(userId);
+        }
+    }
+
+    @Override
+    public void disconnect(String userId) {
+        SseEmitter emitter = emitters.remove(userId);
+        if (emitter != null) {
+            emitter.complete();
         }
     }
 }
