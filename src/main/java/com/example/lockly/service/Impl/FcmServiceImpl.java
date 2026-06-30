@@ -24,10 +24,12 @@ public class FcmServiceImpl implements FcmService {
     @Override
     public void sendToManySilent(FcmNotificationRequestDto data){
         List<String> fcmTokens = data.fcmToken();
+
         if (fcmTokens == null || fcmTokens.isEmpty()) {
             // Không có bạn bè thì không gửi
             return;
         }
+
         try {
             MulticastMessage message =
                     MulticastMessage.builder()
