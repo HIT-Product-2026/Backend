@@ -31,7 +31,7 @@ public class WebSocketController {
     private final MessageService messageService;
     private final RedisService redisService;
     private final AuthService authService;
-    private final UserService userService;
+    private final LocationService locationService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -55,7 +55,7 @@ public class WebSocketController {
     ) {
         //Request để lưu vào db trước rồi gửi imageUrl qua đây
 
-        // Trả kết quả quá socket
+        // Trả kết quả qua socket
         webSocketService.sendImageMessage(
                 request.conversationId(),
                 request.imageUrl());
@@ -63,7 +63,10 @@ public class WebSocketController {
     }
 
     @MessageMapping("/share.location")
-    @Operation(summary = "Chia sẻ vị trí của người dùng", description = "Chia sẻ vị trí của bản thân đến mọi người")
+    @Operation(
+            summary = "Chia sẻ vị trí của người dùng",
+            description = "Dùng để cập nhật vị trí user và vị trí được chia sẻ lên /topic/location/ + userId"
+    )
     public void shareLocation(
             @Parameter(description = "Kinh độ")
             Double longitude,
@@ -73,6 +76,12 @@ public class WebSocketController {
     ){
         User user = authService.getCurrentUser();
 
+        boolean isDropRequest = locationService.isDropRequest(longitude, latitude);
+
+        // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
+        if (isDropRequest)
+            return;
+
         // Lưu vào redis
         redisService.saveUserLocation(user.getId(), latitude, longitude);
         LocationUserResponseDto response = redisService.getUserLocation(user.getId());
@@ -80,12 +89,7 @@ public class WebSocketController {
         if (user.getMode() == UserMode.PRIVATE)
             return;
 
-        // Lấy bạn bè
-        List<UserResponseDto> friends = userService.findFriendsByUserId(user.getId());
-
-        // Chuyển dến bạn bè
-        for (UserResponseDto friend : friends){
-            webSocketService.shareLocationToFriend(friend.id(), response);
-        }
+        // Chuyển lên topic cá nhân
+        webSocketService.shareLocationToFriend(user.getId(), response);
     }
 }

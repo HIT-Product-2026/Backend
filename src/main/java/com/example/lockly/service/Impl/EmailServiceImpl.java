@@ -17,18 +17,15 @@ import jakarta.mail.internet.MimeMessage;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EmailServiceImpl implements EmailService {
 
-    JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    @NonFinal
     @Value("${spring.mail.username}")
-    String fromEmail;
+    private String fromEmail;
 
-    @NonFinal
     @Value("${otp.expiration-minutes:5}")
-    int otpExpirationMinutes;
+    private int otpExpirationMinutes;
 
     @Override
     public void sendOtpEmail(String toEmail, String otpCode, String purpose) {

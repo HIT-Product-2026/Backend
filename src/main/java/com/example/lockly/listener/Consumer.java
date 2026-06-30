@@ -9,9 +9,7 @@ import com.example.lockly.service.AIService;
 import com.example.lockly.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -26,8 +24,6 @@ public class Consumer {
     @RabbitListener(queues = RabbitMQConfig.POST_NOTIFICATION_QUEUE)
     public void sendFcmNotification(FcmNotificationRequestDto message) {
         fcmService.sendToManySilent(message);
-
-        // Trả response qua SSE
     }
 
     @RabbitListener(queues = RabbitMQConfig.POST_NOTIFICATION_QUEUE)

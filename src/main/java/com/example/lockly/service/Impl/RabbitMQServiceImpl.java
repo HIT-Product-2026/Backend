@@ -3,13 +3,11 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.config.RabbitMQConfig;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
-import com.example.lockly.service.AIService;
 import com.example.lockly.service.RabbitMQService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor

@@ -18,8 +18,8 @@ import java.io.InputStream;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MinIOServiceImpl implements MinIOService {
 
-    MinioClient minioClient;
-    MinioProperties props;
+    private final MinioClient minioClient;
+    private final MinioProperties props;
 
     public void saveFile(MultipartFile file, String objectName) throws Exception {
         try {
