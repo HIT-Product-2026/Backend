@@ -1,9 +1,13 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.exception.ForbiddenException;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -27,16 +32,23 @@ import java.util.UUID;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final AuthService authService;
 
     @GetMapping("/{conversation_id}")
     @Operation(summary = "Lấy conversation theo id")
     public ResponseEntity<ApiResponse<ConversationResponseDto>> getConversationById(
             @PathVariable("conversation_id") UUID conversationId
     ) {
+        User user = authService.getCurrentUser();
+
+        ConversationResponseDto response = conversationService.findById(conversationId);
+        if (response.user1().id() != user.getId()
+        || response.user2().id() != user.getId())
+            throw new ForbiddenException("User này không có quyền với conversation này");
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", conversationService.findById(conversationId)));
+                .body(ApiResponse.success("Thành công", response));
     }
 
 
@@ -52,5 +64,17 @@ public class ConversationController {
                         "Tạo conversation thành công",
                         conversationService.createConversation(request)
                 ));
+    }
+
+    @GetMapping("/conversations")
+    @Operation(summary = "Lấy danh sách hội thoại của user")
+    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getConversations(
+    ) {
+
+        List<ConversationResponseDto> result = conversationService.findAll();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 }

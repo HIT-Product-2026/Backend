@@ -2,6 +2,7 @@ package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
@@ -9,6 +10,7 @@ import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,7 +78,8 @@ public class PostController {
                 FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
         );
 
-
+        // Đẩy vào queue (Client cần mở cổng sse để nhận response)
+        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(post, file));
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -156,29 +159,26 @@ public class PostController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId(user, pageNumber)));
+                .body(ApiResponse.success("Thành công", postService.getPostByUserId(user.getId(), pageNumber)));
     }
 
-    @PostMapping(value = "/nsfw", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Kiểm tra ảnh NSFW", description = "Upload ảnh để kiểm tra nội dung nhạy cảm"
-    )
-    public ResponseEntity<ApiResponse<Boolean>> detectNsfw(
+    @GetMapping("/{friendId}/posts")
+    @Operation(summary = "Lấy danh sách bài viết theo friend", description = "Trả về list post của friend")
+    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostByFriendId(
+            @Parameter(description = "Friend id")
+            @PathVariable(name = "friendId") UUID friendId,
 
-            @Parameter(description = "File ảnh cần kiểm tra")
-            @RequestParam("file") MultipartFile file
+            @Parameter(description = "Số trang")
+            @RequestParam(name = "pageNumber") int pageNumber
+    ) {
+        User user = authService.getCurrentUser();
 
-    ) throws IOException {
-
-        // Cần đẩy vào queue
-        Boolean isNsfw = aiService.detectNsfw(file);
+        boolean isFriend = userService.isFriendByUserId(user.getId(), friendId);
+        if (isFriend)
+            throw new ForbiddenException("User không có người bạn này");
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(
-                        ApiResponse.success(
-                                "Kiểm tra thành công",
-                                isNsfw
-                        )
-                );
+                .body(ApiResponse.success("Thành công", postService.getPostByUserId(friendId, pageNumber)));
     }
 }

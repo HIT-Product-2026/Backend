@@ -15,7 +15,6 @@ import java.util.UUID;
 public interface UserService extends UserDetailsService {
 
     UserDetails loadUserByUsername(String username);
-    UserResponseDto getMyInfo(String username) throws UsernameNotFoundException;
     List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id);
     FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
     FriendshipsResponseDto rejectAddFriendRequest( UUID userId, UUID friendshipId);
