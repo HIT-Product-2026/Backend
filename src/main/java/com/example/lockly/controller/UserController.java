@@ -36,33 +36,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final ConversationService conversationService;
     private final AuthService authService;
-
-    @GetMapping("/friends")
-    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id")
-    public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
-    ) {
-        User user = authService.getCurrentUser();
-        List<UserResponseDto> listFriend = userService.findFriendsByUserId(user.getId());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
-    }
-
-    @GetMapping("/friendships")
-    @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách friend request (PENDING)")
-    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests(
-    ) {
-        User user = authService.getCurrentUser();
-
-        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
-    }
 
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -109,18 +83,6 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", isOnline));
-    }
-
-    @GetMapping("/conversations")
-    @Operation(summary = "Lấy danh sách hội thoại của user")
-    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getAllConversations(
-    ) {
-
-        List<ConversationResponseDto> result = conversationService.findAll();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
     @PutMapping("/display-name")

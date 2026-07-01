@@ -1,9 +1,11 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.UserService;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -70,4 +73,26 @@ public class FriendshipController {
                         userService.rejectAddFriendRequest(user.getId(), friendshipId)));
     }
 
+    @GetMapping("/friends")
+    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user")
+    public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getFriends() {
+        User user = authService.getCurrentUser();
+        List<UserResponseDto> listFriend = userService.findFriendsByUserId(user.getId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
+    }
+
+    @GetMapping("/friendships")
+    @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách lời mời kết bạn (PENDING)")
+    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests() {
+        User user = authService.getCurrentUser();
+
+        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
 }
