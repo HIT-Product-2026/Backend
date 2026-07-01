@@ -4,6 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
+import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @Validated
 @RestController
@@ -74,7 +76,18 @@ public class UserController {
             String jwtId = (String) redisTemplate.opsForValue().get(
                     "user_token:" + user.getId()
             );
+            // logout
             authService.logout(LogoutRequestDto.from(jwtId));
+
+            // Tự động thay password, buộc người dùng phải đổi lại password
+            String email = user.getEmail();
+            String password = UUID.randomUUID().toString();
+            authService.resetPassword(
+                    new ResetPasswordRequestDto(
+                            email,
+                            password
+                    )
+            );
         }
 
         // Giảm tần suất cập nhật vị trí
