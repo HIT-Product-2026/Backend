@@ -3,6 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -10,6 +11,7 @@ import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
+import com.example.lockly.service.LocationService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.http.MediaType;
@@ -37,6 +40,8 @@ public class UserController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final LocationService locationService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -63,7 +68,19 @@ public class UserController {
     ) {
         User user = authService.getCurrentUser();
 
-        userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
+        // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
+        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude);
+        if (isUpdateFromUknownLocation) {
+            String jwtId = (String) redisTemplate.opsForValue().get(
+                    "user_token:" + user.getId()
+            );
+            authService.logout(LogoutRequestDto.from(jwtId));
+        }
+
+        // Giảm tần suất cập nhật vị trí
+        boolean isDropRequest = locationService.isDropRequest(longitude, latitude);
+        if (!isDropRequest)
+            userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
