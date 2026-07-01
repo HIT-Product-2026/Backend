@@ -13,5 +13,5 @@ public interface AuthService {
     void sendOtpForForgotPassword(ForgotPasswordRequestDto request);
     void verifyOtpForgotPassword(VerifyOtpRequestDto request);
     void resetPassword(ResetPasswordRequestDto request);
-    public User getCurrentUser();
+    User getCurrentUser();
 }

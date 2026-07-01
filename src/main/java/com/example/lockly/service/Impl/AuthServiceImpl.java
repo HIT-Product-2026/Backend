@@ -48,7 +48,6 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordUtil passwordUtil;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final UserService userService;
 
     static final String REGISTER_PREFIX        = "register:";
     static final Duration REGISTER_TTL         = Duration.ofMinutes(5);
@@ -60,8 +59,8 @@ public class AuthServiceImpl implements AuthService {
 
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    @NonFinal @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
-    @NonFinal @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
+    @Value("${jwt.access.expiration_time}")  long ACCESS_TOKEN_EXPIRATION;
+    @Value("${jwt.refresh.expiration_time}") long REFRESH_TOKEN_EXPIRATION;
 
     @Override
     public void sendOtpForRegister(RegisterRequestDto request) {
@@ -128,8 +127,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS);
         }
 
-        // Cập nhật fcm token
-//        userService.updateFcmTokenByUserId(user.getId(), request.fcmToken());
+        // Cập nhật fcm token (có api cập nhật riêng)
+
         return buildLoginResponse(user);
     }
 
@@ -230,6 +229,16 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken  = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
         String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
+
+        String jwtId = jwtProvider.extractTokenId(accessToken);
+
+        // Lưu token vào redis
+        redisTemplate.opsForValue().set(
+                "user_token:" + user.getId(),
+                jwtId,
+                Duration.ofMillis(ACCESS_TOKEN_EXPIRATION)
+        );
+
 
         return LoginResponseDto.builder()
                 .accessToken(accessToken)

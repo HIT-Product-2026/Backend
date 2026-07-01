@@ -233,16 +233,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude) {
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
-
-        redisService.saveUserLocation(user.getId(), latitude, longitude);
-
-        userRepository.save(user);
+        redisService.saveUserLocation(userId, latitude, longitude);
     }
 
     @Override
