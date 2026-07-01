@@ -3,6 +3,8 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
+import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -10,6 +12,7 @@ import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
+import com.example.lockly.service.LocationService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.http.MediaType;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @Validated
 @RestController
@@ -36,33 +41,9 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final ConversationService conversationService;
     private final AuthService authService;
-
-    @GetMapping("/friends")
-    @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user theo user_id")
-    public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getListFriendsByUserId(
-    ) {
-        User user = authService.getCurrentUser();
-        List<UserResponseDto> listFriend = userService.findFriendsByUserId(user.getId());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
-    }
-
-    @GetMapping("/friendships")
-    @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách friend request (PENDING)")
-    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests(
-    ) {
-        User user = authService.getCurrentUser();
-
-        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
-    }
+    private final LocationService locationService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -89,7 +70,30 @@ public class UserController {
     ) {
         User user = authService.getCurrentUser();
 
-        userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
+        // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
+        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude);
+        if (isUpdateFromUknownLocation) {
+            String jwtId = (String) redisTemplate.opsForValue().get(
+                    "user_token:" + user.getId()
+            );
+            // logout
+            authService.logout(LogoutRequestDto.from(jwtId));
+
+            // Tự động thay password, buộc người dùng phải đổi lại password
+            String email = user.getEmail();
+            String password = UUID.randomUUID().toString();
+            authService.resetPassword(
+                    new ResetPasswordRequestDto(
+                            email,
+                            password
+                    )
+            );
+        }
+
+        // Giảm tần suất cập nhật vị trí
+        boolean isDropRequest = locationService.isDropRequest(longitude, latitude);
+        if (!isDropRequest)
+            userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -109,18 +113,6 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", isOnline));
-    }
-
-    @GetMapping("/conversations")
-    @Operation(summary = "Lấy danh sách hội thoại của user")
-    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getAllConversations(
-    ) {
-
-        List<ConversationResponseDto> result = conversationService.findAll();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
     @PutMapping("/display-name")

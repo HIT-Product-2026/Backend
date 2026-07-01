@@ -45,15 +45,6 @@ public class UserServiceImpl implements UserService {
     private final String prefix = "users/avatar";
 
     @Override
-    public UserResponseDto getMyInfo(String username) throws UsernameNotFoundException {
-        User user = userRepository
-                .findUserDetailByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
-        return UserResponseDto.from(user);
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository
                 .findUserDetailByUsername(username)
@@ -233,16 +224,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude) {
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
-
-        redisService.saveUserLocation(user.getId(), latitude, longitude);
-
-        userRepository.save(user);
+        redisService.saveUserLocation(userId, latitude, longitude);
     }
 
     @Override

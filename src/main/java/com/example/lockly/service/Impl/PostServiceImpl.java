@@ -6,12 +6,14 @@ import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.*;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.EmojiPostRepository;
 import com.example.lockly.repository.PostsRepository;
+import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.PostService;
@@ -36,6 +38,7 @@ public class PostServiceImpl implements PostService {
 
     private final MinioProperties props;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final PostsRepository postsRepository;
     private final AuthService authService;
     private final EmojiPostRepository emojiPostRepository;
@@ -116,8 +119,12 @@ public InputStream getPostImage(UUID postId) throws Exception {
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(User user, int pageNumber){
+    public List<PostResponseDto> getPostByUserId(UUID userId, int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         List<PostResponseDto> response = postsRepository
                 .findByUserOrderByCreatedAtDesc(user, pageable)
