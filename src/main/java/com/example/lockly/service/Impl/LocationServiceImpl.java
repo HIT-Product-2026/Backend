@@ -19,11 +19,11 @@ public class LocationServiceImpl implements LocationService {
     private final RedisService redisService;
     private final AuthService authService;
 
-    private final double distanceLimit = 5;
-    private final long timeLimit = 10;
-
     @Override
     public boolean isDropRequest(Double longitude, Double latitude){
+        final double distanceLimit = 5;
+        final long timeLimit = 10;
+
         User user = authService.getCurrentUser();
 
         LocationUserResponseDto dto = redisService.getUserLocation(user.getId());
@@ -56,6 +56,43 @@ public class LocationServiceImpl implements LocationService {
 
         // Di chuyển ít hơn distanceLimit thì drop
         if (distance < distanceLimit)
+            return true;
+
+        return false;
+    }
+
+    public boolean isUnknownLocation(Double longitude, Double latitude){
+        double safeDistance = 500; // Khoảng cách an toàn là 500m/s (đây là vận tốc của máy bay dân dụng)
+
+        User user = authService.getCurrentUser();
+
+        LocationUserResponseDto dto = redisService.getUserLocation(user.getId());
+
+        if (longitude == null || latitude == null)
+            return false; // Không nghi ngờ nếu không có tọa độ
+
+        if (dto.longitude() == null || dto.latitude() == null)
+            return false; // Không nghi ngờ nếu chưa có tọa độ
+
+        // Chuyển sang double
+        double longitude1 = dto.longitude();
+        double latitude1 = dto.latitude();
+        double longitude2 = longitude;
+        double latitude2 = latitude;
+
+        // Khoảng cách (tính bằng mét)
+        double distance = LocationUtil.calculateDistance(
+                latitude1, longitude1,
+                latitude2, longitude2
+        );
+
+        // Thời gian giữa 2 lần cập nhật
+        long duration = Duration
+                .between(LocalDateTime.now(), dto.lastActiveAt())
+                .toSeconds();
+
+        // Nếu khoảng cách giữa 2 lần cập nhật vị trí khả nghi
+        if (duration * safeDistance < distance)
             return true;
 
         return false;

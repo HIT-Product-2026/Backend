@@ -14,7 +14,7 @@ public class RabbitMQConfig {
     public static final String POST_KEY = "post.create";
 
     // Detect nfws
-    public static final String IMAGE_NFWS_QUEUE = "image.detect.nfws.queue";
+    public static final String IMAGE_NSFW_QUEUE = "image.detect.nfws.queue";
     public static final String IMAGE_DETECT_KEY = "image.detect.nfws";
 
     // Queue
@@ -25,7 +25,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue queueDetectNfws() {
-        return new Queue(IMAGE_NFWS_QUEUE, false);
+        return new Queue(IMAGE_NSFW_QUEUE, false);
     }
 
     // Exchange
@@ -36,17 +36,17 @@ public class RabbitMQConfig {
 
     // Binding (queue <-> exchange)
     @Bean
-    public Binding bindingNotificationFcm(DirectExchange exchange) {
+    public Binding bindingNotificationFcm(Queue queueNotificationFcm, DirectExchange exchange) {
         return BindingBuilder
-                .bind(queueNotificationFcm())
+                .bind(queueNotificationFcm)
                 .to(exchange)
                 .with(POST_KEY);
     }
 
     @Bean
-    public Binding bindingDetectNfws(DirectExchange exchange) {
+    public Binding bindingDetectNfws(Queue queueDetectNfws, DirectExchange exchange) {
         return BindingBuilder
-                .bind(queueDetectNfws())
+                .bind(queueDetectNfws)
                 .to(exchange)
                 .with(IMAGE_DETECT_KEY);
     }
