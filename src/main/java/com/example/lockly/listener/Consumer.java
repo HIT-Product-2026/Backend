@@ -15,12 +15,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -31,7 +34,6 @@ public class Consumer {
     private final FcmService fcmService;
     private final AIService aiService;
     private final SseService sseService;
-    private final TaskScheduler scheduler;
 
     // Gửi thông báo fcm
     @RabbitListener(queues = RabbitMQConfig.POST_NOTIFICATION_QUEUE)
@@ -72,11 +74,15 @@ public class Consumer {
                 response
                 );
 
+        ScheduledExecutorService executor =
+                Executors.newSingleThreadScheduledExecutor();
+
         // delay an toàn để đảm bảo flush network
-        scheduler.schedule(
-                // Đóng kết nối sse sau khi xong
+        executor.schedule(
+                // Đóng connect sse
                 () -> sseService.disconnect(data.user().id().toString()),
-                new Date(System.currentTimeMillis() + 2000)
+                2,
+                TimeUnit.SECONDS
         );
     }
 }
