@@ -12,8 +12,6 @@ public record PostResponseDto (
     UUID id,
     UserResponseDto user,
     String caption,
-    String imageUrl,
-    String contentType,
     Double latitude,
     Double longitude,
     PostModeLocation modeLocation,
@@ -25,8 +23,6 @@ public record PostResponseDto (
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
                 post.getCaption(),
-                imageUrl,
-                post.getContentType(),
                 latitude,
                 longitude,
                 post.getModeLocation(),
@@ -34,13 +30,11 @@ public record PostResponseDto (
         );
     }
 
-    public static PostResponseDto from(Post post, String imageUrl) {
+    public static PostResponseDto from(Post post) {
         return new PostResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
                 post.getCaption(),
-                imageUrl,
-                post.getContentType(),
                 post.getLatitude(),
                 post.getLongitude(),
                 post.getModeLocation(),
@@ -53,8 +47,6 @@ public record PostResponseDto (
                 dto.postId(),
                 dto.user(),
                 dto.caption(),
-                dto.imageUrl(),
-                dto.contentType(),
                 dto.latitude(),
                 dto.longitude(),
                 dto.modeLocation(),

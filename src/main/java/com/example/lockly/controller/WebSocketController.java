@@ -2,11 +2,14 @@ package com.example.lockly.controller;
 
 import com.example.lockly.domain.dto.request.SendImageMessageSocketRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +22,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
 @Validated
 @Controller
@@ -30,12 +35,11 @@ public class WebSocketController {
     private final WebSocketService webSocketService;
     private final MessageService messageService;
     private final RedisService redisService;
-    private final AuthService authService;
+    private final UserRepository userRepository;
     private final LocationService locationService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
-            @Parameter(description = "Gửi tin nhắn dạng văn bản")
             @Valid SendTextMessageRequestDto request
     ) {
         // Lưu vào db
@@ -47,10 +51,8 @@ public class WebSocketController {
 
 
     @MessageMapping("/chat.sendImage")
-    @Operation(summary = "Gửi tin nhắn dạng ảnh", description = "Upload ảnh để gửi tin nhắn")
     public void sendImageMessage(
-            @Parameter(description = "Gửi tin nhắn dạng ảnh")
-            SendImageMessageSocketRequestDto request
+            @Valid SendImageMessageSocketRequestDto request
 
     ) {
         //Request để lưu vào db trước rồi gửi imageUrl qua đây
@@ -63,33 +65,36 @@ public class WebSocketController {
     }
 
     @MessageMapping("/share.location")
-    @Operation(
-            summary = "Chia sẻ vị trí của người dùng",
-            description = "Dùng để cập nhật vị trí user và vị trí được chia sẻ lên /topic/location/ + userId"
-    )
-    public void shareLocation(
-            @Parameter(description = "Kinh độ")
+    public void sendLocationToUserFriends(
+            Principal principal,
             Double longitude,
-
-            @Parameter(description = "Vĩ độ")
             Double latitude
     ){
-        User user = authService.getCurrentUser();
+        if (principal == null || principal.getName() == null) return;
 
-        boolean isDropRequest = locationService.isDropRequest(longitude, latitude);
+        if (longitude == null || latitude == null) return;
 
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
-        if (isDropRequest)
-            return;
+        if (locationService.isDropRequest(longitude, latitude)) return;
+
+        UUID userId = UUID.fromString(principal.getName());
+
+        UserCacheDto user = redisService.getUser(userId);
+
+        if (user == null) {
+            user = UserCacheDto.from(userRepository.findById(userId).orElseThrow());
+            redisService.saveUser(user);
+        }
 
         // Lưu vào redis
-        redisService.saveUserLocation(user.getId(), latitude, longitude);
-        LocationUserResponseDto response = redisService.getUserLocation(user.getId());
+        redisService.saveUserLocation(user.id(), latitude, longitude);
 
-        if (user.getMode() == UserMode.PRIVATE)
+        if (user.mode() == UserMode.PRIVATE)
             return;
 
+        LocationUserResponseDto response = redisService.getUserLocation(user.id());
+
         // Chuyển lên topic cá nhân
-        webSocketService.shareLocationToFriend(user.getId(), response);
+        webSocketService.shareLocationToFriend(user.id(), response);
     }
 }

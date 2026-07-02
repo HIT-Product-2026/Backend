@@ -27,4 +27,16 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
     Optional<Friendship> findById(UUID id);
     boolean existsByRequesterAndReceiver(User Requester, User Receiver);
     boolean existsByReceiverAndRequester(User receiver, User requester);
+
+    @Query("""
+    SELECT 
+        CASE
+            WHEN f.requester.id = :userId THEN f.receiver.id
+            ELSE f.requester.id
+        END
+    FROM Friendship f
+    WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
+    AND f.status = com.example.lockly.domain.entity.FriendshipStatus.ACCEPTED
+""")
+    List<UUID> findFriendIds(@Param("userId") UUID userId);
 }
