@@ -17,7 +17,7 @@ public record PostResponseDto (
     Double latitude,
     Double longitude,
     PostModeLocation modeLocation,
-    NsfwStatus nfws
+    NsfwStatus nsfw
 ){
 
     public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {

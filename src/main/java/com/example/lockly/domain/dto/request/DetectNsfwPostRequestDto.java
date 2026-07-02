@@ -41,7 +41,7 @@ public record DetectNsfwPostRequestDto(
         PostModeLocation modeLocation,
 
         @NotNull
-        NsfwStatus nfws,
+        NsfwStatus nsfw,
 
         @NotNull
         MultipartFile file
@@ -56,7 +56,7 @@ public record DetectNsfwPostRequestDto(
                 dto.latitude(),
                 dto.longitude(),
                 dto.modeLocation(),
-                dto.nfws(),
+                dto.nsfw(),
                 file
         );
     }

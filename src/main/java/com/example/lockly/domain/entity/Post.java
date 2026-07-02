@@ -46,7 +46,7 @@ public class Post {
     private Double longitude;
 
     @Column
-    private NsfwStatus nfws;
+    private NsfwStatus nsfw;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -56,8 +56,8 @@ public class Post {
         if (id == null){
             id = UuidCreator.getTimeOrderedEpoch();
         }
-        if (nfws == null){
-            nfws = NsfwStatus.PROCESSING;
+        if (nsfw == null){
+            nsfw = NsfwStatus.PROCESSING;
         }
         createdAt = LocalDateTime.now();
     }
