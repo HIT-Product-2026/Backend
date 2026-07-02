@@ -7,6 +7,7 @@ import com.example.lockly.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,9 +22,10 @@ public class SseController {
     private final SseService sseService;
     private final AuthService authService;
 
-    @GetMapping("/subscribe")
-    @Operation(summary = "Mở cổng Sse", description = "Dùng để mở cổng sse")
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "Mở SSE connection")
     public SseEmitter subscribe() {
+
         User user = authService.getCurrentUser();
 
         return sseService.subscribeDetectNsfw(user.getId());

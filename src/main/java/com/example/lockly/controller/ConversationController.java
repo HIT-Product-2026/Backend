@@ -5,10 +5,12 @@ import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
+import com.example.lockly.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +35,7 @@ public class ConversationController {
 
     private final ConversationService conversationService;
     private final AuthService authService;
+    private final MessageService messageService;
 
     @GetMapping("/{conversation_id}")
     @Operation(summary = "Lấy conversation theo id")
@@ -72,6 +75,18 @@ public class ConversationController {
     ) {
 
         List<ConversationResponseDto> result = conversationService.findAll();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+
+    @GetMapping("/{conversation_id}/messages")
+    public ResponseEntity<ApiResponse<ListResponse<MessageResponseDto>>> findMessagesByConversationId(
+            @PathVariable("conversation_id") UUID conversationId
+    ) {
+        List<MessageResponseDto> result =
+                messageService.findMessagesByConversationId(conversationId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

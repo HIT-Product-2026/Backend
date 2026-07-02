@@ -1,12 +1,15 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
+import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
+import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.PostModeLocation;
 import com.example.lockly.domain.entity.User;
@@ -31,7 +34,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(ApiPath.API_V1 + "/post")
+@RequestMapping(ApiPath.API_V1 + "/posts")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 
@@ -101,6 +104,7 @@ public class PostController {
             @Parameter(description = "ID bài viết")
             @PathVariable("post_id") UUID postId
     ) throws Exception {
+
         InputStream inputStream = postService.getPostImage(postId);
 
         return ResponseEntity
@@ -109,26 +113,27 @@ public class PostController {
                 .body(inputStream.readAllBytes());
     }
 
-    @PatchMapping("/mode")
+    @PatchMapping("/{post_id}/mode")
     @Operation(summary = "Thay đổi mode location", description = "Quyết định có chia sẻ vị trí của bài post không")
     public ResponseEntity<ApiResponse<Void>> updateModeLocationPost(
             @Parameter(description = "ID bài post")
-            @RequestParam("post_id") UUID postId,
+            @PathVariable("post_id") UUID postId,
 
             @Parameter(description = "Mode muốn đổi")
             @RequestParam("mode_location") PostModeLocation modeLocation
     ){
         postService.updateModeLocationPostById(postId, modeLocation);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công"));
     }
 
-    @GetMapping("/location")
+    @GetMapping("/{post_id}/location")
     @Operation(summary = "Lấy location của post", description = "Post để mode public mới có thể lấy")
     public ResponseEntity<ApiResponse<LocationPostResponseDto>> getLocationPost(
             @Parameter(description = "ID bài post")
-            @RequestParam("post_id") UUID postId
+            @PathVariable("post_id") UUID postId
     ){
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -148,36 +153,40 @@ public class PostController {
                 .body(ApiResponse.success("Thành công"));
     }
 
-    @GetMapping("/posts")
-    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
-    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPosts(
-            @Parameter(description = "Số trang")
-            @RequestParam(name = "pageNumber") int pageNumber
+    @PostMapping("/emojis")
+    @Operation(
+            summary = "Lấy danh sách emoji của nhiều bài viết",
+            description = "Truyền vào danh sách postId và trả về toàn bộ emoji của các bài viết"
+    )
+    public ResponseEntity<ApiResponse<ListResponse<EmojiPostResponseDto>>> getEmojiPosts(
+            @Valid @RequestBody GetEmojiPostsRequestDto request
     ) {
-        User user = authService.getCurrentUser();
+        List<EmojiPostResponseDto> emojis =
+                postService.getEmojiPosts(request.postIds());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId(user.getId(), pageNumber)));
+                .body(ApiResponse.success(
+                        "Thành công",
+                        ListResponse.of(emojis)
+                ));
     }
 
-    @GetMapping("/{friendId}/posts")
-    @Operation(summary = "Lấy danh sách bài viết theo friend", description = "Trả về list post của friend")
-    public ResponseEntity<ApiResponse<List<PostResponseDto>>> getPostByFriendId(
-            @Parameter(description = "Friend id")
-            @PathVariable(name = "friendId") UUID friendId,
-
+    @GetMapping()
+    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
+    public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPosts(
             @Parameter(description = "Số trang")
             @RequestParam(name = "pageNumber") int pageNumber
     ) {
         User user = authService.getCurrentUser();
 
-        boolean isFriend = userService.isFriendByUserId(user.getId(), friendId);
-        if (isFriend)
-            throw new ForbiddenException("User không có người bạn này");
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", postService.getPostByUserId(friendId, pageNumber)));
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Thành công",
+                        ListResponse.of(
+                                postService.getFriendPosts(user.getId(), pageNumber)
+                        )
+                )
+        );
     }
 }

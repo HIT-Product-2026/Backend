@@ -5,22 +5,16 @@ import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
 import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
-import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
-import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
-import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.User;
 import com.example.lockly.domain.entity.UserMode;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.ConversationService;
-import com.example.lockly.service.LocationService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.exception.ForbiddenException;
+import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 
@@ -30,13 +24,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/user/me")
+@RequestMapping(ApiPath.API_V1 + "/user")
 @Tag(name = "User Controller", description = "API quản lý user và friend system")
 public class UserController {
 
@@ -44,6 +38,7 @@ public class UserController {
     private final AuthService authService;
     private final LocationService locationService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PostService postService;
 
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -158,5 +153,45 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công"));
+    }
+
+    @GetMapping("/{user_id}/avatar")
+    @Operation(summary = "Lấy ảnh đại diện", description = "Trả về image binary từ MinIO")
+    public ResponseEntity<byte[]> getAvatar(
+            @Parameter(description = "ID user")
+            @PathVariable("user_id") UUID userId
+    ) throws Exception {
+
+        InputStream inputStream = userService.getAvatar(userId);
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(inputStream.readAllBytes());
+    }
+
+    @GetMapping("/{friendId}/posts")
+    @Operation(summary = "Lấy danh sách bài viết theo friend", description = "Trả về list post của friend")
+    public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPostByFriendId(
+            @Parameter(description = "Friend id")
+            @PathVariable(name = "friendId") UUID friendId,
+
+            @Parameter(description = "Số trang")
+            @RequestParam(name = "pageNumber") int pageNumber
+    ) {
+        User user = authService.getCurrentUser();
+
+        boolean isFriend = userService.isFriendByUserId(user.getId(), friendId);
+        if (!isFriend)
+            throw new ForbiddenException("User không có người bạn này");
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Thành công",
+                        ListResponse.of(
+                                postService.getPostByUserId(friendId, pageNumber)
+                        )
+                )
+        );
     }
 }

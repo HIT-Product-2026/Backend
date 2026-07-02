@@ -25,10 +25,6 @@ public record DetectNsfwPostRequestDto(
         @Size(max = 500)
         String caption,
 
-        String imageUrl,
-
-        String contentType,
-
         @DecimalMin("-90.0")
         @DecimalMax("90.0")
         Double latitude,
@@ -41,7 +37,7 @@ public record DetectNsfwPostRequestDto(
         PostModeLocation modeLocation,
 
         @NotNull
-        NsfwStatus nfws,
+        NsfwStatus nsfw,
 
         @NotNull
         MultipartFile file
@@ -51,12 +47,10 @@ public record DetectNsfwPostRequestDto(
                 dto.id(),
                 dto.user(),
                 dto.caption(),
-                dto.imageUrl(),
-                dto.contentType(),
                 dto.latitude(),
                 dto.longitude(),
                 dto.modeLocation(),
-                dto.nfws(),
+                dto.nsfw(),
                 file
         );
     }

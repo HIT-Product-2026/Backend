@@ -1,6 +1,7 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
@@ -30,7 +31,7 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @PostMapping("/send-text")
+    @PostMapping("/text")
     @Operation(summary = "Gửi text message", description = "Gửi tin nhắn văn bản")
     public ResponseEntity<ApiResponse<MessageResponseDto>> sendTextMessage(
             @RequestBody
@@ -47,7 +48,7 @@ public class MessageController {
     }
 
 
-    @PostMapping(value = "/send-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Gửi image message", description = "Upload ảnh để gửi tin nhắn")
     public ResponseEntity<ApiResponse<MessageResponseDto>> sendImageMessage(
             @Parameter(description = "ID conversation")
@@ -65,22 +66,6 @@ public class MessageController {
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Gửi ảnh thành công", messageService.sendImageMessage(request)));
     }
-
-
-    @GetMapping("/{conversation_id}/messages")
-    @Operation(summary = "Lấy danh sách message", description = "Lấy tất cả message theo conversation")
-    public ResponseEntity<ApiResponse<List<MessageResponseDto>>> findMessagesByConversationId(
-            @Parameter(description = "ID conversation")
-            @PathVariable("conversation_id")
-            UUID conversationId
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(
-                        "Thành công",
-                        messageService.findMessagesByConversationId(conversationId)));
-    }
-
 
     @GetMapping("/{message_id}")
     @Operation(summary = "Lấy message theo ID", description = "Trả về thông tin message")

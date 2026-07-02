@@ -20,12 +20,12 @@ public class RabbitMQConfig {
     // Queue
     @Bean
     public Queue queueNotificationFcm() {
-        return new Queue(POST_NOTIFICATION_QUEUE, false);
+        return new Queue(POST_NOTIFICATION_QUEUE, true);
     }
 
     @Bean
     public Queue queueDetectNfws() {
-        return new Queue(IMAGE_NSFW_QUEUE, false);
+        return new Queue(IMAGE_NSFW_QUEUE, true);
     }
 
     // Exchange
