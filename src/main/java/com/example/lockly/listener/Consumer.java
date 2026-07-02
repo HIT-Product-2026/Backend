@@ -36,12 +36,18 @@ public class Consumer {
     private final SseService sseService;
 
     // Gửi thông báo fcm
-    @RabbitListener(queues = RabbitMQConfig.POST_NOTIFICATION_QUEUE)
+    @RabbitListener(
+            queues = RabbitMQConfig.POST_NOTIFICATION_QUEUE,
+            concurrency = "1-5"
+    )
     public void sendFcmNotification(FcmNotificationRequestDto message) {
         fcmService.sendToManySilent(message);
     }
 
-    @RabbitListener(queues = RabbitMQConfig.IMAGE_NSFW_QUEUE)
+    @RabbitListener(
+            queues = RabbitMQConfig.IMAGE_NSFW_QUEUE,
+            concurrency = "1-3"
+    )
     public void detectNsfw(DetectNsfwPostRequestDto data) throws IOException {
 
         // Giá trị mặc định, tránh lỗi
