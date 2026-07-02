@@ -49,21 +49,21 @@ public class FriendshipController {
     @PostMapping("/accept/{friendships_id}")
     @Operation(summary = "Chấp nhận lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
-            @PathVariable @Valid UUID friendshipsId
-    ) {
+            @PathVariable("friendships_id") UUID friendshipId
+    ){
         User user = authService.getCurrentUser();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.acceptAddFriendRequest(user.getId(), friendshipsId)));
+                        userService.acceptAddFriendRequest(user.getId(), friendshipId)));
     }
 
 
     @PostMapping("/reject/{friendships_id}")
     @Operation(summary = "Từ chối lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
-            @PathVariable @Valid UUID friendshipId
+            @PathVariable("friendships_id") UUID friendshipId
     ) {
         User user = authService.getCurrentUser();
 
