@@ -1,0 +1,100 @@
+package com.example.lockly.controller;
+
+import com.example.lockly.domain.dto.request.SendImageMessageSocketRequestDto;
+import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.request.UserCacheDto;
+import com.example.lockly.domain.dto.response.LocationUserResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.repository.UserRepository;
+import com.example.lockly.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.UUID;
+
+@Validated
+@Controller
+@RequiredArgsConstructor
+@Tag(name = "WebSockets", description = "Quản lý chức năng realtime")
+public class WebSocketController {
+
+    private final WebSocketService webSocketService;
+    private final MessageService messageService;
+    private final RedisService redisService;
+    private final UserRepository userRepository;
+    private final LocationService locationService;
+
+    @MessageMapping("/chat.sendText")
+    public void sendTextMessage(
+            @Valid SendTextMessageRequestDto request
+    ) {
+        // Lưu vào db
+        MessageResponseDto response = messageService.sendTextMessage(request);
+
+        // Response cho client
+        webSocketService.sendTextMessage(request.conversationId(), response);
+    }
+
+
+    @MessageMapping("/chat.sendImage")
+    public void sendImageMessage(
+            @Valid SendImageMessageSocketRequestDto request
+
+    ) {
+        //Request để lưu vào db trước rồi gửi imageUrl qua đây
+
+        // Trả kết quả qua socket
+        webSocketService.sendImageMessage(
+                request.conversationId(),
+                request.imageUrl());
+
+    }
+
+    @MessageMapping("/share.location")
+    public void sendLocationToUserFriends(
+            Principal principal,
+            Double longitude,
+            Double latitude
+    ){
+        if (principal == null || principal.getName() == null) return;
+
+        if (longitude == null || latitude == null) return;
+
+        // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
+        if (locationService.isDropRequest(longitude, latitude)) return;
+
+        UUID userId = UUID.fromString(principal.getName());
+
+        UserCacheDto user = redisService.getUser(userId);
+
+        if (user == null) {
+            user = UserCacheDto.from(userRepository.findById(userId).orElseThrow());
+            redisService.saveUser(user);
+        }
+
+        // Lưu vào redis
+        redisService.saveUserLocation(user.id(), latitude, longitude);
+
+        if (user.mode() == UserMode.PRIVATE)
+            return;
+
+        LocationUserResponseDto response = redisService.getUserLocation(user.id());
+
+        // Chuyển lên topic cá nhân
+        webSocketService.shareLocationToFriend(user.id(), response);
+    }
+}

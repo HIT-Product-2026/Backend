@@ -1,0 +1,95 @@
+package com.example.lockly.controller;
+
+import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.common.response.ListResponse;
+import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
+import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.entity.User;
+import com.example.lockly.exception.ForbiddenException;
+import com.example.lockly.service.AuthService;
+import com.example.lockly.service.ConversationService;
+import com.example.lockly.service.MessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@Validated
+@RestController
+@RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping(ApiPath.API_V1 + "/conversations")
+@Tag(name = "Conversation Controller", description = "API quản lý hội thoại")
+public class ConversationController {
+
+    private final ConversationService conversationService;
+    private final AuthService authService;
+    private final MessageService messageService;
+
+    @GetMapping("/{conversation_id}")
+    @Operation(summary = "Lấy conversation theo id")
+    public ResponseEntity<ApiResponse<ConversationResponseDto>> getConversationById(
+            @PathVariable("conversation_id") UUID conversationId
+    ) {
+        User user = authService.getCurrentUser();
+
+        ConversationResponseDto response = conversationService.findById(conversationId);
+        if (response.user1().id() != user.getId()
+        || response.user2().id() != user.getId())
+            throw new ForbiddenException("User này không có quyền với conversation này");
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", response));
+    }
+
+
+    @PostMapping
+    @Operation(summary = "Tạo conversation mới")
+    public ResponseEntity<ApiResponse<ConversationResponseDto>> createConversation(
+            @RequestBody CreateConversationRequestDto request
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.created(
+                        "Tạo conversation thành công",
+                        conversationService.createConversation(request)
+                ));
+    }
+
+    @GetMapping("/conversations")
+    @Operation(summary = "Lấy danh sách hội thoại của user")
+    public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getConversations(
+    ) {
+
+        List<ConversationResponseDto> result = conversationService.findAll();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+
+    @GetMapping("/{conversation_id}/messages")
+    public ResponseEntity<ApiResponse<ListResponse<MessageResponseDto>>> findMessagesByConversationId(
+            @PathVariable("conversation_id") UUID conversationId
+    ) {
+        List<MessageResponseDto> result =
+                messageService.findMessagesByConversationId(conversationId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+}
