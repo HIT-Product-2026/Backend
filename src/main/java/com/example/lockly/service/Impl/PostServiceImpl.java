@@ -5,6 +5,7 @@ import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
+import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.*;
@@ -12,6 +13,7 @@ import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.EmojiPostRepository;
+import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.AuthService;
@@ -42,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final PostsRepository postsRepository;
     private final AuthService authService;
     private final EmojiPostRepository emojiPostRepository;
+    private final FriendshipsRepository friendshipsRepository;
     private final MinIOService minIOService;
     private final String prefix = "post";
     private final int pageSize = 10;
@@ -75,7 +78,6 @@ public class PostServiceImpl implements PostService {
                     .bucket(props.getBucketName())
                     .objectName(objectName)
                     .caption(caption)
-                    .contentType(file.getContentType())
                     .longitude(request.longitude())
                     .latitude(request.latitude())
                     .modeLocation(mode)
@@ -86,7 +88,7 @@ public class PostServiceImpl implements PostService {
             if (mode == PostModeLocation.PRIVATE)
                 return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
 
-            return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()));
+            return PostResponseDto.from(post);
         } catch (Exception e){
             minIOService.deleteFile(objectName);
             throw e;
@@ -94,7 +96,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-public InputStream getPostImage(UUID postId) throws Exception {
+    public InputStream getPostImage(UUID postId) throws Exception {
 
         Post post = postsRepository
                 .findById(postId)
@@ -115,26 +117,36 @@ public InputStream getPostImage(UUID postId) throws Exception {
         if (post.getModeLocation() == PostModeLocation.PRIVATE){
             return PostResponseDto.from(post, imageUrl, null, null);
         }
-        return PostResponseDto.from(post, imageUrl);
+        return PostResponseDto.from(post);
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(UUID userId, int pageNumber){
+    public List<PostResponseDto> getPostByUserId(UUID userId, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        List<PostResponseDto> response = postsRepository
+        return postsRepository
                 .findByUserOrderByCreatedAtDesc(user, pageable)
                 .stream()
-                .map(post -> PostResponseDto
-                        .from(post, FileUtil.getImageUrlApi(prefix, post.getId()))
-                )
+                .map(PostResponseDto::from)
                 .toList();
+    }
 
-        return response;
+    @Override
+    public List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        List<UUID> friendIds = friendshipsRepository.findFriendIds(userId);
+
+        return postsRepository
+                .findByUserIdInOrderByCreatedAtDesc(friendIds, pageable)
+                .stream()
+                .map(PostResponseDto::from)
+                .toList();
     }
 
     @Override
@@ -186,4 +198,12 @@ public InputStream getPostImage(UUID postId) throws Exception {
         emojiPostRepository.save(emojiPost);
     }
 
+    @Override
+    public List<EmojiPostResponseDto> getEmojiPosts(List<UUID> postIds) {
+        return emojiPostRepository
+                .findByPostIdsWithSender(postIds)
+                .stream()
+                .map(EmojiPostResponseDto::from)
+                .toList();
+    }
 }

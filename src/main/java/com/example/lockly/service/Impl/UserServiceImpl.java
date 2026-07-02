@@ -6,10 +6,7 @@ import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.FriendshipStatus;
-import com.example.lockly.domain.entity.Friendship;
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.domain.entity.*;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ForbiddenException;
@@ -17,6 +14,7 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.FriendshipsRepository;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +38,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FriendshipsRepository friendshipsRepository;
+    private final MinIOService minIOService;
     private final MinioClient minioClient;
     private final MinioProperties props;
     private final RedisService redisService;
@@ -304,5 +304,15 @@ public class UserServiceImpl implements UserService {
         user.setFcmToken(fcmToken);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public InputStream getAvatar(UUID userId) throws Exception {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        return minIOService.getFile(user.getAvatarUrl());
     }
 }

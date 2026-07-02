@@ -33,9 +33,6 @@ public class Post {
     @Column(length = 100)
     private String caption;
 
-    @Column(name = "content_type")
-    private String contentType;
-
     @Column(name = "mode_location")
     private PostModeLocation modeLocation;
 
@@ -46,7 +43,7 @@ public class Post {
     private Double longitude;
 
     @Column
-    private NsfwStatus nfws;
+    private NsfwStatus nsfw;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -56,8 +53,8 @@ public class Post {
         if (id == null){
             id = UuidCreator.getTimeOrderedEpoch();
         }
-        if (nfws == null){
-            nfws = NsfwStatus.PROCESSING;
+        if (nsfw == null){
+            nsfw = NsfwStatus.PROCESSING;
         }
         createdAt = LocalDateTime.now();
     }

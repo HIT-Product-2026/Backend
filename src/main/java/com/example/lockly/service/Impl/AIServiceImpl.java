@@ -1,11 +1,13 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.service.AIService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -15,10 +17,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class AIServiceImpl implements AIService {
 
     private static final String AI_API_URL = "http://localhost:8000/detect";
 
+    @Override
+    @CircuitBreaker(
+            name = "aiService",
+            fallbackMethod = "fallback"
+    )
     public Boolean detectNsfw(MultipartFile imageFile) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -49,5 +57,14 @@ public class AIServiceImpl implements AIService {
                 );
 
         return response.getBody();
+    }
+
+    public Boolean fallback(
+            MultipartFile imageFile,
+            Exception ex) {
+
+        log.debug("AI unavailable: " + ex.getMessage());
+
+        return false;
     }
 }
