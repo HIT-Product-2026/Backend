@@ -6,7 +6,10 @@ import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.NsfwStatus;
+import com.example.lockly.domain.entity.Post;
 import com.example.lockly.domain.entity.User;
+import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.repository.PostsRepository;
 import com.example.lockly.service.AIService;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
@@ -34,6 +37,7 @@ public class Consumer {
     private final FcmService fcmService;
     private final AIService aiService;
     private final SseService sseService;
+    private final PostsRepository postsRepository;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -55,11 +59,13 @@ public class Consumer {
 
         try {
             isNfws = aiService.detectNsfw(data.file());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error detecting NSFW image. userId={}, postId={}",
                     data.user().id(),
                     data.postId(),
                     e);
+
+            throw new RuntimeException(e);
         }
 
         NsfwStatus nsfw;
@@ -70,6 +76,13 @@ public class Consumer {
         else {
             nsfw = NsfwStatus.FALSE;
         }
+
+        Post post = postsRepository
+                .findById(data.postId())
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", data.postId()));
+
+        post.setNsfw(nsfw);
+        postsRepository.save(post);
 
         PostResponseDto response = PostResponseDto.from(data, nsfw);
 
