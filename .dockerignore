@@ -1,0 +1,14 @@
+target/
+.git
+.github/
+minIO_db/images/
+*.md
+.mvn/
+mvnw
+mvnw.cmd
+Dockerfile
+*.log
+src/test/
+README.md
+.env
+docker-compose.yml
