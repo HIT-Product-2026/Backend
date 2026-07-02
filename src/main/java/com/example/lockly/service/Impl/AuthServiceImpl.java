@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -92,17 +93,25 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Phiên đăng ký đã hết hạn. Vui lòng thử lại.");
         }
 
-        String baseUsername = request.email().split("@")[0];
-        String username = baseUsername;
+        String displayName = request.email().split("@")[0];
 
-        int suffix = 1;
-        while (userRepository.existsByUsername(username)) {
-            username = baseUsername + suffix++;
-        }
+        // Username là 1 dãy số ngẫu nhiên 10 chữ số
+        Random random = new Random();
+        String username;
+
+        do {
+            StringBuilder rawUsername = new StringBuilder();
+
+            for (int i = 0; i < 10; i++) {
+                rawUsername.append(random.nextInt(10));
+            }
+
+            username = rawUsername.toString();
+        } while (!userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
 
         User user = User.builder()
                 .username(username)
-                .displayName(username)
+                .displayName(displayName)
                 .email(request.email())
                 .passwordHash(rawPwd.toString())
                 .build();
