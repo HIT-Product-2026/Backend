@@ -97,4 +97,8 @@ public class LocationServiceImpl implements LocationService {
 
         return false;
     }
+
+    public void updateCityVisited(Double latitude, Double longitude){
+
+    }
 }
