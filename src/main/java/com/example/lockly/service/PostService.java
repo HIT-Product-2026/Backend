@@ -23,4 +23,6 @@ public interface PostService {
     List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber);
 
     void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation);
+
+    void dropEmoji(ReactEmojiToPostRequestDto request);
 }

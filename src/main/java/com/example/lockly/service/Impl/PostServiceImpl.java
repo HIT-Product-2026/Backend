@@ -178,7 +178,9 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    // UNIQUE(post_id, sender_id)
     @Override
+    @Transactional
     public void sendEmoji(ReactEmojiToPostRequestDto request){
         Post post = postsRepository
                 .findById(request.postId())
@@ -197,6 +199,31 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         emojiPostRepository.save(emojiPost);
+    }
+
+    @Override
+    @Transactional
+    public void dropEmoji(ReactEmojiToPostRequestDto request) {
+
+        Post post = postsRepository
+                .findById(request.postId())
+                .orElseThrow(() -> new BadRequestException("Post id", request.postId()));
+
+        User user = authService.getCurrentUser();
+        User postAuthor = post.getUser();
+
+        if (!userService.isFriendByUserId(user.getId(), postAuthor.getId()))
+            throw new ForbiddenException("User và chủ post không phải bạn bè");
+
+        EmojiPost emojiPost = emojiPostRepository
+                .findByPostIdAndSenderId(post.getId(), user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "EmojiPost",
+                        "postId & senderId",
+                        post.getId() + " & " + user.getId()
+                ));
+
+        emojiPostRepository.delete(emojiPost);
     }
 
     @Override
