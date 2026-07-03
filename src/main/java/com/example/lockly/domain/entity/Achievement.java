@@ -10,7 +10,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "achievements")
+@Table(
+        name = "achievements",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"profile_id", "achievement_name"})
+        },
+
+        indexes = {
+        @Index(name = "idx_profile", columnList = "profile_id")
+            }
+)
 @Getter
 @Setter
 @NoArgsConstructor
