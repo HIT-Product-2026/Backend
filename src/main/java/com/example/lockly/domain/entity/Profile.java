@@ -1,6 +1,5 @@
 package com.example.lockly.domain.entity;
 
-import com.example.lockly.domain.entity.enumEntity.VietnamCity;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
@@ -94,7 +93,7 @@ public class Profile {
     )
     @Column(name = "city")
     @Builder.Default
-    private Set<VietnamCity> cities = new HashSet<>();
+    private Set<String> cityCodes = new HashSet<>();
 
     // ======= Flag ========
     @Column(name = "visited_profiles_completed")
