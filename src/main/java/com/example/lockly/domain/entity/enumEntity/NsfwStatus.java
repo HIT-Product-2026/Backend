@@ -1,4 +1,4 @@
-package com.example.lockly.domain.entity;
+package com.example.lockly.domain.entity.enumEntity;
 
 public enum NsfwStatus {
     TRUE,

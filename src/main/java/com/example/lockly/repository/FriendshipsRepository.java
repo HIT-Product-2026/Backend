@@ -1,6 +1,6 @@
 package com.example.lockly.repository;
 
-import com.example.lockly.domain.entity.FriendshipStatus;
+import com.example.lockly.domain.entity.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.Friendship;
 import com.example.lockly.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

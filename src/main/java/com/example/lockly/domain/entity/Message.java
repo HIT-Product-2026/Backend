@@ -1,5 +1,6 @@
 package com.example.lockly.domain.entity;
 
+import com.example.lockly.domain.entity.enumEntity.MessageType;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;

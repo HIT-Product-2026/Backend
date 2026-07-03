@@ -7,6 +7,8 @@ import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.*;
+import com.example.lockly.domain.entity.enumEntity.FriendshipStatus;
+import com.example.lockly.domain.entity.enumEntity.UserMode;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ForbiddenException;

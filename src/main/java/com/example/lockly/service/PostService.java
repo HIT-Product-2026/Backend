@@ -5,8 +5,7 @@ import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
-import com.example.lockly.domain.entity.PostModeLocation;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.enumEntity.PostModeLocation;
 
 import java.io.InputStream;
 import java.util.List;
