@@ -5,25 +5,17 @@ import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
-import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserMode;
-import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.domain.entity.enumEntity.UserMode;
 import com.example.lockly.repository.UserRepository;
 import com.example.lockly.service.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
 
 @Validated

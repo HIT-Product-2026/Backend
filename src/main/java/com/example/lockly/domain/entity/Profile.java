@@ -1,13 +1,12 @@
 package com.example.lockly.domain.entity;
 
+import com.example.lockly.domain.entity.enumEntity.VietnamCity;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "profiles")
@@ -55,6 +54,8 @@ public class Profile {
     @JoinColumn(name = "favorite_post_id")
     private Post favoritePost;
 
+    // ========== Danh sách nhiệm vụ ==========
+
     // Danh sách profile mà người này từng ghé thăm
     @ElementCollection
     @CollectionTable(
@@ -63,7 +64,7 @@ public class Profile {
     )
     @Column(name = "visited_profile_id", columnDefinition = "BINARY(16)")
     @Builder.Default
-    private List<UUID> visitedProfileIds = new ArrayList<>();
+    private Set<UUID> visitedProfileIds = new HashSet<>();
 
     // Danh sách người từng ghé thăm profile này
     @ElementCollection
@@ -73,7 +74,7 @@ public class Profile {
     )
     @Column(name = "visitor_profile_id", columnDefinition = "BINARY(16)")
     @Builder.Default
-    private List<UUID> visitorProfileIds = new ArrayList<>();
+    private Set<UUID> visitorProfileIds = new HashSet<>();
 
     // Danh sách bạn bè từng chụp chung
     @ElementCollection
@@ -83,18 +84,34 @@ public class Profile {
     )
     @Column(name = "friend_user_id", columnDefinition = "BINARY(16)")
     @Builder.Default
-    private List<UUID> photographedFriendIds = new ArrayList<>();
+    private Set<UUID> photographedFriendIds = new HashSet<>();
 
-
-    // Embedding khuôn mặt
-    @Lob
-    @Column(name = "face_embedding")
-    private byte[] faceEmbedding;
-
-    // Tổng số lần chụp với tất cả bạn bè
-    @Column(name = "total_photo_with_friends")
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(
+            name = "profile_cities",
+            joinColumns = @JoinColumn(name = "profile_id")
+    )
+    @Column(name = "city")
     @Builder.Default
-    private Integer totalPhotoWithFriends = 0;
+    private Set<VietnamCity> cities = new HashSet<>();
+
+    // ======= Flag ========
+    @Column(name = "visited_profiles_completed")
+    @Builder.Default
+    private boolean visitedProfilesCompleted = false;
+
+    @Column(name = "visitors_completed")
+    @Builder.Default
+    private boolean visitorsCompleted = false;
+
+    @Column(name = "photographed_friends_completed")
+    @Builder.Default
+    private boolean photographedFriendsCompleted = false;
+
+    @Column(name = "cities_completed")
+    @Builder.Default
+    private boolean citiesCompleted = false;
 
 
     @PrePersist

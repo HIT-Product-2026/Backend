@@ -1,6 +1,6 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.Emoji;
+import com.example.lockly.domain.entity.enumEntity.Emoji;
 import com.example.lockly.domain.entity.EmojiPost;
 
 import java.time.LocalDateTime;

@@ -1,5 +1,7 @@
 package com.example.lockly.domain.entity;
 
+import com.example.lockly.domain.entity.enumEntity.NsfwStatus;
+import com.example.lockly.domain.entity.enumEntity.PostModeLocation;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
