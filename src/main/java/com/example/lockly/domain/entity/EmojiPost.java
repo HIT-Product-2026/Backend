@@ -9,7 +9,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "emoji_posts")
+@Table(
+        name = "emoji_posts",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_post_sender",
+                        columnNames = {"post_id", "sender_id"}
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
