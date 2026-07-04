@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: lockly_db
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -19,6 +19,31 @@ services:
           memory: 1024M
         reservations:
           memory: 256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql_vietnam_gis:
+    image: mysql:8.0.33
+    container_name: lockly-mysql-vietnam-gis
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: vietnam_gis
+
+    ports:
+      - "3308:3306"
+
+    volumes:
+      - mysql_vietnam_gis:/var/lib/mysql
+      - ./mysql-init/vietnam_gis:/docker-entrypoint-initdb.d
+
+    networks:
+      - lockly-network
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
       interval: 10s
@@ -135,6 +160,9 @@ services:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
+      - LOCATION_DB_URL=${LOCATION_DB_URL}
+      - LOCATION_DB_USERNAME=${LOCATION_DB_USERNAME}
+      - LOCATION_DB_PASSWORD=${LOCATION_DB_PASSWORD}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
@@ -147,6 +175,8 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
     depends_on:
       mysql:
+        condition: service_healthy
+      mysql_vietnam_gis:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -176,6 +206,7 @@ networks:
 
 volumes:
   mysql_data:
+  mysql_vietnam_gis:
   redis_data:
   rabbitmq_data:
   minio_data:

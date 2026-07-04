@@ -1,6 +1,6 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.Conversation;
+import com.example.lockly.domain.entity.main.Conversation;
 
 import java.time.LocalDateTime;
 

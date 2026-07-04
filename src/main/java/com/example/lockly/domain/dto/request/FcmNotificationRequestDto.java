@@ -1,6 +1,6 @@
 package com.example.lockly.domain.dto.request;
 
-import com.example.lockly.domain.entity.enumEntity.FcmMessageType;
+import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

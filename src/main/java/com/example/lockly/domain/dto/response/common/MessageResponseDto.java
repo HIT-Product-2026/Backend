@@ -1,7 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.Message;
-import com.example.lockly.domain.entity.enumEntity.MessageType;
+import com.example.lockly.domain.entity.main.Message;
+import com.example.lockly.domain.entity.main.enumEntity.MessageType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

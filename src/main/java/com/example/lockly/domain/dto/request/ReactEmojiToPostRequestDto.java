@@ -1,6 +1,6 @@
 package com.example.lockly.domain.dto.request;
 
-import com.example.lockly.domain.entity.enumEntity.Emoji;
+import com.example.lockly.domain.entity.main.enumEntity.Emoji;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;

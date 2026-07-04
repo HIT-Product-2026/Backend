@@ -1,9 +1,9 @@
 package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
-import com.example.lockly.domain.entity.enumEntity.NsfwStatus;
-import com.example.lockly.domain.entity.Post;
-import com.example.lockly.domain.entity.enumEntity.PostModeLocation;
+import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
+import com.example.lockly.domain.entity.main.Post;
+import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 
 import java.util.UUID;
 

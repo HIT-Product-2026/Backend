@@ -1,7 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.enumEntity.Emoji;
-import com.example.lockly.domain.entity.EmojiPost;
+import com.example.lockly.domain.entity.main.enumEntity.Emoji;
+import com.example.lockly.domain.entity.main.EmojiPost;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

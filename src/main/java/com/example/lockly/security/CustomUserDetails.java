@@ -1,6 +1,6 @@
 package com.example.lockly.security;
 
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

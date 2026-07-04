@@ -40,3 +40,5 @@ src/main/resources/lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json
 src/main/resources/application.properties
 
 vn_geo.zip
+
+mysql-init/
