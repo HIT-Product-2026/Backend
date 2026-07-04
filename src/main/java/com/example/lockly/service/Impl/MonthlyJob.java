@@ -1,12 +1,11 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.domain.entity.Profile;
-import com.example.lockly.repository.ProfileRepository;
+import com.example.lockly.domain.entity.main.Profile;
+import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.service.AchievementService;
 import com.example.lockly.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;

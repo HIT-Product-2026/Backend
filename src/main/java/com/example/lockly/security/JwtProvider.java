@@ -1,7 +1,7 @@
 package com.example.lockly.security;
 
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.repository.InvalidatedTokenRepository;
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.repository.main.InvalidatedTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

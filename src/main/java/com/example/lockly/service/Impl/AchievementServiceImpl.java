@@ -1,10 +1,10 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.domain.entity.Achievement;
-import com.example.lockly.domain.entity.Profile;
-import com.example.lockly.domain.entity.enumEntity.AchievementName;
-import com.example.lockly.domain.entity.enumEntity.AchievementType;
-import com.example.lockly.repository.AchievementRepository;
+import com.example.lockly.domain.entity.main.Achievement;
+import com.example.lockly.domain.entity.main.Profile;
+import com.example.lockly.domain.entity.main.enumEntity.AchievementName;
+import com.example.lockly.domain.entity.main.enumEntity.AchievementType;
+import com.example.lockly.repository.main.AchievementRepository;
 import com.example.lockly.service.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,37 +23,51 @@ public class AchievementServiceImpl implements AchievementService {
     // Danh hiệu "Nhà thám hiểm"
     @Override
     public boolean isExplorer(){
-
+        return false;
     }
 
     // Danh hiệu "Kế thừa di sản"
     @Override
-    public boolean isLegacyInheritor(){}
+    public boolean isLegacyInheritor(){
+        return false;
+    }
 
     // Danh hiệu "Được lòng dân, bình thiên hạ"
     @Override
-    public boolean isPopularLeader(){}
+    public boolean isPopularLeader(){
+        return false;
+    }
 
     // Danh hiệu "Kỷ luật thép"
     @Override
-    public boolean isDisciplinedSteel(){}
+    public boolean isDisciplinedSteel(){
+        return false;
+    }
 
     // Danh hiệu "Bạn của tôi, cậu còn nhớ chứ?"
     @Override
-    public boolean isOldFriend(){}
+    public boolean isOldFriend(){
+        return false;
+    }
 
 
     // Cup "Bốn bể là nhà"
     @Override
-    public boolean isFourSeasHome(){}
+    public boolean isFourSeasHome(){
+        return false;
+    }
 
     // Cup "Đông phương bất bại"
     @Override
-    public boolean isEasternUndefeated(){}
+    public boolean isEasternUndefeated(){
+        return false;
+    }
 
     // Cup "Lời hứa năm xưa"
     @Override
-    public boolean isOldPromise(){}
+    public boolean isOldPromise(){
+        return false;
+    }
 
 
     @Override

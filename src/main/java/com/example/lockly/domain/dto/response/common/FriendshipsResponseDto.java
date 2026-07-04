@@ -1,7 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.enumEntity.FriendshipStatus;
-import com.example.lockly.domain.entity.Friendship;
+import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
+import com.example.lockly.domain.entity.main.Friendship;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

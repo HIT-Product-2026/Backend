@@ -2,7 +2,6 @@ package com.example.lockly.service;
 
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
-import com.example.lockly.domain.entity.User;
 
 import java.util.UUID;
 

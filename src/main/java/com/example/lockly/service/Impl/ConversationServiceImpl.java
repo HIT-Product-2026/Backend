@@ -2,17 +2,15 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
-import com.example.lockly.domain.entity.Conversation;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.Conversation;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
-import com.example.lockly.repository.ConversationRepository;
-import com.example.lockly.repository.UserRepository;
+import com.example.lockly.repository.main.ConversationRepository;
+import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

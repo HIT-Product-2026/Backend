@@ -1,8 +1,6 @@
 package com.example.lockly.service;
 
-import com.example.lockly.domain.entity.Profile;
-
-import java.util.UUID;
+import com.example.lockly.domain.entity.main.Profile;
 
 public interface AchievementService {
 

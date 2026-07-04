@@ -1,12 +1,12 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
-import com.example.lockly.domain.entity.Post;
-import com.example.lockly.domain.entity.Profile;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.Post;
+import com.example.lockly.domain.entity.main.Profile;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.ResourceNotFoundException;
-import com.example.lockly.repository.PostsRepository;
-import com.example.lockly.repository.ProfileRepository;
+import com.example.lockly.repository.main.PostsRepository;
+import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ProfileService;
 import lombok.RequiredArgsConstructor;
