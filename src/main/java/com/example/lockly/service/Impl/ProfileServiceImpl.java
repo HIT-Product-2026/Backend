@@ -10,8 +10,11 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.location.GISProvinceRepository;
+import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.ProfileRepository;
+import com.example.lockly.repository.main.UserRepository;
+import com.example.lockly.service.AIService;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ProfileService;
 import com.example.lockly.service.UserService;
@@ -23,12 +26,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,14 +41,18 @@ public class ProfileServiceImpl implements ProfileService {
     private final PostsRepository postsRepository;
     private final ProfileRepository profileRepository;
     private final GISProvinceRepository gisProvinceRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final AIService aiService;
+    private final FriendshipsRepository friendshipsRepository;
 
     @Override
     @Transactional
     public void
     createProfile(UUID userId, CreateProfileRequestDto request){
 
-        User user = authService.getCurrentUser();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         int postCount = postsRepository.countByUserId(userId);
 
@@ -59,7 +66,26 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void updateProcessProfile(UUID postId){
+    @Transactional
+    public void registerFace(UUID userId, MultipartFile image) {
+
+        userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "id", userId));
+
+        profileRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Profile", "user id", userId));
+
+        boolean success = aiService.registerFace(userId, image);
+
+        if (!success) {
+            throw new RuntimeException("Đăng ký khuôn mặt thất bại");
+        }
+    }
+
+    @Override
+    public void updateProcessProfile(UUID postId, MultipartFile image){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
@@ -82,6 +108,8 @@ public class ProfileServiceImpl implements ProfileService {
         // Cập nhật tiến trình "Kế thừa di sản"
         updatePostReupped(profile.getId(), latitude, longitude);
 
+        // Cập nhật tiến trình "Lời hứa năm xưa"
+        updateProcessPhotoWithFriends(profile.getId(), image);
     }
 
     // Cập nhật tiến trình liên quan đến post
@@ -243,5 +271,40 @@ public class ProfileServiceImpl implements ProfileService {
                             .toList()
             );
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateProcessPhotoWithFriends(UUID profileId, MultipartFile image) {
+        User user = authService.getCurrentUser();
+
+        List<String> detectedIds;
+        try {
+            detectedIds = aiService.detectFaces(image);
+        } catch (Exception e) {
+            throw new RuntimeException("AI Service timeout", e);
+        }
+
+        List<UUID> friendIds = friendshipsRepository.findFriendIds(
+                user.getId(),
+                FriendshipStatus.ACCEPTED
+        );
+
+        Set<UUID> friendIdSet = new HashSet<>(friendIds);
+
+        Set<UUID> friendsInPhoto = detectedIds.stream()
+                .map(UUID::fromString)
+                .filter(friendIdSet::contains)
+                .collect(Collectors.toSet());
+
+        if (friendsInPhoto.isEmpty()) {
+            return;
+        }
+
+        Profile profile = profileRepository
+                .findById(profileId)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        profile.getPhotographedFriendIds().addAll(friendsInPhoto);
     }
 }

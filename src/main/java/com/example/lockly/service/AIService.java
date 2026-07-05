@@ -12,7 +12,7 @@ public interface AIService {
 
     List<String> detectFaces(MultipartFile imageFile) throws IOException;
 
-    Boolean registerFace(UUID personId, MultipartFile imageFile) throws IOException;
+    Boolean registerFace(UUID personId, MultipartFile imageFile);
 
     Boolean checkFace(UUID personId);
 }

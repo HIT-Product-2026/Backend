@@ -20,10 +20,7 @@ import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.UserRepository;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.MinIOService;
-import com.example.lockly.service.PostService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.*;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +45,7 @@ public class PostServiceImpl implements PostService {
     private final PostsRepository postsRepository;
     private final AuthService authService;
     private final EmojiPostRepository emojiPostRepository;
-    private final FriendshipsRepository friendshipsRepository;
+    private final ProfileService profileService;
     private final MinIOService minIOService;
     private final String prefix = "post";
     private final int pageSize = 10;
@@ -88,7 +85,8 @@ public class PostServiceImpl implements PostService {
                     .modeLocation(mode)
                     .build();
 
-            postsRepository.save(post);
+            // Cập nhật tiến trình nhiệm vụ
+            profileService.updateProcessProfile(postId, file);
 
             if (mode == PostModeLocation.PRIVATE)
                 return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
