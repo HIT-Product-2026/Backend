@@ -53,6 +53,10 @@ public class Profile {
     @JoinColumn(name = "favorite_post_id")
     private Post favoritePost;
 
+    @Column(name = "count_post_reup")
+    @Builder.Default
+    private Integer countPostReup = 0;
+
     // ========== Danh sách nhiệm vụ ==========
 
     // Danh sách profile mà người này từng ghé thăm
@@ -85,6 +89,7 @@ public class Profile {
     @Builder.Default
     private Set<UUID> photographedFriendIds = new HashSet<>();
 
+    // Danh sách thành phố người này từng đi qua
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @CollectionTable(
@@ -93,24 +98,34 @@ public class Profile {
     )
     @Column(name = "city")
     @Builder.Default
-    private Set<String> cityCodes = new HashSet<>();
+    private Set<String> cityCodeList = new HashSet<>();
+
+    // Danh sách bài post đã được reup
+    @ElementCollection
+    @CollectionTable(
+            name = "profile_reup_posts",
+            joinColumns = @JoinColumn(name = "profile_id")
+    )
+    @Column(name = "post_id", columnDefinition = "BINARY(16)")
+    @Builder.Default
+    private Set<UUID> reupPostIds = new HashSet<>();
 
     // ======= Flag ========
-    @Column(name = "visited_profiles_completed")
-    @Builder.Default
-    private boolean visitedProfilesCompleted = false;
-
-    @Column(name = "visitors_completed")
-    @Builder.Default
-    private boolean visitorsCompleted = false;
-
-    @Column(name = "photographed_friends_completed")
-    @Builder.Default
-    private boolean photographedFriendsCompleted = false;
-
-    @Column(name = "cities_completed")
-    @Builder.Default
-    private boolean citiesCompleted = false;
+//    @Column(name = "visited_profiles_completed")
+//    @Builder.Default
+//    private boolean visitedProfilesCompleted = false;
+//
+//    @Column(name = "visitors_completed")
+//    @Builder.Default
+//    private boolean visitorsCompleted = false;
+//
+//    @Column(name = "photographed_friends_completed")
+//    @Builder.Default
+//    private boolean photographedFriendsCompleted = false;
+//
+//    @Column(name = "cities_completed")
+//    @Builder.Default
+//    private boolean citiesCompleted = false;
 
 
     @PrePersist

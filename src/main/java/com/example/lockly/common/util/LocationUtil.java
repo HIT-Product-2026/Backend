@@ -4,6 +4,7 @@ public class LocationUtil {
 
     private static final double R = 6371000; // meters
 
+    // Khoảng cách tính bằng m
     public static double calculateDistance(
             double lat1, double lon1,
             double lat2, double lon2
