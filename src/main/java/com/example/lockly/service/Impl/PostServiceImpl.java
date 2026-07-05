@@ -68,6 +68,7 @@ public class PostServiceImpl implements PostService {
         UUID postId = UuidCreator.getTimeOrderedEpoch();
         String objectName = FileUtil.getObjectNameFile(prefix, postId, file);
 
+        // Lưu ảnh vào minIO
         try {
             minIOService.saveFile(file, objectName);
 
@@ -139,18 +140,11 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    @Override
     public List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber) {
-
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        List<UUID> friendIds = friendshipsRepository.findFriendIds(
-                userId,
-                FriendshipStatus.ACCEPTED
-        );
-
         return postsRepository
-                .findByUserIdInOrderByCreatedAtDesc(friendIds, pageable)
+                .findFriendPosts(userId, FriendshipStatus.ACCEPTED, pageable)
                 .stream()
                 .map(PostResponseDto::from)
                 .toList();
