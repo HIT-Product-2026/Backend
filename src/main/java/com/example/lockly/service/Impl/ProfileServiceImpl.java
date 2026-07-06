@@ -273,6 +273,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
     }
 
+    // Cập nhật các bạn bè đã được chụp chung
     @Override
     @Transactional
     public void updateProcessPhotoWithFriends(UUID profileId, MultipartFile image) {
