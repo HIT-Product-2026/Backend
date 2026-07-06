@@ -1,7 +1,9 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.entity.main.Profile;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.repository.main.ProfileRepository;
+import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.AchievementService;
 import com.example.lockly.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class MonthlyJob {
-
-    private final ProfileRepository profileRepository;
-    private final ProfileService profileService;
+    private final UserRepository userRepository;
     private final AchievementService achievementService;
 
 
@@ -27,17 +27,16 @@ public class MonthlyJob {
         int page = 0;
         int size = 500;
 
-        Slice<Profile> results;
+        Slice<User> results;
 
         do {
-            results = profileRepository.findAll(PageRequest.of(page, size));
+            results = userRepository.findAll(PageRequest.of(page, size));
 
-            for (Profile profile : results){
-                // Cập nhật danh hiệu
+            for (User user : results) {
                 try {
-                    achievementService.refreshProfileCups(profile);
-                } catch (Exception e){
-                    log.debug("Lỗi ở profile id: " + profile.getId());
+                    achievementService.refreshProfileCups(user);
+                } catch (Exception e) {
+                    log.error("Lỗi khi refresh achievement cho userId={}", user.getId(), e);
                 }
             }
 
