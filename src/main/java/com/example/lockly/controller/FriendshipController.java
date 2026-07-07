@@ -82,15 +82,31 @@ public class FriendshipController {
                 .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
     }
 
-    @GetMapping("/friendships")
+    @GetMapping("/friendships/requester")
     @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách lời mời kết bạn (PENDING)")
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests() {
         User user = authService.getCurrentUser();
 
-        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
+        List<FriendshipsResponseDto> result = userService.findFriendRequestRequesterByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+
+    @GetMapping("/friendships/received")
+    @Operation(
+            summary = "Lấy danh sách lời mời kết bạn đã nhận",
+            description = "Trả về danh sách các lời mời kết bạn mà người dùng hiện tại là người nhận"
+    )
+    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getReceivedFriendRequests() {
+
+        User user = authService.getCurrentUser();
+
+        List<FriendshipsResponseDto> result =
+                userService.findFriendRequestsReceivedByUserId(user.getId());
+
+        return ResponseEntity
+                .ok(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 }

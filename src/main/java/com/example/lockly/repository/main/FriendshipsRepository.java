@@ -23,7 +23,20 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
             @Param("requester") User requester,
             @Param("status") FriendshipStatus status
     );
-    List<Friendship> findByReceiverAndStatus(User receiver, FriendshipStatus status);
+
+
+    @Query("""
+    SELECT f
+    FROM Friendship f
+    JOIN FETCH f.requester
+    WHERE f.receiver = :receiver
+      AND f.status = :status
+""")
+    List<Friendship> findByReceiverAndStatus(
+            @Param("receiver") User receiver,
+            @Param("status") FriendshipStatus status
+    );
+
     Optional<Friendship> findById(UUID id);
     boolean existsByRequesterAndReceiver(User Requester, User Receiver);
     boolean existsByReceiverAndRequester(User receiver, User requester);

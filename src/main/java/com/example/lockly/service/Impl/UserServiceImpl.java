@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id){
+    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -70,6 +70,21 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return friendshipsDtoList;
+    }
+
+    @Override
+    public List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId) {
+
+        User receiver = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        List<Friendship> friendshipList = friendshipsRepository
+                .findByReceiverAndStatus(receiver, FriendshipStatus.SENT);
+
+        return friendshipList.stream()
+                .map(FriendshipsResponseDto::from)
+                .toList();
     }
 
         @Override
