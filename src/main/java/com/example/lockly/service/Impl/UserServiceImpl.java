@@ -6,13 +6,16 @@ import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.*;
+import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
+import com.example.lockly.domain.entity.main.Friendship;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.DuplicateResourceException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
-import com.example.lockly.repository.FriendshipsRepository;
-import com.example.lockly.repository.UserRepository;
+import com.example.lockly.repository.main.FriendshipsRepository;
+import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RedisService;
@@ -53,7 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id){
+    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id){
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -67,6 +70,21 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return friendshipsDtoList;
+    }
+
+    @Override
+    public List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId) {
+
+        User receiver = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        List<Friendship> friendshipList = friendshipsRepository
+                .findByReceiverAndStatus(receiver, FriendshipStatus.SENT);
+
+        return friendshipList.stream()
+                .map(FriendshipsResponseDto::from)
+                .toList();
     }
 
         @Override

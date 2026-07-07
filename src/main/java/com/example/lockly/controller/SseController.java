@@ -1,7 +1,7 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;

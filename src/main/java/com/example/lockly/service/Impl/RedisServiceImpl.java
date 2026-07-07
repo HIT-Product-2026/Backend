@@ -2,11 +2,8 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
-import com.example.lockly.domain.entity.User;
 import com.example.lockly.service.RedisService;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

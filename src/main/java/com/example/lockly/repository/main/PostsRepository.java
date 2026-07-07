@@ -1,0 +1,53 @@
+package com.example.lockly.repository.main;
+
+import com.example.lockly.domain.entity.main.Post;
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface PostsRepository extends JpaRepository<Post, UUID> {
+    @Query("""
+    SELECT p
+    FROM Post p
+    JOIN FETCH p.user
+    WHERE p.user = :user
+    ORDER BY p.createdAt DESC
+""")
+    Page<Post> findByUserOrderByCreatedAtDesc(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
+    Page<Post> findByUserIdInOrderByCreatedAtDesc(List<UUID> userIds, Pageable pageable);
+
+    int countByUserId(UUID userId);
+
+    @Query("""
+    SELECT p
+    FROM Post p
+    WHERE p.user.id IN (
+        SELECT
+            CASE
+                WHEN f.requester.id = :userId THEN f.receiver.id
+                ELSE f.requester.id
+            END
+        FROM Friendship f
+        WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
+          AND f.status = :status
+    )
+    ORDER BY p.createdAt DESC
+    """)
+    Slice<Post> findFriendPosts(
+            @Param("userId") UUID userId,
+            @Param("status") FriendshipStatus status,
+            Pageable pageable
+    );
+}

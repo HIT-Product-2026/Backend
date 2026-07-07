@@ -3,10 +3,9 @@ package com.example.lockly.service;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -16,7 +15,8 @@ import java.util.UUID;
 public interface UserService extends UserDetailsService {
 
     UserDetails loadUserByUsername(String username);
-    List<FriendshipsResponseDto> findFriendshipsByUserId(UUID id);
+    List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id);
+    List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId);
     List<UserResponseDto> findFriendsByUserId(UUID userId);
     List<String> findFcmTokenOfFriendsByUserId(UUID userId);
     InputStream getAvatar(UUID userId) throws Exception;

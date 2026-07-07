@@ -2,8 +2,8 @@ package com.example.lockly.domain.dto.request;
 
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.NsfwStatus;
-import com.example.lockly.domain.entity.PostModeLocation;
+import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
+import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
