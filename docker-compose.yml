@@ -20,7 +20,7 @@ services:
         reservations:
           memory: 256M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,23 +29,25 @@ services:
     image: mysql:8.0.33
     container_name: lockly-mysql-vietnam-gis
     restart: always
-
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${LOCATION_DB_PASSWORD}
       MYSQL_DATABASE: vietnam_gis
-
     ports:
       - "3308:3306"
-
     volumes:
       - mysql_vietnam_gis:/var/lib/mysql
       - ./mysql-init/vietnam_gis:/docker-entrypoint-initdb.d
-
     networks:
       - lockly-network
-
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          memory: 256M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -95,7 +97,7 @@ services:
         reservations:
           memory: 128M
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -123,7 +125,7 @@ services:
         reservations:
           memory: 128M
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || wget -q --spider http://localhost:9000/minio/health/live || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -155,7 +157,7 @@ services:
     container_name: lockly-backend
     restart: always
     ports:
-      - "8081:8080"   # Host 8081 -> Container 8080
+      - "8081:8080"
     environment:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
@@ -173,6 +175,9 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
     depends_on:
       mysql:
         condition: service_healthy
@@ -194,7 +199,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || wget -q --spider http://localhost:8080/v3/api-docs || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 5
