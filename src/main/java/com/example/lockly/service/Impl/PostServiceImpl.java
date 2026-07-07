@@ -7,19 +7,20 @@ import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
-import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.*;
+import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
+import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
+import com.example.lockly.domain.entity.main.EmojiPost;
+import com.example.lockly.domain.entity.main.Post;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
-import com.example.lockly.repository.EmojiPostRepository;
-import com.example.lockly.repository.FriendshipsRepository;
-import com.example.lockly.repository.PostsRepository;
-import com.example.lockly.repository.UserRepository;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.MinIOService;
-import com.example.lockly.service.PostService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.repository.main.EmojiPostRepository;
+import com.example.lockly.repository.main.FriendshipsRepository;
+import com.example.lockly.repository.main.PostsRepository;
+import com.example.lockly.repository.main.UserRepository;
+import com.example.lockly.service.*;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class PostServiceImpl implements PostService {
     private final PostsRepository postsRepository;
     private final AuthService authService;
     private final EmojiPostRepository emojiPostRepository;
-    private final FriendshipsRepository friendshipsRepository;
+    private final ProfileService profileService;
     private final MinIOService minIOService;
     private final String prefix = "post";
     private final int pageSize = 10;
@@ -64,6 +65,7 @@ public class PostServiceImpl implements PostService {
         UUID postId = UuidCreator.getTimeOrderedEpoch();
         String objectName = FileUtil.getObjectNameFile(prefix, postId, file);
 
+        // Lưu ảnh vào minIO
         try {
             minIOService.saveFile(file, objectName);
 
@@ -83,7 +85,8 @@ public class PostServiceImpl implements PostService {
                     .modeLocation(mode)
                     .build();
 
-            postsRepository.save(post);
+            // Cập nhật tiến trình nhiệm vụ
+            profileService.updateProcessProfile(postId, file);
 
             if (mode == PostModeLocation.PRIVATE)
                 return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
@@ -135,15 +138,11 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    @Override
     public List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber) {
-
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        List<UUID> friendIds = friendshipsRepository.findFriendIds(userId);
-
         return postsRepository
-                .findByUserIdInOrderByCreatedAtDesc(friendIds, pageable)
+                .findFriendPosts(userId, FriendshipStatus.ACCEPTED, pageable)
                 .stream()
                 .map(PostResponseDto::from)
                 .toList();
@@ -177,7 +176,9 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    // UNIQUE(post_id, sender_id)
     @Override
+    @Transactional
     public void sendEmoji(ReactEmojiToPostRequestDto request){
         Post post = postsRepository
                 .findById(request.postId())
@@ -196,6 +197,31 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         emojiPostRepository.save(emojiPost);
+    }
+
+    @Override
+    @Transactional
+    public void dropEmoji(ReactEmojiToPostRequestDto request) {
+
+        Post post = postsRepository
+                .findById(request.postId())
+                .orElseThrow(() -> new BadRequestException("Post id", request.postId()));
+
+        User user = authService.getCurrentUser();
+        User postAuthor = post.getUser();
+
+        if (!userService.isFriendByUserId(user.getId(), postAuthor.getId()))
+            throw new ForbiddenException("User và chủ post không phải bạn bè");
+
+        EmojiPost emojiPost = emojiPostRepository
+                .findByPostIdAndSenderId(post.getId(), user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "EmojiPost",
+                        "postId & senderId",
+                        post.getId() + " & " + user.getId()
+                ));
+
+        emojiPostRepository.delete(emojiPost);
     }
 
     @Override

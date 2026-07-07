@@ -2,7 +2,7 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.LocationService;
 import com.example.lockly.service.RedisService;
@@ -96,5 +96,9 @@ public class LocationServiceImpl implements LocationService {
             return true;
 
         return false;
+    }
+
+    public void updateCityVisited(Double latitude, Double longitude){
+
     }
 }

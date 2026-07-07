@@ -1,7 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
-import com.example.lockly.domain.entity.FcmMessageType;
+import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
 import com.google.firebase.messaging.BatchResponse;

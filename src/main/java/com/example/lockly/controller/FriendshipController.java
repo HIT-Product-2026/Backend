@@ -6,15 +6,13 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.User;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -84,15 +82,31 @@ public class FriendshipController {
                 .body(ApiResponse.success("Thành công", ListResponse.of(listFriend)));
     }
 
-    @GetMapping("/friendships")
+    @GetMapping("/friendships/requester")
     @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách lời mời kết bạn (PENDING)")
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests() {
         User user = authService.getCurrentUser();
 
-        List<FriendshipsResponseDto> result = userService.findFriendshipsByUserId(user.getId());
+        List<FriendshipsResponseDto> result = userService.findFriendRequestRequesterByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+
+    @GetMapping("/friendships/received")
+    @Operation(
+            summary = "Lấy danh sách lời mời kết bạn đã nhận",
+            description = "Trả về danh sách các lời mời kết bạn mà người dùng hiện tại là người nhận"
+    )
+    public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getReceivedFriendRequests() {
+
+        User user = authService.getCurrentUser();
+
+        List<FriendshipsResponseDto> result =
+                userService.findFriendRequestsReceivedByUserId(user.getId());
+
+        return ResponseEntity
+                .ok(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 }

@@ -1,23 +1,27 @@
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/lockly_db
-    username: root
-    password: root
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
   data:
     redis:
-      host: redis
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
   rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 
 resilience4j:
   circuitbreaker:
@@ -27,3 +31,11 @@ resilience4j:
         slidingWindowSize: 10
         waitDurationInOpenState: 30s
         permittedNumberOfCallsInHalfOpenState: 3
+
+# ================= SECOND DATABASE (CUSTOM) =================
+location:
+  datasource:
+    url: ${LOCATION_DB_URL}
+    username: ${LOCATION_DB_USERNAME}
+    password: ${LOCATION_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver

@@ -33,6 +33,19 @@
 	</properties>
 	<dependencies>
 
+		<!-- Hibernate Spatial -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
+
+		<!-- JTS -->
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.20.0</version>
+		</dependency>
+
 		<!-- Circuit Breaker -->
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>

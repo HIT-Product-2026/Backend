@@ -1,6 +1,5 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.domain.entity.User;
 import com.example.lockly.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

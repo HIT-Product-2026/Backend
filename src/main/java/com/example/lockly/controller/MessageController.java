@@ -60,6 +60,7 @@ public class MessageController {
             MultipartFile file
 
     ) throws Exception {
+
         SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 
         return ResponseEntity

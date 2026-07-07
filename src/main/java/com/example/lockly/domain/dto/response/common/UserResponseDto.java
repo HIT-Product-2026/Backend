@@ -1,7 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.User;
-import com.example.lockly.domain.entity.UserMode;
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import lombok.Builder;
 
 import java.util.UUID;
