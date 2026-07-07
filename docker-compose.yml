@@ -20,7 +20,7 @@ services:
         reservations:
           memory: 256M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ services:
         reservations:
           memory: 256M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${LOCATION_DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,7 +97,7 @@ services:
         reservations:
           memory: 128M
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -175,6 +175,9 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - JWT_SECRET=${jwt.secret}
+      - JWT_ACCESS_EXPIRATION=${jwt.access.expiration_time}
+      - JWT_REFRESH_EXPIRATION=${jwt.refresh.expiration_time}
     depends_on:
       mysql:
         condition: service_healthy
