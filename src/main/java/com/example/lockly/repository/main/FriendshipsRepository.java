@@ -56,5 +56,15 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
             @Param("status") FriendshipStatus status
             );
 
-    long countByUserIdAndStatus(UUID userId, FriendshipStatus status);
+    @Query("""
+    SELECT COUNT(f)
+    FROM Friendship f
+    WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
+      AND f.status = :status
+    """)
+    long countFriendships(
+            @Param("userId") UUID userId,
+            @Param("status") FriendshipStatus status
+    );
+        
 }
