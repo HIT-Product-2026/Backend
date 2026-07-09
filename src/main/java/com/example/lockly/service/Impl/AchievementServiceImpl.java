@@ -59,7 +59,7 @@ public class AchievementServiceImpl implements AchievementService {
         long countPostReup = profile.getCountPostReup();
 
         long countFriends = friendshipsRepository
-                .countByUserIdAndStatus(
+                .countFriendships(
                         user.getId(),
                         FriendshipStatus.ACCEPTED
                 );
@@ -89,7 +89,7 @@ public class AchievementServiceImpl implements AchievementService {
             return false;
         }
 
-        long countFriends = friendshipsRepository.countByUserIdAndStatus(
+        long countFriends = friendshipsRepository.countFriendships(
                 user.getId(),
                 FriendshipStatus.ACCEPTED
         );

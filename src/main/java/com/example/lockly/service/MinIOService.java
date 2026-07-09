@@ -8,4 +8,5 @@ public interface MinIOService {
     void saveFile(MultipartFile file, String objectName) throws Exception;
     InputStream getFile(String objectName) throws Exception;
     void deleteFile(String objectName);
+    String generatePresignedUrl(String objectName) throws Exception;
 }
