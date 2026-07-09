@@ -26,7 +26,6 @@ import java.util.Collections;
 
 @Slf4j
 @Component
-//@AllArgsConstructor
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
