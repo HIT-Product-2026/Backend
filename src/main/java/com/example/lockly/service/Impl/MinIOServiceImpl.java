@@ -3,6 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.service.MinIOService;
 import io.minio.*;
+import io.minio.http.Method;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -63,5 +64,17 @@ public class MinIOServiceImpl implements MinIOService {
         } catch (Exception e) {
             // Không xóa được thì thôi
         }
+    }
+
+    // Hàm tạo ra 1 url cho phép lấy dữ liệu từ minIO mà không cần public storage
+    public String generatePresignedUrl(String objectName) throws Exception {
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.GET.GET)
+                        .bucket(props.getBucketName())
+                        .object(objectName)
+                        .expiry(60 * 60)
+                        .build()
+        );
     }
 }

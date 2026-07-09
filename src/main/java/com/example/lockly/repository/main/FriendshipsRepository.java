@@ -66,5 +66,5 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
             @Param("userId") UUID userId,
             @Param("status") FriendshipStatus status
     );
-        
+
 }

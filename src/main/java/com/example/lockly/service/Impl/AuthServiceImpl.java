@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             username = rawUsername.toString();
-        } while (!userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
+        } while (userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
 
         User user = User.builder()
                 .username(username)
