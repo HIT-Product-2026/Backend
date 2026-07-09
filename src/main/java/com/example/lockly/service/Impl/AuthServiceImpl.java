@@ -98,15 +98,15 @@ public class AuthServiceImpl implements AuthService {
         Random random = new Random();
         String username;
 
-        do {
-            StringBuilder rawUsername = new StringBuilder();
+//        do {
+        StringBuilder rawUsername = new StringBuilder();
 
-            for (int i = 0; i < 10; i++) {
-                rawUsername.append(random.nextInt(10));
-            }
+        for (int i = 0; i < 10; i++) {
+            rawUsername.append(random.nextInt(10));
+        }
 
-            username = rawUsername.toString();
-        } while (userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
+        username = rawUsername.toString();
+//        } while (userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
 
         User user = User.builder()
                 .username(username)

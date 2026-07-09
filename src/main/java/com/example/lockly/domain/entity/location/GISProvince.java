@@ -17,7 +17,7 @@ public class GISProvince {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "province_code")
+    @Column(name = "province_code", length = 20, nullable = false)
     private String provinceCode;
 
     @Column(name = "geom")

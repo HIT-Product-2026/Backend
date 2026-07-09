@@ -1,6 +1,7 @@
 package com.example.lockly.exception;
 
 import com.example.lockly.common.response.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandle {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -56,17 +58,20 @@ public class GlobalExceptionHandle {
     }
 
     // Exception chung
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRuntime(RuntimeException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(400, ex.getMessage()));
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ApiResponse<Void>> handleRuntime(RuntimeException ex) {
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(ApiResponse.error(400, ex.getMessage()));
+//    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
+
+        log.error("Lỗi hệ thống", ex);
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "Lỗi hệ thống"));
+                .body(ApiResponse.error(500, ex.getMessage()));
     }
 }
