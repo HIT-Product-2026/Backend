@@ -54,7 +54,7 @@ public interface EmojiPostRepository extends JpaRepository<EmojiPost, UUID> {
     long countByPost(Post post);
 
     @Query("""
-SELECT new com.example.lockly.dto.PostEmojiCount(
+SELECT new com.example.lockly.domain.dto.response.PostEmojiCount(
     ep.post,
     COUNT(ep)
 )
