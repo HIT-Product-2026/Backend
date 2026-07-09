@@ -4,16 +4,15 @@ import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.entity.main.Achievement;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.AchievementType;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.location.GISProvinceRepository;
-import com.example.lockly.repository.main.FriendshipsRepository;
-import com.example.lockly.repository.main.PostsRepository;
-import com.example.lockly.repository.main.ProfileRepository;
-import com.example.lockly.repository.main.UserRepository;
+import com.example.lockly.repository.main.*;
 import com.example.lockly.service.AIService;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ProfileService;
@@ -29,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,7 +45,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final AIService aiService;
     private final FriendshipsRepository friendshipsRepository;
-
     @Override
     @Transactional
     public void
