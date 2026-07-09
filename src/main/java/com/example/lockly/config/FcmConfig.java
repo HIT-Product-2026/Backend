@@ -18,8 +18,13 @@ public class FcmConfig {
 //            FileInputStream serviceAccount =
 //                    new FileInputStream("src/main/resources/lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json");
             InputStream serviceAccount =
-                    getClass().getClassLoader()
+                    Thread.currentThread()
+                            .getContextClassLoader()
                             .getResourceAsStream("lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json");
+
+            if (serviceAccount == null) {
+                throw new RuntimeException("Firebase JSON not found in classpath");
+            }
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
