@@ -7,6 +7,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.AchievementName;
 import com.example.lockly.domain.entity.main.enumEntity.AchievementType;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
+import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.main.*;
 import com.example.lockly.service.AchievementService;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -28,6 +32,11 @@ public class AchievementServiceImpl implements AchievementService {
     private final FriendshipsRepository friendshipsRepository;
     private final ProfileRepository profileRepository;
     private final EmojiPostRepository emojiPostRepository;
+
+    private static final int MAX_DAYS_POWER = 90;
+    private static final int TITLE_POWER = 30;
+    private static final int CUP_POWER = 365;
+
 
     // Danh hiệu "Nhà thám hiểm"
     @Override
@@ -150,7 +159,61 @@ public class AchievementServiceImpl implements AchievementService {
     // Cup "Đông phương bất bại"
     @Override
     public boolean isEasternUndefeated(User user, Profile profile){
-        return false;
+        Integer power = profile.getPower();
+
+        // Lấy danh sách bạn bè
+        List<UUID> friendIds = friendshipsRepository.findFriendIds(
+                user.getId(),
+                FriendshipStatus.ACCEPTED
+        );
+
+        // Lấy profile của toàn bộ bạn bè
+        List<Profile> profiles = profileRepository.findByUserIdIn(friendIds);
+
+        // Lấy power cao nhất của tất cả bạn bè
+        int maxPower = profiles.stream()
+                .map(Profile::getPower)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+
+        // power của user có phải lớn nhất không ?
+        return profile.getPower() >= maxPower;
+    }
+
+    // Chỉ được gọi vào lúc reset mùa giải (lúc trao danh hiệu + cup)
+    // Hàm này cần được gọi trước khi xóa toàn bộ danh hiệu của mùa trướ
+    @Transactional
+    private void updatePower(UUID profileId){
+
+        Profile profile = profileRepository
+                .findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", "profile id", profileId));
+
+        int power = 0;
+
+        // Kiểm tra xem tồn tại được 90 ngày chưa (1 mùa giải)
+        power = Math.min(
+                MAX_DAYS_POWER,
+                Math.toIntExact(
+                        ChronoUnit.DAYS.between(
+                                profile.getCreateAt().toLocalDate(),
+                                LocalDate.now()
+                        )
+                )
+        );
+
+        List<Achievement> achievementList = achievementRepository.findByProfile(profile);
+
+        for (Achievement a : achievementList){
+            switch (a.getType()) {
+                case TITLE -> power += TITLE_POWER;
+                case CUP -> power += CUP_POWER;
+            }
+        }
+
+        profile.setPower(profile.getPower() + power);
     }
 
 
@@ -166,6 +229,10 @@ public class AchievementServiceImpl implements AchievementService {
             return;
         }
 
+        // Cập nhật chiến lực trước khi reset thành tích
+        updatePower(profile.getId());
+
+        // Reset thành tích
         achievementRepository.deleteByProfile(profile);
 
         // Cập nhật favorite post trước khi xét achievement
