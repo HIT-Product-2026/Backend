@@ -1,14 +1,12 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.service.AIService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,24 +21,30 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AIServiceImpl implements AIService {
 
-    private static final String AI_API_URL = "http://localhost:8000/detect";
-    private static final String FACE_REGISTER_API = "http://localhost:8000/face/register";
-    private static final String FACE_DETECT_API = "http://localhost:8000/face/detect";
-    private static final String FACE_CHECK_API = "http://localhost:8000/face/check";
+    private static final String BASE_URL = "http://localhost:8000";
+
+    private static final String AI_API_URL = BASE_URL + "/detect";
+    private static final String FACE_REGISTER_API = BASE_URL + "/face/register";
+    private static final String FACE_DETECT_API = BASE_URL + "/face/detect";
+    private static final String FACE_CHECK_API = BASE_URL + "/face/check";
 
     private final RestTemplate restTemplate;
 
-    @Override
-    @CircuitBreaker(
-            name = "aiService",
-            fallbackMethod = "fallback"
-    )
-    public Boolean detectNsfw(MultipartFile imageFile) throws IOException {
+
+    // Build multipart/form-data request
+    private HttpEntity<MultiValueMap<String, Object>> buildMultipartRequest(
+            MultipartFile imageFile,
+            Map<String, String> extraFields
+    ) throws IOException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        if (extraFields != null) {
+            extraFields.forEach(body::add);
+        }
 
         body.add(
                 "file",
@@ -52,8 +56,18 @@ public class AIServiceImpl implements AIService {
                 }
         );
 
+        return new HttpEntity<>(body, headers);
+    }
+
+    @Override
+    @CircuitBreaker(
+            name = "aiService",
+            fallbackMethod = "fallback"
+    )
+    public Boolean detectNsfw(MultipartFile imageFile) throws IOException {
+
         HttpEntity<MultiValueMap<String, Object>> request =
-                new HttpEntity<>(body, headers);
+                buildMultipartRequest(imageFile, null);
 
         ResponseEntity<Boolean> response =
                 restTemplate.postForEntity(
@@ -62,14 +76,15 @@ public class AIServiceImpl implements AIService {
                         Boolean.class
                 );
 
-        return response.getBody();
+        return Boolean.TRUE.equals(response.getBody());
     }
 
     public Boolean fallback(
             MultipartFile imageFile,
-            Exception ex) {
+            Exception ex
+    ) {
 
-        log.debug("AI unavailable: " + ex.getMessage());
+        log.warn("AI unavailable: {}", ex.getMessage());
 
         return false;
     }
@@ -81,29 +96,15 @@ public class AIServiceImpl implements AIService {
     )
     public List<String> detectFaces(MultipartFile imageFile) throws IOException {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-        body.add(
-                "file",
-                new ByteArrayResource(imageFile.getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return imageFile.getOriginalFilename();
-                    }
-                }
-        );
-
         HttpEntity<MultiValueMap<String, Object>> request =
-                new HttpEntity<>(body, headers);
+                buildMultipartRequest(imageFile, null);
 
-        ResponseEntity<List> response =
-                restTemplate.postForEntity(
+        ResponseEntity<List<String>> response =
+                restTemplate.exchange(
                         FACE_DETECT_API,
+                        HttpMethod.POST,
                         request,
-                        List.class
+                        new ParameterizedTypeReference<>() {}
                 );
 
         return response.getBody();
@@ -114,11 +115,10 @@ public class AIServiceImpl implements AIService {
             Exception ex
     ) {
 
-        log.error("Face detect failed", ex);
+        log.warn("Face detect failed", ex);
 
         return Collections.emptyList();
     }
-
 
     @Override
     @CircuitBreaker(
@@ -131,25 +131,12 @@ public class AIServiceImpl implements AIService {
     ) {
 
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-            body.add("person_id", personId.toString());
-
-            body.add(
-                    "file",
-                    new ByteArrayResource(imageFile.getBytes()) {
-                        @Override
-                        public String getFilename() {
-                            return imageFile.getOriginalFilename();
-                        }
-                    }
-            );
+            Map<String, String> fields = new HashMap<>();
+            fields.put("person_id", personId.toString());
 
             HttpEntity<MultiValueMap<String, Object>> request =
-                    new HttpEntity<>(body, headers);
+                    buildMultipartRequest(imageFile, fields);
 
             ResponseEntity<Boolean> response =
                     restTemplate.postForEntity(
@@ -161,7 +148,11 @@ public class AIServiceImpl implements AIService {
             return Boolean.TRUE.equals(response.getBody());
 
         } catch (IOException e) {
-            throw new RuntimeException("Không thể đọc file ảnh", e);
+
+            throw new RuntimeException(
+                    "Không thể đọc file ảnh",
+                    e
+            );
         }
     }
 
@@ -171,7 +162,7 @@ public class AIServiceImpl implements AIService {
             Exception ex
     ) {
 
-        log.error("Register face failed", ex);
+        log.warn("Register face failed", ex);
 
         return false;
     }
@@ -199,7 +190,7 @@ public class AIServiceImpl implements AIService {
                         Boolean.class
                 );
 
-        return response.getBody();
+        return Boolean.TRUE.equals(response.getBody());
     }
 
     public Boolean checkFaceFallback(
@@ -207,7 +198,7 @@ public class AIServiceImpl implements AIService {
             Exception ex
     ) {
 
-        log.error("Check face failed", ex);
+        log.warn("Check face failed", ex);
 
         return false;
     }

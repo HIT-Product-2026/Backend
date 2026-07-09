@@ -26,5 +26,9 @@ public interface AchievementService {
     // Cup "Đông phương bất bại"
     boolean isEasternUndefeated(User user, Profile profile);
 
+    // Cập nhật điểm chiến lực trước khi mùa giải kết thúc
+//    void updatePower(UUID profileId);
+
+
     void refreshProfileCups(User user);
 }
