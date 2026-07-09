@@ -24,10 +24,10 @@ public record ApiResponse<T>(
     }
 
     public static <T> ApiResponse<T> error(int code, String message){
-        return new ApiResponse<>(400, false, message, null, LocalDateTime.now());
+        return new ApiResponse<>(code, false, message, null, LocalDateTime.now());
     }
 
     public static <T> ApiResponse<T> error(int code, String message, T data){
-        return new ApiResponse<>(400, false, message, data, LocalDateTime.now());
+        return new ApiResponse<>(code, false, message, data, LocalDateTime.now());
     }
 }
