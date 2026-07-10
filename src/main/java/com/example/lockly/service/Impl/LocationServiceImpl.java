@@ -88,7 +88,7 @@ public class LocationServiceImpl implements LocationService {
 
         // Thời gian giữa 2 lần cập nhật
         long duration = Duration
-                .between(LocalDateTime.now(), dto.lastActiveAt())
+                .between(dto.lastActiveAt(), LocalDateTime.now())
                 .toSeconds();
 
         // Nếu khoảng cách giữa 2 lần cập nhật vị trí khả nghi

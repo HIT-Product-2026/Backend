@@ -88,6 +88,8 @@ public class PostServiceImpl implements PostService {
             // Cập nhật tiến trình nhiệm vụ
             profileService.updateProcessProfile(postId, file);
 
+            postsRepository.save(post);
+
             if (mode == PostModeLocation.PRIVATE)
                 return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
 
@@ -161,6 +163,8 @@ public class PostServiceImpl implements PostService {
             throw new ForbiddenException("User id", user.getId());
 
         post.setModeLocation(modeLocation);
+
+        postsRepository.save(post);
     }
 
     @Override

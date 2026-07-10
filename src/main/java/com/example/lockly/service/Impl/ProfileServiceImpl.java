@@ -63,6 +63,8 @@ public class ProfileServiceImpl implements ProfileService {
                 .phoneNumber(request.phoneNumber())
                 .postCount(postCount)
                 .build();
+
+        profileRepository.save(profile);
     }
 
     @Override
@@ -160,6 +162,8 @@ public class ProfileServiceImpl implements ProfileService {
 
         // Tăng số lượng bài viết đã đăng
         profile.setPostCount(profile.getPostCount() + 1);
+
+        profileRepository.save(profile);
     }
 
     // Cập số thành phố đã đi

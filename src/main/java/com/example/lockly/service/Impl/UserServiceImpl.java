@@ -196,6 +196,8 @@ public class UserServiceImpl implements UserService {
                 .status(FriendshipStatus.SENT)
                 .build();
 
+        friendshipsRepository.save(friendship);
+
         return FriendshipsResponseDto.from(
                 friendshipsRepository.save(friendship)
         );

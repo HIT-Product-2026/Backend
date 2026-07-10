@@ -73,6 +73,8 @@ public class MessageServiceImpl implements MessageService {
 
         conversation.setLastMessageTime(LocalDateTime.now());
 
+        messageRepository.save(message);
+
         return MessageResponseDto.from(message);
     }
 
@@ -110,6 +112,8 @@ public class MessageServiceImpl implements MessageService {
 
             // Cập nhật thời gian của tin nhắn cuối
             conversation.setLastMessageTime(LocalDateTime.now());
+
+            messageRepository.save(message);
 
             return MessageResponseDto.from(messageRepository.save(message));
         } catch (Exception e) {

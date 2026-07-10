@@ -10,9 +10,11 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,8 +37,16 @@ public class FriendshipController {
     @PostMapping("/request")
     @Operation(summary = "Gửi lời mời kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> sendFriendRequest(
-            @RequestBody @Valid CreateFriendshipRequestDto request
+            @Parameter(description = "Id người nhận")
+            @RequestParam("receiverId") UUID receiverId
     ) {
+        User user = authService.getCurrentUser();
+
+        CreateFriendshipRequestDto request = new CreateFriendshipRequestDto(
+                user.getId(),
+                receiverId
+        );
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Thành công",

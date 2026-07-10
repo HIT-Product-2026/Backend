@@ -214,6 +214,8 @@ public class AchievementServiceImpl implements AchievementService {
         }
 
         profile.setPower(profile.getPower() + power);
+
+        profileRepository.save(profile);
     }
 
 
