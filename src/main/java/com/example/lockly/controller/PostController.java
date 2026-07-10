@@ -33,14 +33,13 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(ApiPath.API_V1 + "/posts")
+@RequestMapping(ApiPath.API_V1 + "/post")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 
     private final PostService postService;
     private final UserService userService;
     private final AuthService authService;
-    private final AIService aiService;
     private final RabbitMQService rabbitMQService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
