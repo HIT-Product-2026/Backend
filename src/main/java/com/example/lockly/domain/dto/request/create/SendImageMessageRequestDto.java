@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.request;
+package com.example.lockly.domain.dto.request.create;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;

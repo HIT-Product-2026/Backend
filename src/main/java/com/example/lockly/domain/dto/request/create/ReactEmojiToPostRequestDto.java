@@ -1,4 +1,4 @@
-package com.example.lockly.domain.dto.request;
+package com.example.lockly.domain.dto.request.create;
 
 import com.example.lockly.domain.entity.main.enumEntity.Emoji;
 import jakarta.validation.constraints.NotNull;
