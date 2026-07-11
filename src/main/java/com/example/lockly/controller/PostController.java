@@ -66,21 +66,25 @@ public class PostController {
                 longitude
         );
 
+        log.debug("Chuẩn bị tạo bài viết");
         PostResponseDto post = postService.createPost(request);
 
+        log.debug("Tạo bài viế thành công");
         User user = authService.getCurrentUser();
 
         // Lấy danh sách fcm của bạn bè
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
-
+        log.debug("Lấy fcm list thành công");
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
                 FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
         );
+        log.debug("Thông báo fcm thành công");
 
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
         rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(post, file));
 
+        log.debug("Detect thành công");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Tạo bài viết thành công", post));

@@ -12,6 +12,7 @@ import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import com.example.lockly.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +57,15 @@ public class ConversationController {
     @PostMapping
     @Operation(summary = "Tạo conversation mới")
     public ResponseEntity<ApiResponse<ConversationResponseDto>> createConversation(
-            @RequestBody CreateConversationRequestDto request
+            @Parameter(description = "Id của người muốn nhắn tin")
+            @RequestParam(name = "userId") UUID userId
     ) {
+        User user = authService.getCurrentUser();
+
+        CreateConversationRequestDto request = new CreateConversationRequestDto(
+                user.getId(),
+                userId
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
