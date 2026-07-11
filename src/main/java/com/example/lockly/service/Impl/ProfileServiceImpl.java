@@ -65,13 +65,22 @@ public class ProfileServiceImpl implements ProfileService {
         profileRepository.save(profile);
     }
 
-//    @Override
-//    @Transactional
-//    public void updateProfile(UUID profileId, UpdateProfileRequestDto request){
-//        User user = authService.getCurrentUser();
-//
-//        Profile profile =
-//    }
+    @Override
+    public void updateProfile(UUID profileId, UpdateProfileRequestDto request){
+        User user = authService.getCurrentUser();
+
+        Profile profile = profileRepository
+                .findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", "profile id", profileId));
+
+        profile = Profile.builder()
+                .birthday(request.birthday())
+                .hobbies(request.hobbies())
+                .phoneNumber(request.phoneNumber())
+                .build();
+
+        profileRepository.save(profile);
+    }
 
     @Override
     @Transactional
