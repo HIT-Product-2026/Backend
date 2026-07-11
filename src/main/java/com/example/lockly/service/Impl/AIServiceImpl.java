@@ -64,19 +64,20 @@ public class AIServiceImpl implements AIService {
             name = "aiService",
             fallbackMethod = "fallback"
     )
-    public Boolean detectNsfw(MultipartFile imageFile) throws IOException {
+    public Boolean detectNsfw(String bucket, String objectName) throws IOException {
+        return false;
 
-        HttpEntity<MultiValueMap<String, Object>> request =
-                buildMultipartRequest(imageFile, null);
-
-        ResponseEntity<Boolean> response =
-                restTemplate.postForEntity(
-                        AI_API_URL,
-                        request,
-                        Boolean.class
-                );
-
-        return Boolean.TRUE.equals(response.getBody());
+//        HttpEntity<MultiValueMap<String, Object>> request =
+//                buildMultipartRequest(imageFile, null);
+//
+//        ResponseEntity<Boolean> response =
+//                restTemplate.postForEntity(
+//                        AI_API_URL,
+//                        request,
+//                        Boolean.class
+//                );
+//
+//        return Boolean.TRUE.equals(response.getBody());
     }
 
     public Boolean fallback(
@@ -94,20 +95,21 @@ public class AIServiceImpl implements AIService {
             name = "aiService",
             fallbackMethod = "detectFaceFallback"
     )
-    public List<String> detectFaces(MultipartFile imageFile) throws IOException {
+    public List<String> detectFaces(String bucket, String objectName) throws IOException {
+        return null;
 
-        HttpEntity<MultiValueMap<String, Object>> request =
-                buildMultipartRequest(imageFile, null);
-
-        ResponseEntity<List<String>> response =
-                restTemplate.exchange(
-                        FACE_DETECT_API,
-                        HttpMethod.POST,
-                        request,
-                        new ParameterizedTypeReference<>() {}
-                );
-
-        return response.getBody();
+//        HttpEntity<MultiValueMap<String, Object>> request =
+//                buildMultipartRequest(imageFile, null);
+//
+//        ResponseEntity<List<String>> response =
+//                restTemplate.exchange(
+//                        FACE_DETECT_API,
+//                        HttpMethod.POST,
+//                        request,
+//                        new ParameterizedTypeReference<>() {}
+//                );
+//
+//        return response.getBody();
     }
 
     public List<String> detectFaceFallback(
@@ -127,33 +129,35 @@ public class AIServiceImpl implements AIService {
     )
     public Boolean registerFace(
             UUID personId,
-            MultipartFile imageFile
+            String bucket,
+            String objectName
     ) {
-
-        try {
-
-            Map<String, String> fields = new HashMap<>();
-            fields.put("person_id", personId.toString());
-
-            HttpEntity<MultiValueMap<String, Object>> request =
-                    buildMultipartRequest(imageFile, fields);
-
-            ResponseEntity<Boolean> response =
-                    restTemplate.postForEntity(
-                            FACE_REGISTER_API,
-                            request,
-                            Boolean.class
-                    );
-
-            return Boolean.TRUE.equals(response.getBody());
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(
-                    "Không thể đọc file ảnh",
-                    e
-            );
-        }
+        return false;
+//
+//        try {
+//
+//            Map<String, String> fields = new HashMap<>();
+//            fields.put("person_id", personId.toString());
+//
+//            HttpEntity<MultiValueMap<String, Object>> request =
+//                    buildMultipartRequest(imageFile, fields);
+//
+//            ResponseEntity<Boolean> response =
+//                    restTemplate.postForEntity(
+//                            FACE_REGISTER_API,
+//                            request,
+//                            Boolean.class
+//                    );
+//
+//            return Boolean.TRUE.equals(response.getBody());
+//
+//        } catch (IOException e) {
+//
+//            throw new RuntimeException(
+//                    "Không thể đọc file ảnh",
+//                    e
+//            );
+//        }
     }
 
     public Boolean registerFallback(
