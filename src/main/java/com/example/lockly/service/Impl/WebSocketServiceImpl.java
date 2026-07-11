@@ -13,6 +13,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Override
     public void sendTextMessage(
             UUID conversationId,
             Object payload
@@ -24,6 +25,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         );
     }
 
+    @Override
     public void sendImageMessage(
             UUID conversationId,
             Object payload
@@ -36,6 +38,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     }
 
 //     Send private message
+    @Override
     public void shareLocationToFriend(
             UUID userId,
             Object payload
@@ -43,6 +46,18 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         messagingTemplate.convertAndSend(
                 "/topic/location/" + userId,
+                payload
+        );
+    }
+
+    // Chia sẻ trạng thái online của người dùng
+    @Override
+    public void shareOnlineToFriend(
+            UUID userId,
+            Object payload
+    ){
+        messagingTemplate.convertAndSend(
+                "/topic/online/" + userId,
                 payload
         );
     }
