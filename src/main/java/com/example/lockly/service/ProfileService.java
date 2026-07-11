@@ -1,5 +1,6 @@
 package com.example.lockly.service;
 
+import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
@@ -18,4 +19,5 @@ public interface ProfileService {
     Profile updateCityVisited(Profile profile, Double latitude, Double longitude);
     Profile updatePostReupped(Profile profile, Double latitude, Double longitude);
     Profile updateProcessPhotoWithFriends(Profile profile, MultipartFile image);
+    void updateProfile(UUID profileId, UpdateProfileRequestDto request);
 }
