@@ -98,6 +98,7 @@ public class PostServiceImpl implements PostService {
             postsRepository.save(post);
 
             log.debug("Lưu post thành công");
+            log.debug("Người đăng bài là user với id là: ", post.getUser().getId());
 
             // Cập nhật tiến trình nhiệm vụ
             profileService.updateProcessProfile(postId, file);
