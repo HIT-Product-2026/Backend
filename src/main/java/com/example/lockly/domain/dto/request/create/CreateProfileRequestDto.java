@@ -8,9 +8,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record CreateProfileRequestDto(
-        @NotNull(message = "userId is required")
-        UUID userId,
-
         @Past(message = "birthday must be in the past")
         LocalDate birthday,
 

@@ -5,6 +5,7 @@ import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.*;
+import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.InvalidatedToken;
@@ -18,6 +19,7 @@ import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
+import com.example.lockly.service.ProfileService;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordUtil passwordUtil;
     private final RedisService redisService;
+    private final ProfileService profileService;
     private final RedisTemplate<String, Object> redisTemplate;
 
     static final String REGISTER_PREFIX        = "register:";
@@ -114,6 +117,13 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.email())
                 .passwordHash(rawPwd.toString())
                 .build();
+
+        CreateProfileRequestDto requestDto = new CreateProfileRequestDto(
+                null,
+                null,
+                null
+        );
+        profileService.createProfile(user, requestDto);
 
         userRepository.save(user);
         log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
