@@ -49,8 +49,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final FriendshipsRepository friendshipsRepository;
     @Override
     @Transactional
-    public void
-    createProfile(User user, CreateProfileRequestDto request){
+    public void createProfile(User user, CreateProfileRequestDto request){
 
         int postCount = postsRepository.countByUserId(user.getId());
 

@@ -95,21 +95,6 @@ public class UserController {
                 .body(ApiResponse.success("Cập nhật vị trí thành công", null));
     }
 
-    @GetMapping("/online")
-    @Operation(summary = "Kiểm tra trạng thái online",
-            description = "Trả về true nếu user hoạt động trong 5 phút gần nhất"
-    )
-    public ResponseEntity<ApiResponse<Boolean>> isUserOnline(
-    ) {
-
-        User user = authService.getCurrentUser();
-        boolean isOnline = userService.isUserOnlineByUserId(user.getId());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", isOnline));
-    }
-
     @PutMapping("/display-name")
     @Operation(
             summary = "Cập nhật display name",
