@@ -50,13 +50,9 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public void
-    createProfile(UUID userId, CreateProfileRequestDto request){
+    createProfile(User user, CreateProfileRequestDto request){
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
-        int postCount = postsRepository.countByUserId(userId);
+        int postCount = postsRepository.countByUserId(user.getId());
 
         Profile profile = Profile.builder()
                 .user(user)

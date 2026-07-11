@@ -33,7 +33,7 @@ public class ProfileController {
     ) {
         User user = authService.getCurrentUser();
 
-        profileService.createProfile(user.getId(), request);
+        profileService.createProfile(user, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
