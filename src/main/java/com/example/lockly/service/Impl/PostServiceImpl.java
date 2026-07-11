@@ -59,20 +59,28 @@ public class PostServiceImpl implements PostService {
 
         User user = authService.getCurrentUser();
 
+        log.debug("Lấy user thành công");
+
         MultipartFile file = request.file();
         String caption = request.caption();
 
         UUID postId = UuidCreator.getTimeOrderedEpoch();
         String objectName = FileUtil.getObjectNameFile(prefix, postId, file);
 
+        log.debug("Chuẩn bị file thành công");
+
         // Lưu ảnh vào minIO
         try {
             minIOService.saveFile(file, objectName);
+
+            log.debug("Lưu ảnh thành công");
 
             // Set mode cho bài post
             PostModeLocation mode = (user.getMode() == UserMode.PRIVATE)
                     ? PostModeLocation.PRIVATE
                     : PostModeLocation.PUBLIC;
+
+            log.debug("Set mode thành công");
 
             Post post = Post.builder()
                     .id(postId)
@@ -85,10 +93,16 @@ public class PostServiceImpl implements PostService {
                     .modeLocation(mode)
                     .build();
 
+            log.debug("Tạo post thành công");
+
+            postsRepository.save(post);
+
+            log.debug("Lưu post thành công");
+
             // Cập nhật tiến trình nhiệm vụ
             profileService.updateProcessProfile(postId, file);
 
-            postsRepository.save(post);
+            log.debug("Tiến trình cập nhật thành công");
 
             if (mode == PostModeLocation.PRIVATE)
                 return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
