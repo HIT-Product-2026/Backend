@@ -1,8 +1,8 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
-import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
-import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
+import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.Message;

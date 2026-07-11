@@ -26,19 +26,19 @@ public class ProfileController {
     private final ProfileService profileService;
     private final AuthService authService;
 
-    @PostMapping
-    @Operation(summary = "Tạo profile", description = "Tạo profile cho user hiện tại")
-    public ResponseEntity<ApiResponse<Void>> createProfile(
-            @RequestBody @Valid CreateProfileRequestDto request
-    ) {
-        User user = authService.getCurrentUser();
-
-        profileService.createProfile(user, request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo profile thành công", null));
-    }
+//    @PostMapping
+//    @Operation(summary = "Tạo profile", description = "Tạo profile cho user hiện tại")
+//    public ResponseEntity<ApiResponse<Void>> createProfile(
+//            @RequestBody @Valid CreateProfileRequestDto request
+//    ) {
+//        User user = authService.getCurrentUser();
+//
+//        profileService.createProfile(user, request);
+//
+//        return ResponseEntity
+//                .status(HttpStatus.CREATED)
+//                .body(ApiResponse.success("Tạo profile thành công", null));
+//    }
 
     @PostMapping(value = "/face", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(

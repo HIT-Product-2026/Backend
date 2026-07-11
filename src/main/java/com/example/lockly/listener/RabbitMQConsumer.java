@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class Consumer {
+public class RabbitMQConsumer {
 
     private final FcmService fcmService;
     private final AIService aiService;
