@@ -1,8 +1,12 @@
 package com.example.lockly.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 
 @Configuration
 public class RabbitMQConfig {
@@ -16,6 +20,22 @@ public class RabbitMQConfig {
     // Detect nfws
     public static final String IMAGE_NSFW_QUEUE = "image.detect.nfws.queue";
     public static final String IMAGE_DETECT_KEY = "image.detect.nfws";
+
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(
+            ConnectionFactory connectionFactory,
+            MessageConverter messageConverter) {
+
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(messageConverter);
+
+        return rabbitTemplate;
+    }
 
     // Queue
     @Bean
