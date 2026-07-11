@@ -87,6 +87,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Transactional
     public void updateProcessProfile(UUID postId, MultipartFile image){
         Post post = postsRepository
                 .findById(postId)
@@ -102,25 +103,24 @@ public class ProfileServiceImpl implements ProfileService {
         Double longitude = post.getLongitude();
 
         // Cập nhật tiến trình streak, latest post, số lượng post
-        updatePostProfile(postId);
+        post = updatePostProfile(post);
 
         // Cập nhật tiến trình "Nhà thám hiểm"
-        updateCityVisited(profile.getId(), latitude, longitude);
+        profile = updateCityVisited(profile, latitude, longitude);
 
         // Cập nhật tiến trình "Kế thừa di sản"
-        updatePostReupped(profile.getId(), latitude, longitude);
+        profile = updatePostReupped(profile, latitude, longitude);
 
         // Cập nhật tiến trình "Lời hứa năm xưa"
-        updateProcessPhotoWithFriends(profile.getId(), image);
+        profile = updateProcessPhotoWithFriends(profile, image);
+
+        profileRepository.save(profile);
+        postsRepository.save(post);
     }
 
     // Cập nhật tiến trình liên quan đến post
     @Override
-    @Transactional
-    public void updatePostProfile(UUID postId){
-        Post post = postsRepository
-                .findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+    public Post updatePostProfile(Post post){
 
         User user = post.getUser();
 
@@ -163,16 +163,12 @@ public class ProfileServiceImpl implements ProfileService {
         // Tăng số lượng bài viết đã đăng
         profile.setPostCount(profile.getPostCount() + 1);
 
-        profileRepository.save(profile);
+        return post;
     }
 
     // Cập số thành phố đã đi
-    @Transactional
     @Override
-    public void updateCityVisited(UUID profileId, Double latitude, Double longitude){
-        Profile profile = profileRepository
-                .findByUserId(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "id", profileId));
+    public Profile updateCityVisited(Profile profile, Double latitude, Double longitude){
 
         String cityCode = gisProvinceRepository
                 .findProvinceCodeByLocation(latitude, longitude)
@@ -182,15 +178,13 @@ public class ProfileServiceImpl implements ProfileService {
         if (cityCode != null){
             profile.getCityCodeList().add(cityCode);
         }
+
+        return profile;
     }
 
     // Cập nhật số bài viết được reup
-    @Transactional
     @Override
-    public void updatePostReupped(UUID profileId, Double latitude, Double longitude){
-        Profile profile = profileRepository
-                .findByUserId(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "id", profileId));
+    public Profile updatePostReupped(Profile profile, Double latitude, Double longitude){
 
         User user = authService.getCurrentUser();
 
@@ -275,12 +269,14 @@ public class ProfileServiceImpl implements ProfileService {
                             .toList()
             );
         }
+
+        return profile;
     }
 
     // Cập nhật các bạn bè đã được chụp chung
     @Override
     @Transactional
-    public void updateProcessPhotoWithFriends(UUID profileId, MultipartFile image) {
+    public Profile updateProcessPhotoWithFriends(Profile profile, MultipartFile image) {
         User user = authService.getCurrentUser();
 
         List<String> detectedIds;
@@ -303,13 +299,11 @@ public class ProfileServiceImpl implements ProfileService {
                 .collect(Collectors.toSet());
 
         if (friendsInPhoto.isEmpty()) {
-            return;
+            return profile;
         }
 
-        Profile profile = profileRepository
-                .findById(profileId)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
-
         profile.getPhotographedFriendIds().addAll(friendsInPhoto);
+
+        return profile;
     }
 }
