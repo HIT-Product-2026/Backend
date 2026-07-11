@@ -20,6 +20,7 @@ import com.example.lockly.service.UserService;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileServiceImpl implements ProfileService {
 
     private final AuthService authService;
@@ -95,9 +97,14 @@ public class ProfileServiceImpl implements ProfileService {
 
         User user = post.getUser();
 
-        Profile profile = profileRepository
-                .findByUserId(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "user id", user.getId()));
+        // Lấy Profile
+        Optional<Profile> optionalProfile = profileRepository.findByUserId(user.getId());
+
+        // Dừng cập nhật nếu chưa có profile
+        if (optionalProfile.isEmpty()) {
+            return;
+        }
+        Profile profile = optionalProfile.get();
 
         Double latitude = post.getLatitude();
         Double longitude = post.getLongitude();
