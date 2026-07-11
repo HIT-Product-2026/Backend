@@ -1,5 +1,6 @@
 package com.example.lockly.listener;
 
+import com.example.lockly.config.MinioProperties;
 import com.example.lockly.config.RabbitMQConfig;
 import com.example.lockly.constant.EventType;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
@@ -11,13 +12,17 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.service.AIService;
 import com.example.lockly.service.FcmService;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +36,8 @@ public class RabbitMQConsumer {
     private final AIService aiService;
     private final SseService sseService;
     private final PostsRepository postsRepository;
+    private final MinIOService minIOService;
+    private final MinioProperties props;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -48,18 +55,31 @@ public class RabbitMQConsumer {
     public void detectNsfw(DetectNsfwPostRequestDto data) throws IOException {
 
         // Giá trị mặc định, tránh lỗi
-        boolean isNfws = false;
+        boolean isNfws = aiService.detectNsfw(
+                props.getBucketName(),
+                data.objectName()
+        );
 
-        try {
-            isNfws = aiService.detectNsfw(data.file());
-        } catch (Exception e) {
-            log.error("Error detecting NSFW image. userId={}, postId={}",
-                    data.user().id(),
-                    data.postId(),
-                    e);
-
-            throw new RuntimeException(e);
-        }
+//        try {
+//            InputStream fileStream = minIOService.getFile(data.objectName());
+//
+//            MultipartFile multipartFile = new MockMultipartFile(
+//                    "file",
+//                    data.objectName(),      // tên file
+//                    "image/jpeg",         // hoặc lấy contentType thực tế
+//                    fileStream
+//            );
+//
+//            isNfws = aiService.detectNsfw(multipartFile);
+//
+//        } catch (Exception e) {
+//            log.error("Error detecting NSFW image. userId={}, postId={}",
+//                    data.user().id(),
+//                    data.postId(),
+//                    e);
+//
+//            throw new RuntimeException(e);
+//        }
 
         NsfwStatus nsfw;
 

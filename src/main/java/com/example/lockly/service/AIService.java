@@ -8,11 +8,11 @@ import java.util.UUID;
 
 public interface AIService {
 
-    Boolean detectNsfw(MultipartFile imageFile) throws IOException;
+    Boolean detectNsfw(String bucket, String objectName) throws IOException;
 
-    List<String> detectFaces(MultipartFile imageFile) throws IOException;
+    List<String> detectFaces(String bucket, String objectName) throws IOException;
 
-    Boolean registerFace(UUID personId, MultipartFile imageFile);
+    Boolean registerFace(UUID personId, String bucket, String objectName);
 
     Boolean checkFace(UUID personId);
 }

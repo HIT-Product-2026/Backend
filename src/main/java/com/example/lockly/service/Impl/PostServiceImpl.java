@@ -99,7 +99,7 @@ public class PostServiceImpl implements PostService {
             log.debug("Lưu post thành công");
 
             // Cập nhật tiến trình nhiệm vụ
-            profileService.updateProcessProfile(postId, file);
+            profileService.updateProcessProfile(postId, objectName);
 
             log.debug("Tiến trình cập nhật thành công");
 
