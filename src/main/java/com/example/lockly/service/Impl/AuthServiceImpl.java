@@ -9,11 +9,14 @@ import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.InvalidatedToken;
+import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
+import com.example.lockly.repository.main.PostsRepository;
+import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
@@ -49,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordUtil passwordUtil;
     private final RedisService redisService;
-    private final ProfileService profileService;
+    private final ProfileRepository profileRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     static final String REGISTER_PREFIX        = "register:";
@@ -118,12 +121,16 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(rawPwd.toString())
                 .build();
 
-        CreateProfileRequestDto requestDto = new CreateProfileRequestDto(
-                null,
-                null,
-                null
-        );
-        profileService.createProfile(user, requestDto);
+        // Tạo profile
+        Profile profile = Profile.builder()
+                .user(user)
+                .birthday(null)
+                .hobbies(null)
+                .phoneNumber(null)
+                .postCount(0)
+                .build();
+
+        profileRepository.save(profile);
 
         userRepository.save(user);
         log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
