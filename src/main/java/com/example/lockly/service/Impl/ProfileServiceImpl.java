@@ -1,6 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
+import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -63,6 +64,14 @@ public class ProfileServiceImpl implements ProfileService {
 
         profileRepository.save(profile);
     }
+
+//    @Override
+//    @Transactional
+//    public void updateProfile(UUID profileId, UpdateProfileRequestDto request){
+//        User user = authService.getCurrentUser();
+//
+//        Profile profile =
+//    }
 
     @Override
     @Transactional

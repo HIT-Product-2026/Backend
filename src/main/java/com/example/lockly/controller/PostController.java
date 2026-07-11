@@ -7,7 +7,7 @@ import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
-import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
+import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;

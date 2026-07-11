@@ -1,7 +1,7 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.domain.dto.request.SendImageMessageSocketRequestDto;
-import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
