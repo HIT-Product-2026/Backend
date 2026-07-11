@@ -67,7 +67,7 @@ public class PostController {
         );
 
         log.debug("Chuẩn bị tạo bài viết");
-        PostResponseDto post = postService.createPost(request);
+        PostResponseDto response = postService.createPost(request);
 
         log.debug("Tạo bài viế thành công");
         User user = authService.getCurrentUser();
@@ -77,17 +77,20 @@ public class PostController {
         log.debug("Lấy fcm list thành công");
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
-                FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
+                FcmNotificationRequestDto.from(user.getId(), response.id(), fcmTokens)
         );
         log.debug("Thông báo fcm thành công");
 
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
-        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(post, file));
+        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(
+                response,
+                response.objectName())
+        );
 
         log.debug("Detect thành công");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Tạo bài viết thành công", post));
+                .body(ApiResponse.created("Tạo bài viết thành công", response));
     }
 
     @GetMapping("/{post_id}")

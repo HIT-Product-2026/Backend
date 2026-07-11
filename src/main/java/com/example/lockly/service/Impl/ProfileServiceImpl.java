@@ -1,6 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
+import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
@@ -48,6 +49,8 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final AIService aiService;
     private final FriendshipsRepository friendshipsRepository;
+    private final MinioProperties minioProperties;
+
     @Override
     @Transactional
     public void createProfile(User user, CreateProfileRequestDto request){
@@ -84,7 +87,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void registerFace(UUID userId, MultipartFile image) {
+    public void registerFace(UUID userId, String objectName) {
 
         userRepository.findById(userId)
                 .orElseThrow(() ->
@@ -94,7 +97,11 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Profile", "user id", userId));
 
-        boolean success = aiService.registerFace(userId, image);
+        boolean success = aiService.registerFace(
+                userId,
+                minioProperties.getBucketName(),
+                objectName
+        );
 
         if (!success) {
             throw new RuntimeException("Đăng ký khuôn mặt thất bại");
@@ -103,7 +110,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void updateProcessProfile(UUID postId, MultipartFile image){
+    public void updateProcessProfile(UUID postId, String objectName){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
@@ -132,7 +139,7 @@ public class ProfileServiceImpl implements ProfileService {
         profile = updatePostReupped(profile, latitude, longitude);
 
         // Cập nhật tiến trình "Lời hứa năm xưa"
-        profile = updateProcessPhotoWithFriends(profile, image);
+        profile = updateProcessPhotoWithFriends(profile, objectName);
 
         profileRepository.save(profile);
         postsRepository.save(post);
@@ -296,12 +303,15 @@ public class ProfileServiceImpl implements ProfileService {
     // Cập nhật các bạn bè đã được chụp chung
     @Override
     @Transactional
-    public Profile updateProcessPhotoWithFriends(Profile profile, MultipartFile image) {
+    public Profile updateProcessPhotoWithFriends(Profile profile, String objectName) {
         User user = authService.getCurrentUser();
 
         List<String> detectedIds;
         try {
-            detectedIds = aiService.detectFaces(image);
+            detectedIds = aiService.detectFaces(
+                    minioProperties.getBucketName(),
+                    objectName
+            );
         } catch (Exception e) {
             throw new RuntimeException("AI Service timeout", e);
         }
