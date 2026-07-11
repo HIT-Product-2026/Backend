@@ -15,7 +15,8 @@ public record PostResponseDto (
     Double latitude,
     Double longitude,
     PostModeLocation modeLocation,
-    NsfwStatus nsfw
+    NsfwStatus nsfw,
+    String objectName
 ){
 
     public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
@@ -26,7 +27,8 @@ public record PostResponseDto (
                 latitude,
                 longitude,
                 post.getModeLocation(),
-                NsfwStatus.PROCESSING
+                NsfwStatus.PROCESSING,
+                imageUrl
         );
     }
 
@@ -38,7 +40,8 @@ public record PostResponseDto (
                 post.getLatitude(),
                 post.getLongitude(),
                 post.getModeLocation(),
-                NsfwStatus.PROCESSING
+                NsfwStatus.PROCESSING,
+                null
         );
     }
 
@@ -50,7 +53,8 @@ public record PostResponseDto (
                 dto.latitude(),
                 dto.longitude(),
                 dto.modeLocation(),
-                nsfw
+                nsfw,
+                null
         );
     }
 }
