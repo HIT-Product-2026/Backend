@@ -108,9 +108,6 @@ public class WebSocketController {
         // Redis lưu trạng thái online
         redisService.saveUserOnline(user.id(), isOnline);
 
-        // Lấy trạng thái online vừa lưu
-        isOnline = redisService.getUserOnline(user.id());
-
         // Chuyển lên topic cá nhân
         webSocketService.shareOnlineToFriend(user.id(), isOnline);
     }
