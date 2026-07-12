@@ -4,6 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
+import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ProfileService;
@@ -29,19 +30,16 @@ public class ProfileController {
     private final ProfileService profileService;
     private final AuthService authService;
 
-    @PutMapping("/{profileId}")
+    @PutMapping()
     @Operation(
             summary = "Cập nhật profile",
             description = "Cập nhật thông tin profile theo ID"
     )
     public ResponseEntity<ApiResponse<Void>> updateProfile(
-            @Parameter(description = "ID của profile")
-            @PathVariable("profileId") UUID profileId,
-
             @RequestBody @Valid UpdateProfileRequestDto request
     ) {
-
-        profileService.updateProfile(profileId, request);
+        
+        profileService.updateProfile(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
