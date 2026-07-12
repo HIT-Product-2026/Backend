@@ -3,6 +3,8 @@ package com.example.lockly.service;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +23,9 @@ public interface UserService extends UserDetailsService {
     List<String> findFcmTokenOfFriendsByUserId(UUID userId);
     InputStream getAvatar(UUID userId) throws Exception;
     UserResponseDto findUserById(UUID id);
+    List<User> searchUserByUsername(String username);
+    List<User> searchUserByEmail(String email);
+    List<UserSimpleResponseDto> searchFriend(String keywork);
 
 
     FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
