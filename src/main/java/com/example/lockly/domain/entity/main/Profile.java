@@ -21,7 +21,7 @@ public class Profile {
     @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
