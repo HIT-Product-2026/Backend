@@ -129,11 +129,11 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(null)
                 .postCount(0)
                 .build();
-
-        profileRepository.save(profile);
-
+        
         userRepository.save(user);
         log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
+
+        profileRepository.save(profile);
 
         redisTemplate.delete(otpKey);
         redisTemplate.delete(pwdKey);

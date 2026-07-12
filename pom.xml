@@ -33,6 +33,13 @@
 	</properties>
 	<dependencies>
 
+		<!-- qdrant -->
+		<dependency>
+			<groupId>io.qdrant</groupId>
+			<artifactId>client</artifactId>
+			<version>1.15.0</version>
+		</dependency>
+
 		<!-- Mock data -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -149,7 +156,6 @@
 			<artifactId>firebase-admin</artifactId>
 			<version>9.4.3</version>
 		</dependency>
-
 
 		<!-- LocalDateTime -->
 		<dependency>
