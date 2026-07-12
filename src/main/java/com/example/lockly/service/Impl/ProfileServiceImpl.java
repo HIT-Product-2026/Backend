@@ -69,12 +69,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void updateProfile(UUID profileId, UpdateProfileRequestDto request){
+    public void updateProfile(UpdateProfileRequestDto request){
         User user = authService.getCurrentUser();
 
         Profile profile = profileRepository
-                .findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "profile id", profileId));
+                .findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", "user id", user.getId()));
 
         profile = Profile.builder()
                 .birthday(request.birthday())
