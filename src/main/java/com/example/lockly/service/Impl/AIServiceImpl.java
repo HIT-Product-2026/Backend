@@ -46,10 +46,13 @@ public class AIServiceImpl implements AIService {
             return false;
         }
 
-        qdrantService.save(
-                userId,
-                vectorEmbeddings.get(0)
+
+        boolean saved = qdrantService.save(userId, vectorEmbeddings.get(0)
         );
+
+        if (!saved) {
+            return false;
+        }
 
         return true;
     }
