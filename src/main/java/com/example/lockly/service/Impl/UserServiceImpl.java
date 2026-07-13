@@ -18,6 +18,7 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
@@ -47,6 +48,8 @@ public class UserServiceImpl implements UserService {
     private final MinioClient minioClient;
     private final MinioProperties props;
     private final RedisService redisService;
+    private final AuthService authService;
+
     private final String prefix = "users/avatar";
 
     @Override
@@ -357,33 +360,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> searchUserByUsername(String username){
-        return userRepository.findByUsernameContaining(
-                username,
-                PageRequest.of(0, 10)
-        ).getContent();
-    }
+    public List<UserSimpleResponseDto> searchFriend (String keyword) {
+        User user = authService.getCurrentUser();
 
-    @Override
-    public List<User> searchUserByEmail(String email){
-        return userRepository.findByEmailContaining(
-                email,
-                PageRequest.of(0, 10)
-        ).getContent();
-    }
-
-    @Override
-    public List<UserSimpleResponseDto> searchFriend(String keywork){
-        if (keywork.contains("@")){
-            // Tìm theo email
-            return searchUserByEmail(keywork).stream()
-                    .map(UserSimpleResponseDto::from)
-                    .toList();
-        } else {
-            // Tìm theo username
-            return searchUserByUsername(keywork).stream()
-                    .map(UserSimpleResponseDto::from)
-                    .toList();
-        }
+        return userRepository.searchStrangers(
+                        user.getId(),
+                        keyword,
+                        PageRequest.of(0, 10)
+                )
+                .getContent()
+                .stream()
+                .map(UserSimpleResponseDto::from)
+                .toList();
     }
 }
