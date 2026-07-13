@@ -36,8 +36,6 @@ public class RabbitMQConsumer {
     private final AIService aiService;
     private final SseService sseService;
     private final PostsRepository postsRepository;
-    private final MinIOService minIOService;
-    private final MinioProperties props;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -52,7 +50,9 @@ public class RabbitMQConsumer {
             queues = RabbitMQConfig.IMAGE_NSFW_QUEUE,
             concurrency = "1-3"
     )
-    public void detectNsfw(DetectNsfwPostRequestDto data) throws IOException {
+    public void detectNsfw(DetectNsfwPostRequestDto data) {
+
+        log.info("Received message id={}", data.postId());
 
         // Giá trị mặc định, tránh lỗi
         boolean isNfws = aiService.detectNsfw(data.objectName());
