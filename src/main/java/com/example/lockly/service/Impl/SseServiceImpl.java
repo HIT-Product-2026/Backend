@@ -1,7 +1,9 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.service.SseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -10,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SseServiceImpl implements SseService {
 
@@ -31,7 +34,9 @@ public class SseServiceImpl implements SseService {
     }
 
     @Override
-    public void push(String userId, String eventType, Object response) {
+    public void push(String userId, String eventType, PostResponseDto response) {
+
+        log.info("[SSE] Push result {}", response.id());
 
         SseEmitter emitter = emitters.get(userId);
 

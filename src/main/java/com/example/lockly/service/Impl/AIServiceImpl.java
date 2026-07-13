@@ -24,6 +24,8 @@ public class AIServiceImpl implements AIService {
     @Override
     public Boolean detectNsfw(String objectName){
 
+        log.info("[AI] Detect NSFW objectName={}", objectName);
+
         MultipartFile file = minIOService.getMultipartFile(objectName);
 
         if (file == null){

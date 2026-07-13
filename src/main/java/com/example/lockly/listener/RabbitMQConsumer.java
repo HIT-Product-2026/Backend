@@ -52,10 +52,28 @@ public class RabbitMQConsumer {
     )
     public void detectNsfw(DetectNsfwPostRequestDto data) {
 
-        log.info("Received message id={}", data.postId());
+        log.info(
+                "[RabbitMQ][RECV] postId={}, objectName={}",
+                data.postId(),
+                data.objectName()
+        );
+
+        boolean isNfws = false;
 
         // Giá trị mặc định, tránh lỗi
-        boolean isNfws = aiService.detectNsfw(data.objectName());
+        try {
+            isNfws = aiService.detectNsfw(data.objectName());
+        } catch (Exception e) {
+
+            log.error(
+                    "[RabbitMQ][ERROR] postId={}, objectName={}",
+                    data.postId(),
+                    data.objectName(),
+                    e
+            );
+
+            throw e;
+        }
 
         NsfwStatus nsfw;
 
@@ -91,6 +109,12 @@ public class RabbitMQConsumer {
                 () -> sseService.disconnect(data.user().id().toString()),
                 2,
                 TimeUnit.SECONDS
+        );
+
+        log.info(
+                "[RabbitMQ][DONE] postId={}, nsfw={}",
+                data.postId(),
+                nsfw
         );
     }
 }
