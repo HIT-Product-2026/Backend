@@ -9,12 +9,14 @@ import io.qdrant.client.grpc.Collections;
 import io.qdrant.client.grpc.Points;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class QdrantServiceImpl implements QdrantService {
 
@@ -52,7 +54,7 @@ public class QdrantServiceImpl implements QdrantService {
     }
 
     @Override
-    public void save(UUID userId, List<Float> embedding) {
+    public Boolean save(UUID userId, List<Float> embedding) {
         try {
             Points.PointStruct point =
                     Points.PointStruct.newBuilder()
@@ -66,6 +68,10 @@ public class QdrantServiceImpl implements QdrantService {
                     COLLECTION_NAME,
                     List.of(point)
             ).get();
+
+            log.info("Register userId = {}", userId);
+
+            return true;
 
         } catch (Exception e) {
             throw new QdrantException(
@@ -86,6 +92,9 @@ public class QdrantServiceImpl implements QdrantService {
                             true,
                             null
                     ).get();
+
+            log.info("Retrieved points: {}", points.size());
+            log.info("Check userId = {}", userId);
 
             if (points.isEmpty()) {
                 return null;
