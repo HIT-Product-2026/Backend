@@ -251,7 +251,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new BadRequestException("User id", userId));
 
-        String objectName = FileUtil.getObjectNameFile(prefix, user.getId(), file);
+        String objectName = FileUtil.getObjectNameFile(prefix, user.getId());
 
         minioClient.putObject(
                 PutObjectArgs.builder()

@@ -96,9 +96,8 @@ public class MessageServiceImpl implements MessageService {
 
         UUID messageId = UuidCreator.getTimeOrderedEpoch();
 
-        String objectName = FileUtil.getObjectNameFile(prefix, messageId, request.file());
+        String objectName = FileUtil.getObjectNameFile(prefix, messageId);
 
-        try {
             // Save file
             minIOService.saveFile(request.file(), objectName);
 
@@ -116,11 +115,7 @@ public class MessageServiceImpl implements MessageService {
             messageRepository.save(message);
 
             return MessageResponseDto.from(messageRepository.save(message));
-        } catch (Exception e) {
-            minIOService.deleteFile(objectName);
 
-            throw e;
-        }
     }
 
 

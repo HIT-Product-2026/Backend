@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public class FileUtil{
-    public static String getObjectNameFile(String prefix, UUID objectId, MultipartFile file){
+    public static String getObjectNameFile(String prefix, UUID objectId){
         return prefix
                 + "/"
                 + objectId
