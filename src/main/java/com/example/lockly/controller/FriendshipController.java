@@ -83,9 +83,9 @@ public class FriendshipController {
     }
 
     @PostMapping("/unfriend/{friendId}")
-    @Operation(summary = "Từ chối lời mời kết bạn")
+    @Operation(summary = "Xóa kết bạn")
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> unfriendRequest(
-            @PathVariable("friend_id") UUID friendId
+            @PathVariable("friendId") UUID friendId
     ) {
         User user = authService.getCurrentUser();
 
