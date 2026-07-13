@@ -97,11 +97,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Profile", "user id", userId));
 
-        boolean success = aiService.registerFace(
-                userId,
-                minioProperties.getBucketName(),
-                objectName
-        );
+        boolean success = aiService.registerFace(userId, objectName);
 
         if (!success) {
             throw new RuntimeException("Đăng ký khuôn mặt thất bại");
@@ -306,12 +302,9 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile updateProcessPhotoWithFriends(Profile profile, String objectName) {
         User user = authService.getCurrentUser();
 
-        List<String> detectedIds;
+        List<UUID> detectedIds;
         try {
-            detectedIds = aiService.detectFaces(
-                    minioProperties.getBucketName(),
-                    objectName
-            );
+            detectedIds = aiService.detectFaces(objectName);
         } catch (Exception e) {
             throw new RuntimeException("AI Service timeout", e);
         }
@@ -324,7 +317,6 @@ public class ProfileServiceImpl implements ProfileService {
         Set<UUID> friendIdSet = new HashSet<>(friendIds);
 
         Set<UUID> friendsInPhoto = detectedIds.stream()
-                .map(UUID::fromString)
                 .filter(friendIdSet::contains)
                 .collect(Collectors.toSet());
 
