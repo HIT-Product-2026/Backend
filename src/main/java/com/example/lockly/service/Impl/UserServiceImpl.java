@@ -211,8 +211,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BadRequestException("receiver id", request.receiverId()));
 
         if (friendshipsRepository.existsByRequesterAndReceiver(requester, receiver)
-        || friendshipsRepository.existsByReceiverAndRequester(receiver, requester))
+                || friendshipsRepository.existsByRequesterAndReceiver(receiver, requester)) {
             throw new DuplicateResourceException("Friend request has been sent");
+        }
 
         Friendship friendship = Friendship.builder()
                 .requester(requester)
@@ -225,16 +226,6 @@ public class UserServiceImpl implements UserService {
         return FriendshipsResponseDto.from(
                 friendshipsRepository.save(friendship)
         );
-    }
-
-    @Override
-    public UserResponseDto findUserById(UUID id) {
-
-        User user = userRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-
-        return UserResponseDto.from(user);
     }
 
     @Override

@@ -10,9 +10,7 @@ import java.util.UUID;
 public record UserResponseDto(
     UUID id,
     String username,
-    String email,
     String displayName,
-    String avatarUrl,
     UserMode mode,
     String fcmToken
 ){
@@ -21,9 +19,7 @@ public record UserResponseDto(
         return new UserResponseDto(
                 user.getId(),
                 user.getUsername(),
-                user.getEmail(),
                 user.getDisplayName(),
-                user.getAvatarUrl(),
                 user.getMode(),
                 user.getFcmToken()
         );
