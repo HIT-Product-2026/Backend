@@ -45,7 +45,8 @@ public class Post {
     private Double longitude;
 
     @Column
-    private NsfwStatus nsfw;
+    @Builder.Default
+    private NsfwStatus nsfw = NsfwStatus.PROCESSING;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

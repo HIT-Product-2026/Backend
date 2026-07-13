@@ -40,9 +40,9 @@ public record DetectNsfwPostRequestDto(
         NsfwStatus nsfw,
 
         @NotNull
-        MultipartFile file
+        String objectName
 ) {
-    public static DetectNsfwPostRequestDto from(PostResponseDto dto, MultipartFile file){
+    public static DetectNsfwPostRequestDto from(PostResponseDto dto, String urlFile){
         return new DetectNsfwPostRequestDto(
                 dto.id(),
                 dto.user(),
@@ -51,7 +51,7 @@ public record DetectNsfwPostRequestDto(
                 dto.longitude(),
                 dto.modeLocation(),
                 dto.nsfw(),
-                file
+                urlFile
         );
     }
 }

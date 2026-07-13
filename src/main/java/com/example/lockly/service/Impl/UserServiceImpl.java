@@ -6,6 +6,7 @@ import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.domain.entity.main.Friendship;
@@ -23,6 +24,7 @@ import com.example.lockly.service.UserService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -356,5 +358,36 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         return minIOService.getFile(user.getAvatarUrl());
+    }
+
+    @Override
+    public List<User> searchUserByUsername(String username){
+        return userRepository.findByUsernameContaining(
+                username,
+                PageRequest.of(0, 10)
+        ).getContent();
+    }
+
+    @Override
+    public List<User> searchUserByEmail(String email){
+        return userRepository.findByEmailContaining(
+                email,
+                PageRequest.of(0, 10)
+        ).getContent();
+    }
+
+    @Override
+    public List<UserSimpleResponseDto> searchFriend(String keywork){
+        if (keywork.contains("@")){
+            // Tìm theo email
+            return searchUserByEmail(keywork).stream()
+                    .map(UserSimpleResponseDto::from)
+                    .toList();
+        } else {
+            // Tìm theo username
+            return searchUserByUsername(keywork).stream()
+                    .map(UserSimpleResponseDto::from)
+                    .toList();
+        }
     }
 }

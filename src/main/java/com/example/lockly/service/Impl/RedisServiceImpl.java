@@ -18,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class RedisServiceImpl implements RedisService {
 
     private final RedisTemplate<String,Object> redisTemplate;
+
     private final String userLocationKey = "user:location:";
+    private final String userOnlineKey = "user.online";
 
     @Override
     @Transactional
@@ -56,4 +58,21 @@ public class RedisServiceImpl implements RedisService {
     public UserCacheDto getUser(UUID userId) {
         return (UserCacheDto) redisTemplate.opsForValue().get("user:" + userId);
     }
+
+    @Override
+    public void saveUserOnline(UUID userId, boolean isOnline){
+        String key = userOnlineKey;
+
+        redisTemplate.opsForHash().put(key, "isOnline", isOnline);
+    }
+
+    @Override
+    public Boolean getUserOnline(UUID userId){
+        String key = userOnlineKey + userId;
+
+        Boolean isOnline = (Boolean) redisTemplate.opsForHash().get(key, "isOnline");
+
+        return isOnline;
+    }
+
 }

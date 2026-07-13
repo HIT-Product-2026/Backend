@@ -5,19 +5,24 @@ import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.*;
+import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.InvalidatedToken;
+import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
+import com.example.lockly.repository.main.PostsRepository;
+import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
+import com.example.lockly.service.ProfileService;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordUtil passwordUtil;
     private final RedisService redisService;
+    private final ProfileRepository profileRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     static final String REGISTER_PREFIX        = "register:";
@@ -115,8 +121,19 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(rawPwd.toString())
                 .build();
 
+        // Tạo profile
+        Profile profile = Profile.builder()
+                .user(user)
+                .birthday(null)
+                .hobbies(null)
+                .phoneNumber(null)
+                .postCount(0)
+                .build();
+
         userRepository.save(user);
         log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
+
+        profileRepository.save(profile);
 
         redisTemplate.delete(otpKey);
         redisTemplate.delete(pwdKey);
