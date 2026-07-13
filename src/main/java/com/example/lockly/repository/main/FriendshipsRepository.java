@@ -67,4 +67,15 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
             @Param("status") FriendshipStatus status
     );
 
+    @Query("""
+        SELECT f
+        FROM Friendship f
+        WHERE (f.requester = :user1 AND f.receiver = :user2)
+           OR (f.requester = :user2 AND f.receiver = :user1)
+    """)
+    Optional<Friendship> findFriendshipBetweenUsers(
+            @Param("user1") User user1,
+            @Param("user2") User user2
+    );
+
 }

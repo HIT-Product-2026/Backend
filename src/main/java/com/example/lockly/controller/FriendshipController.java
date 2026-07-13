@@ -81,6 +81,19 @@ public class FriendshipController {
                         userService.rejectAddFriendRequest(user.getId(), friendshipId)));
     }
 
+    @PostMapping("/reject/{friendships_id}")
+    @Operation(summary = "Từ chối lời mời kết bạn")
+    public ResponseEntity<ApiResponse<FriendshipsResponseDto>> unfriendRequest(
+            @PathVariable("friendships_id") UUID friendshipId
+    ) {
+        User user = authService.getCurrentUser();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công",
+                        userService.unfriend(user.getId(), friendshipId)));
+    }
+
     @GetMapping("/friends")
     @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user")
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getFriends() {
