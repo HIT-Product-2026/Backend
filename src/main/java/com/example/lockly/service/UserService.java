@@ -16,7 +16,6 @@ import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
 
-    UserDetails loadUserByUsername(String username);
     List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id);
     List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId);
     List<UserResponseDto> findFriendsByUserId(UUID userId);
