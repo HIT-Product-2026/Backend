@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestAIServiceImpl implements RequestAIService {
 
-    private static final String BASE_URL = "http://localhost:8000";
+    private static final String BASE_URL = "http://lockly-ai:8000";
 
     private static final String NSFW_API = BASE_URL + "/nsfw/detect";
     private static final String FACE_DETECT_API = BASE_URL + "/face/detect";
