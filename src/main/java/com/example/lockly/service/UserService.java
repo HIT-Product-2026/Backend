@@ -22,8 +22,6 @@ public interface UserService extends UserDetailsService {
     List<UserResponseDto> findFriendsByUserId(UUID userId);
     List<String> findFcmTokenOfFriendsByUserId(UUID userId);
     InputStream getAvatar(UUID userId) throws Exception;
-    List<User> searchUserByUsername(String username);
-    List<User> searchUserByEmail(String email);
     List<UserSimpleResponseDto> searchFriend(String keywork);
 
 

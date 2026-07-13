@@ -39,7 +39,6 @@ public interface FriendshipsRepository extends JpaRepository<Friendship, UUID   
 
     Optional<Friendship> findById(UUID id);
     boolean existsByRequesterAndReceiver(User Requester, User Receiver);
-    boolean existsByReceiverAndRequester(User receiver, User requester);
 
     @Query("""
     SELECT 
