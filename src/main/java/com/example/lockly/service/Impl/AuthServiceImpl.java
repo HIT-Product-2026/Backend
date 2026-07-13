@@ -129,7 +129,7 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(null)
                 .postCount(0)
                 .build();
-        
+
         userRepository.save(user);
         log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
 

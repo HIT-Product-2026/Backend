@@ -31,6 +31,9 @@ public interface UserService extends UserDetailsService {
     FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
     FriendshipsResponseDto rejectAddFriendRequest( UUID userId, UUID friendshipId);
     FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
+    FriendshipsResponseDto unfriend(UUID userId ,UUID friendId);
+
+
 
     boolean isUserOnlineByUserId(UUID userId);
     boolean isFriendByUserId(UUID userId, UUID friendId);

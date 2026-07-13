@@ -141,6 +141,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public FriendshipsResponseDto unfriend(UUID userId, UUID friendId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend", "id", friendId));
+
+        Friendship friendship = friendshipsRepository
+                .findFriendshipBetweenUsers(user, friend)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "friendId", friendId));
+
+        if (friendship.getStatus() != FriendshipStatus.ACCEPTED) {
+            throw new BadRequestException("Friendship is not ACCEPTED");
+        }
+
+        friendshipsRepository.delete(friendship);
+
+        return FriendshipsResponseDto.from(friendship);
+    }
+
+    @Override
     public List<UserResponseDto> findFriendsByUserId(UUID userId){
         User user = userRepository
                 .findById(userId)
