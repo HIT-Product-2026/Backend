@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface ProfileService {
     void createProfile(User user, CreateProfileRequestDto request);
-    void registerFace(UUID userId, MultipartFile file) ;
+    Boolean registerFace(UUID userId, MultipartFile file) ;
     Boolean checkFace(UUID userId);
 
     void updateProcessProfile(UUID postId, String objectName);

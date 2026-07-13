@@ -87,7 +87,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void registerFace(UUID userId, MultipartFile file) {
+    public Boolean registerFace(UUID userId, MultipartFile file) {
 
         userRepository.findById(userId)
                 .orElseThrow(() ->
@@ -98,11 +98,7 @@ public class ProfileServiceImpl implements ProfileService {
         // Lưu ảnh trước rồi mới check
         minIOService.saveFile(file, objectName);
 
-        boolean success = aiService.registerFace(userId, objectName);
-
-        if (!success) {
-            throw new RuntimeException("Đăng ký khuôn mặt thất bại");
-        }
+        return aiService.registerFace(userId, objectName);
     }
 
     @Override
