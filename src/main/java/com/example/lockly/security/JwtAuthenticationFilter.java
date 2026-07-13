@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     JwtProvider jwtProvider;
-    UserRepository userRepository;
+    UserDetailsService userDetailsService;
     ObjectMapper objectMapper;
 
     // FIX: bỏ InvalidatedTokenRepository khỏi đây
@@ -78,10 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("No existing authentication in SecurityContext, loading user: {}", username);
 
-                User user = userRepository
-                        .findUserDetailByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
-                UserDetails userDetails = new CustomUserDetails(user);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 log.debug("UserDetails loaded: {}", userDetails.getUsername());
                 log.debug("Authorities from DB: {}", userDetails.getAuthorities());
