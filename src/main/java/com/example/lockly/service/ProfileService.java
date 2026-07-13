@@ -5,12 +5,14 @@ import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
 public interface ProfileService {
     void createProfile(User user, CreateProfileRequestDto request);
-    void registerFace(UUID userId, String objectName) ;
+    void registerFace(UUID userId, MultipartFile file) ;
+    Boolean checkFace(UUID userId);
 
     void updateProcessProfile(UUID postId, String objectName);
 

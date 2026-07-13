@@ -25,7 +25,7 @@ public class MinIOServiceImpl implements MinIOService {
     private final MinioClient minioClient;
     private final MinioProperties props;
 
-    public void saveFile(MultipartFile file, String objectName) throws Exception {
+    public void saveFile(MultipartFile file, String objectName){
         try {
             InputStream is = file.getInputStream();
 
@@ -98,15 +98,19 @@ public class MinIOServiceImpl implements MinIOService {
     }
 
     // Hàm tạo ra 1 url cho phép lấy dữ liệu từ minIO mà không cần public storage
-    public String generatePresignedUrl(String objectName) throws Exception {
-        return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET.GET)
-                        .bucket(props.getBucketName())
-                        .object(objectName)
-                        .expiry(60 * 60)
-                        .build()
-        );
+    public String generatePresignedUrl(String objectName) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET.GET)
+                            .bucket(props.getBucketName())
+                            .object(objectName)
+                            .expiry(60 * 60)
+                            .build()
+            );
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
