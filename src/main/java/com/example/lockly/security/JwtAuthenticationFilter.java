@@ -2,6 +2,8 @@ package com.example.lockly.security;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,7 +34,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     JwtProvider jwtProvider;
-    UserService userService;
+    UserRepository userRepository;
     ObjectMapper objectMapper;
 
     // FIX: bỏ InvalidatedTokenRepository khỏi đây
@@ -75,7 +78,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("No existing authentication in SecurityContext, loading user: {}", username);
 
-                UserDetails userDetails = userService.loadUserByUsername(username);
+                User user = userRepository
+                        .findUserDetailByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
+                UserDetails userDetails = new CustomUserDetails(user);
+
                 log.debug("UserDetails loaded: {}", userDetails.getUsername());
                 log.debug("Authorities from DB: {}", userDetails.getAuthorities());
 

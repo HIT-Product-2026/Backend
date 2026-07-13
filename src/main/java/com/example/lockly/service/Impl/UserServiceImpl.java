@@ -53,14 +53,6 @@ public class UserServiceImpl implements UserService {
     private final String prefix = "users/avatar";
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository
-                .findUserDetailByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorMessage.User.ERR_USER_NOT_EXISTED + username));
-        return new CustomUserDetails(user);
-    }
-
-    @Override
     public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id){
         User requester = userRepository
                 .findById(id)
