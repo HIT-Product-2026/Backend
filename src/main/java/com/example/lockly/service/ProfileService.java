@@ -1,18 +1,22 @@
 package com.example.lockly.service;
 
+import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
-import org.springframework.web.multipart.MultipartFile;
+import com.example.lockly.domain.entity.main.Post;
+import com.example.lockly.domain.entity.main.Profile;
+import com.example.lockly.domain.entity.main.User;
 
 import java.util.UUID;
 
 public interface ProfileService {
-    void createProfile(UUID userId, CreateProfileRequestDto request);
-    void registerFace(UUID userId, MultipartFile image) ;
+    void createProfile(User user, CreateProfileRequestDto request);
+    void registerFace(UUID userId, String objectName) ;
 
-    void updateProcessProfile(UUID postId, MultipartFile image);
+    void updateProcessProfile(UUID postId, String objectName);
 
-    void updatePostProfile(UUID postId);
-    void updateCityVisited(UUID profileId, Double latitude, Double longitude);
-    void updatePostReupped(UUID profileId, Double latitude, Double longitude);
-    void updateProcessPhotoWithFriends(UUID profileId, MultipartFile image);
+    Post updatePostProfile(Post post);
+    Profile updateCityVisited(Profile profile, Double latitude, Double longitude);
+    Profile updatePostReupped(Profile profile, Double latitude, Double longitude);
+    Profile updateProcessPhotoWithFriends(Profile profile, String objectName);
+    void updateProfile(UUID profileId, UpdateProfileRequestDto request);
 }

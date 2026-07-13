@@ -1,18 +1,15 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
-import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.SendImageMessageRequestDto;
-import com.example.lockly.domain.dto.request.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
+import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.UUID;
 
 @RestController

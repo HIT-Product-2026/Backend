@@ -7,7 +7,7 @@ import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
-import com.example.lockly.domain.dto.request.ReactEmojiToPostRequestDto;
+import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
@@ -66,24 +66,31 @@ public class PostController {
                 longitude
         );
 
-        PostResponseDto post = postService.createPost(request);
+        log.debug("Chuẩn bị tạo bài viết");
+        PostResponseDto response = postService.createPost(request);
 
+        log.debug("Tạo bài viế thành công");
         User user = authService.getCurrentUser();
 
         // Lấy danh sách fcm của bạn bè
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
-
+        log.debug("Lấy fcm list thành công");
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
-                FcmNotificationRequestDto.from(user.getId(), post.id(), fcmTokens)
+                FcmNotificationRequestDto.from(user.getId(), response.id(), fcmTokens)
         );
+        log.debug("Thông báo fcm thành công");
 
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
-        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(post, file));
+        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(
+                response,
+                response.objectName())
+        );
 
+        log.debug("Detect thành công");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Tạo bài viết thành công", post));
+                .body(ApiResponse.created("Tạo bài viết thành công", response));
     }
 
     @GetMapping("/{post_id}")

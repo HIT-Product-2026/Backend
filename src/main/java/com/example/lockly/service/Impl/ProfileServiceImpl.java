@@ -1,6 +1,8 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
+import com.example.lockly.config.MinioProperties;
+import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -20,6 +22,7 @@ import com.example.lockly.service.UserService;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,6 +39,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileServiceImpl implements ProfileService {
 
     private final AuthService authService;
@@ -45,16 +49,13 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final AIService aiService;
     private final FriendshipsRepository friendshipsRepository;
+    private final MinioProperties minioProperties;
+
     @Override
     @Transactional
-    public void
-    createProfile(UUID userId, CreateProfileRequestDto request){
+    public void createProfile(User user, CreateProfileRequestDto request){
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
-        int postCount = postsRepository.countByUserId(userId);
+        int postCount = postsRepository.countByUserId(user.getId());
 
         Profile profile = Profile.builder()
                 .user(user)
@@ -68,8 +69,25 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    public void updateProfile(UUID profileId, UpdateProfileRequestDto request){
+        User user = authService.getCurrentUser();
+
+        Profile profile = profileRepository
+                .findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", "profile id", profileId));
+
+        profile = Profile.builder()
+                .birthday(request.birthday())
+                .hobbies(request.hobbies())
+                .phoneNumber(request.phoneNumber())
+                .build();
+
+        profileRepository.save(profile);
+    }
+
+    @Override
     @Transactional
-    public void registerFace(UUID userId, MultipartFile image) {
+    public void registerFace(UUID userId, String objectName) {
 
         userRepository.findById(userId)
                 .orElseThrow(() ->
@@ -79,7 +97,11 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Profile", "user id", userId));
 
-        boolean success = aiService.registerFace(userId, image);
+        boolean success = aiService.registerFace(
+                userId,
+                minioProperties.getBucketName(),
+                objectName
+        );
 
         if (!success) {
             throw new RuntimeException("Đăng ký khuôn mặt thất bại");
@@ -87,40 +109,45 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void updateProcessProfile(UUID postId, MultipartFile image){
+    @Transactional
+    public void updateProcessProfile(UUID postId, String objectName){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         User user = post.getUser();
 
-        Profile profile = profileRepository
-                .findByUserId(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "user id", user.getId()));
+        // Lấy Profile
+        Optional<Profile> optionalProfile = profileRepository.findByUserId(user.getId());
+
+        // Dừng cập nhật nếu chưa có profile
+        if (optionalProfile.isEmpty()) {
+            return;
+        }
+        Profile profile = optionalProfile.get();
 
         Double latitude = post.getLatitude();
         Double longitude = post.getLongitude();
 
         // Cập nhật tiến trình streak, latest post, số lượng post
-        updatePostProfile(postId);
+        post = updatePostProfile(post);
 
         // Cập nhật tiến trình "Nhà thám hiểm"
-        updateCityVisited(profile.getId(), latitude, longitude);
+        profile = updateCityVisited(profile, latitude, longitude);
 
         // Cập nhật tiến trình "Kế thừa di sản"
-        updatePostReupped(profile.getId(), latitude, longitude);
+        profile = updatePostReupped(profile, latitude, longitude);
 
         // Cập nhật tiến trình "Lời hứa năm xưa"
-        updateProcessPhotoWithFriends(profile.getId(), image);
+        profile = updateProcessPhotoWithFriends(profile, objectName);
+
+        profileRepository.save(profile);
+        postsRepository.save(post);
     }
 
     // Cập nhật tiến trình liên quan đến post
     @Override
-    @Transactional
-    public void updatePostProfile(UUID postId){
-        Post post = postsRepository
-                .findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+    public Post updatePostProfile(Post post){
 
         User user = post.getUser();
 
@@ -163,16 +190,12 @@ public class ProfileServiceImpl implements ProfileService {
         // Tăng số lượng bài viết đã đăng
         profile.setPostCount(profile.getPostCount() + 1);
 
-        profileRepository.save(profile);
+        return post;
     }
 
     // Cập số thành phố đã đi
-    @Transactional
     @Override
-    public void updateCityVisited(UUID profileId, Double latitude, Double longitude){
-        Profile profile = profileRepository
-                .findByUserId(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "id", profileId));
+    public Profile updateCityVisited(Profile profile, Double latitude, Double longitude){
 
         String cityCode = gisProvinceRepository
                 .findProvinceCodeByLocation(latitude, longitude)
@@ -182,15 +205,13 @@ public class ProfileServiceImpl implements ProfileService {
         if (cityCode != null){
             profile.getCityCodeList().add(cityCode);
         }
+
+        return profile;
     }
 
     // Cập nhật số bài viết được reup
-    @Transactional
     @Override
-    public void updatePostReupped(UUID profileId, Double latitude, Double longitude){
-        Profile profile = profileRepository
-                .findByUserId(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", "id", profileId));
+    public Profile updatePostReupped(Profile profile, Double latitude, Double longitude){
 
         User user = authService.getCurrentUser();
 
@@ -275,17 +296,22 @@ public class ProfileServiceImpl implements ProfileService {
                             .toList()
             );
         }
+
+        return profile;
     }
 
     // Cập nhật các bạn bè đã được chụp chung
     @Override
     @Transactional
-    public void updateProcessPhotoWithFriends(UUID profileId, MultipartFile image) {
+    public Profile updateProcessPhotoWithFriends(Profile profile, String objectName) {
         User user = authService.getCurrentUser();
 
         List<String> detectedIds;
         try {
-            detectedIds = aiService.detectFaces(image);
+            detectedIds = aiService.detectFaces(
+                    minioProperties.getBucketName(),
+                    objectName
+            );
         } catch (Exception e) {
             throw new RuntimeException("AI Service timeout", e);
         }
@@ -303,13 +329,11 @@ public class ProfileServiceImpl implements ProfileService {
                 .collect(Collectors.toSet());
 
         if (friendsInPhoto.isEmpty()) {
-            return;
+            return profile;
         }
 
-        Profile profile = profileRepository
-                .findById(profileId)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
-
         profile.getPhotographedFriendIds().addAll(friendsInPhoto);
+
+        return profile;
     }
 }

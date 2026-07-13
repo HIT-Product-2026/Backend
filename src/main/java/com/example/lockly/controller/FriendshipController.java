@@ -6,6 +6,7 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.UserService;
@@ -131,5 +132,20 @@ public class FriendshipController {
 
         return ResponseEntity
                 .ok(ApiResponse.success("Thành công", ListResponse.of(result)));
+    }
+
+    @GetMapping("/friendships/search")
+    @Operation(
+            summary = "Tìm kiếm người dùng để kết bạn",
+            description = "Tìm kiếm người dùng theo username hoặc email"
+    )
+    public ResponseEntity<ApiResponse<ListResponse<UserSimpleResponseDto>>> searchFriend(
+            @RequestParam String keyword
+    ) {
+        List<UserSimpleResponseDto> result = userService.searchFriend(keyword);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 }

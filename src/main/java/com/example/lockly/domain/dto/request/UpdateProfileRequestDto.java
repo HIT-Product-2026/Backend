@@ -1,13 +1,11 @@
-package com.example.lockly.domain.dto.request.create;
+package com.example.lockly.domain.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
-public record CreateProfileRequestDto(
+public record UpdateProfileRequestDto(
         @Past(message = "birthday must be in the past")
         LocalDate birthday,
 
