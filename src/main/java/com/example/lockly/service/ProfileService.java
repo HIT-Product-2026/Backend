@@ -18,5 +18,5 @@ public interface ProfileService {
     Profile updateCityVisited(Profile profile, Double latitude, Double longitude);
     Profile updatePostReupped(Profile profile, Double latitude, Double longitude);
     Profile updateProcessPhotoWithFriends(Profile profile, String objectName);
-    void updateProfile(UUID profileId, UpdateProfileRequestDto request);
+    void updateProfile(UpdateProfileRequestDto request);
 }
