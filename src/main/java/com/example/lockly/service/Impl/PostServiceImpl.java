@@ -64,53 +64,48 @@ public class PostServiceImpl implements PostService {
         String caption = request.caption();
 
         UUID postId = UuidCreator.getTimeOrderedEpoch();
-        String objectName = FileUtil.getObjectNameFile(prefix, postId, file);
+        String objectName = FileUtil.getObjectNameFile(prefix, postId);
 
         log.debug("Chuẩn bị file thành công");
 
         // Lưu ảnh vào minIO
-        try {
-            minIOService.saveFile(file, objectName);
+        minIOService.saveFile(file, objectName);
 
-            log.debug("Lưu ảnh thành công");
+        log.debug("Lưu ảnh thành công");
 
-            // Set mode cho bài post
-            PostModeLocation mode = (user.getMode() == UserMode.PRIVATE)
-                    ? PostModeLocation.PRIVATE
-                    : PostModeLocation.PUBLIC;
+        // Set mode cho bài post
+        PostModeLocation mode = (user.getMode() == UserMode.PRIVATE)
+                ? PostModeLocation.PRIVATE
+                : PostModeLocation.PUBLIC;
 
-            log.debug("Set mode thành công");
+        log.debug("Set mode thành công");
 
-            Post post = Post.builder()
-                    .id(postId)
-                    .user(user)
-                    .bucket(props.getBucketName())
-                    .objectName(objectName)
-                    .caption(caption)
-                    .longitude(request.longitude())
-                    .latitude(request.latitude())
-                    .modeLocation(mode)
-                    .build();
+        Post post = Post.builder()
+                .id(postId)
+                .user(user)
+                .bucket(props.getBucketName())
+                .objectName(objectName)
+                .caption(caption)
+                .longitude(request.longitude())
+                .latitude(request.latitude())
+                .modeLocation(mode)
+                .build();
 
-            log.debug("Tạo post thành công");
+        log.debug("Tạo post thành công");
 
-            postsRepository.save(post);
+        postsRepository.save(post);
 
-            log.debug("Lưu post thành công");
+        log.debug("Lưu post thành công");
 
-            // Cập nhật tiến trình nhiệm vụ
-            profileService.updateProcessProfile(postId, objectName);
+        // Cập nhật tiến trình nhiệm vụ
+        profileService.updateProcessProfile(postId, objectName);
 
-            log.debug("Tiến trình cập nhật thành công");
+        log.debug("Tiến trình cập nhật thành công");
 
-            if (mode == PostModeLocation.PRIVATE)
-                return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
+        if (mode == PostModeLocation.PRIVATE)
+            return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
 
-            return PostResponseDto.from(post);
-        } catch (Exception e){
-            minIOService.deleteFile(objectName);
-            throw e;
-        }
+        return PostResponseDto.from(post);
     }
 
     @Override

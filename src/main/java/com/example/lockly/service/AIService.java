@@ -14,5 +14,5 @@ public interface AIService {
 
     Boolean registerFace(UUID userId, String objectName);
 
-    Boolean checkFace(UUID personId);
+    Boolean checkFace(UUID userId);
 }
