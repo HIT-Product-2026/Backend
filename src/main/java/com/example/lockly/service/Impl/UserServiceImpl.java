@@ -210,6 +210,11 @@ public class UserServiceImpl implements UserService {
                 .findById(request.receiverId())
                 .orElseThrow(() -> new BadRequestException("receiver id", request.receiverId()));
 
+        // Người gửi và người nhận không được cùng là 1 người
+        if (requester.getId().equals(receiver.getId()))
+            throw new BadRequestException("Người gửi và người nhận không được trùng nhau");
+
+        // Không được kết bạn với người đã là bạn
         if (friendshipsRepository.existsByRequesterAndReceiver(requester, receiver)
                 || friendshipsRepository.existsByRequesterAndReceiver(receiver, requester)) {
             throw new DuplicateResourceException("Friend request has been sent");
