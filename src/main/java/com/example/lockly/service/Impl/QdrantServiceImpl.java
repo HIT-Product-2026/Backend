@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.exception.QdrantException;
 import com.example.lockly.service.QdrantService;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.QdrantClient;
@@ -18,33 +19,137 @@ import java.util.UUID;
 public class QdrantServiceImpl implements QdrantService {
 
     private final QdrantClient client;
+    private final float threshold = 0.7f;
+
+    private static final String COLLECTION_NAME = "users";
 
     // Khởi tạo cấu trúc vector embedding 512 chiều
+    // Giống table trong sql
     @PostConstruct
-    public void createCollection() throws Exception {
-        client.createCollectionAsync(
-                "users",
-                Collections.VectorParams.newBuilder()
-                        .setSize(512)
-                        .setDistance(Collections.Distance.Cosine)
-                        .build()
-        ).get();
+    public void createCollection() {
+        // Nếu tồn tại rồi thì không khởi tạo nữa
+        try {
+            boolean exists =
+                    client.collectionExistsAsync(COLLECTION_NAME)
+                            .get();
+
+            if (!exists) {
+                client.createCollectionAsync(
+                        COLLECTION_NAME,
+                        Collections.VectorParams.newBuilder()
+                                .setSize(512)
+                                .setDistance(Collections.Distance.Cosine)
+                                .build()
+                ).get();
+            }
+
+        } catch (Exception e) {
+            throw new QdrantException(
+                    "Cannot initialize Qdrant collection",
+                    e
+            );
+        }
     }
 
-    public void save(UUID userId, List<Float> embedding) throws Exception {
+    @Override
+    public void save(UUID userId, List<Float> embedding) {
+        try {
+            Points.PointStruct point =
+                    Points.PointStruct.newBuilder()
+                            .setId(PointIdFactory.id(userId))
+                            .setVectors(
+                                    VectorsFactory.vectors(embedding)
+                            )
+                            .build();
 
-        Points.PointStruct point =
-                Points.PointStruct.newBuilder()
-                        .setId(PointIdFactory.id(userId.toString()))
-                        .setVectors(
-                                VectorsFactory.vectors(embedding)
-                        )
-                        .build();
+            client.upsertAsync(
+                    COLLECTION_NAME,
+                    List.of(point)
+            ).get();
 
-        client.upsertAsync(
-                "users",
-                List.of(point)
-        ).get();
+        } catch (Exception e) {
+            throw new QdrantException(
+                    "Cannot save embedding for user: " + userId,
+                    e
+            );
+        }
+    }
 
+    @Override
+    public List<Float> getEmbedding(UUID userId) {
+        try {
+            List<Points.RetrievedPoint> points =
+                    client.retrieveAsync(
+                            COLLECTION_NAME,
+                            List.of(PointIdFactory.id(userId)),
+                            true,
+                            true,
+                            null
+                    ).get();
+
+            if (points.isEmpty()) {
+                return null;
+            }
+
+            return points.get(0)
+                    .getVectors()
+                    .getVector()
+                    .getDataList();
+
+        } catch (Exception e) {
+            throw new QdrantException(
+                    "Cannot get embedding for user: " + userId,
+                    e
+            );
+        }
+    }
+
+    @Override
+    public void delete(UUID userId) {
+        try {
+            client.deleteAsync(
+                    COLLECTION_NAME,
+                    List.of(PointIdFactory.id(userId)),
+                    null
+            ).get();
+
+        } catch (Exception e) {
+            throw new QdrantException(
+                    "Cannot delete embedding for user: " + userId,
+                    e
+            );
+        }
+    }
+
+    @Override
+    public UUID searchVectorEmbedding(List<Float> embedding) {
+        try {
+            Points.SearchPoints request =
+                    Points.SearchPoints.newBuilder()
+                            .setCollectionName(COLLECTION_NAME)
+                            .addAllVector(embedding)
+                            .setLimit(1)
+                            .setScoreThreshold(threshold)
+                            .build();
+
+            List<Points.ScoredPoint> results =
+                    client.searchAsync(request).get();
+
+            if (results.isEmpty()) {
+                return null;
+            }
+
+            return UUID.fromString(
+                    results.get(0)
+                            .getId()
+                            .getUuid()
+            );
+
+        } catch (Exception e) {
+            throw new QdrantException(
+                    "Cannot search vector embedding",
+                    e
+            );
+        }
     }
 }

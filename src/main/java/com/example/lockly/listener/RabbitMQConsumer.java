@@ -55,31 +55,7 @@ public class RabbitMQConsumer {
     public void detectNsfw(DetectNsfwPostRequestDto data) throws IOException {
 
         // Giá trị mặc định, tránh lỗi
-        boolean isNfws = aiService.detectNsfw(
-                props.getBucketName(),
-                data.objectName()
-        );
-
-//        try {
-//            InputStream fileStream = minIOService.getFile(data.objectName());
-//
-//            MultipartFile multipartFile = new MockMultipartFile(
-//                    "file",
-//                    data.objectName(),      // tên file
-//                    "image/jpeg",         // hoặc lấy contentType thực tế
-//                    fileStream
-//            );
-//
-//            isNfws = aiService.detectNsfw(multipartFile);
-//
-//        } catch (Exception e) {
-//            log.error("Error detecting NSFW image. userId={}, postId={}",
-//                    data.user().id(),
-//                    data.postId(),
-//                    e);
-//
-//            throw new RuntimeException(e);
-//        }
+        boolean isNfws = aiService.detectNsfw(data.objectName());
 
         NsfwStatus nsfw;
 
