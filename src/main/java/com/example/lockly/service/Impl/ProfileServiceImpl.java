@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
@@ -15,10 +16,7 @@ import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.location.GISProvinceRepository;
 import com.example.lockly.repository.main.*;
-import com.example.lockly.service.AIService;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.ProfileService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +47,9 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final AIService aiService;
     private final FriendshipsRepository friendshipsRepository;
-    private final MinioProperties minioProperties;
+    private final MinIOService minIOService;
+
+    private final String prefixFace = "users/face";
 
     @Override
     @Transactional
@@ -87,21 +87,32 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void registerFace(UUID userId, String objectName) {
+    public void registerFace(UUID userId, MultipartFile file) {
 
         userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User", "id", userId));
 
-        profileRepository.findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Profile", "user id", userId));
+        String objectName = FileUtil.getObjectNameFile(prefixFace, userId);
+
+        // Lưu ảnh trước rồi mới check
+        minIOService.saveFile(file, objectName);
 
         boolean success = aiService.registerFace(userId, objectName);
 
         if (!success) {
             throw new RuntimeException("Đăng ký khuôn mặt thất bại");
         }
+    }
+
+    @Override
+    public Boolean checkFace(UUID userId) {
+
+        userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "id", userId));
+
+        return aiService.checkFace(userId);
     }
 
     @Override

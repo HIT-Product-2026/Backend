@@ -46,22 +46,39 @@ public class ProfileController {
                 .body(ApiResponse.success("Cập nhật profile thành công", null));
     }
 
-//    @PostMapping(value = "/face", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @Operation(
-//            summary = "Đăng ký khuôn mặt",
-//            description = "Đăng ký khuôn mặt của user hiện tại với AI Service"
-//    )
-//    public ResponseEntity<ApiResponse<Void>> registerFace(
-//            @Parameter(description = "Ảnh khuôn mặt")
-//            @RequestParam("file") MultipartFile file
-//    ) {
-//
-//        User user = authService.getCurrentUser();
-//
-//        profileService.registerFace(user.getId(), objectName);
-//
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(ApiResponse.success("Đăng ký khuôn mặt thành công", null));
-//    }
+    @PostMapping("/face/register")
+    @Operation(
+            summary = "Đăng ký khuôn mặt",
+            description = "Đăng ký khuôn mặt của người dùng hiện tại bằng ảnh đã upload lên MinIO"
+    )
+    public ResponseEntity<ApiResponse<Void>> registerFace(
+            @Parameter(description = "Object name của ảnh trên MinIO")
+            @RequestParam("image") MultipartFile file
+    ) {
+        User user = authService.getCurrentUser();
+
+        profileService.registerFace(user.getId(), file);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Đăng ký khuôn mặt thành công", null));
+    }
+
+    @GetMapping("/face/check")
+    @Operation(
+            summary = "Kiểm tra đã đăng ký khuôn mặt",
+            description = "Kiểm tra người dùng hiện tại đã đăng ký khuôn mặt hay chưa"
+    )
+    public ResponseEntity<ApiResponse<Boolean>> checkFace() {
+        User user = authService.getCurrentUser();
+
+        Boolean hasFace = profileService.checkFace(user.getId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        "Kiểm tra khuôn mặt thành công",
+                        hasFace
+                ));
+    }
 }
