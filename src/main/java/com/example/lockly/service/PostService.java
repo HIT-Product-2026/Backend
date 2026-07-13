@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PostService {
-    PostResponseDto createPost(CreatePostRequestDto request) throws Exception;
+    PostResponseDto createPost(CreatePostRequestDto request);
     void sendEmoji(ReactEmojiToPostRequestDto request);
 
     InputStream getPostImage(UUID postId) throws Exception;

@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDto createPost(CreatePostRequestDto request) throws Exception {
+    public PostResponseDto createPost(CreatePostRequestDto request) {
 
         if (request.file() == null || request.file().isEmpty())
             throw new BadRequestException("File is empty");

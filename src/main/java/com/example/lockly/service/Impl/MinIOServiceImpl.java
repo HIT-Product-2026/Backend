@@ -62,6 +62,9 @@ public class MinIOServiceImpl implements MinIOService {
 
     @Override
     public MultipartFile getMultipartFile(String objectName) {
+
+        log.info("[MinIO] Download objectName={}", objectName);
+
         try {
             InputStream inputStream = minioClient.getObject(
                     GetObjectArgs.builder()
