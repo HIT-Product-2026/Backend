@@ -42,3 +42,4 @@ src/main/resources/application.properties
 vn_geo.zip
 
 mysql-init/
+postgres-init/
