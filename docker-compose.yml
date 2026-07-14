@@ -27,7 +27,7 @@ services:
       retries: 5
 
   postgres_vietnam_gis:
-    image: postgres:17
+    image: postgis/postgis:17-3.5
     container_name: lockly-postgres-vietnam-gis
     restart: always
     environment:
