@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/link")
+@RequestMapping(ApiPath.API_NOW + "/link")
 @Tag(name = "Link controller", description = "Quản lý ý nghĩa của các link")
 public class LinkController {
 

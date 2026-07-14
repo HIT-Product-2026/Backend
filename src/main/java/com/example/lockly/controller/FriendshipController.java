@@ -30,7 +30,7 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/friendship")
+@RequestMapping(ApiPath.API_NOW + "/friendship")
 @Tag(name = "Friendship Controller", description = "API quản lý kết bạn")
 public class FriendshipController {
 

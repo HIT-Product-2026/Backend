@@ -165,8 +165,8 @@ services:
       "
 
   backend:
-    image: khanhsayhi/lockly-backend:develop
-    container_name: lockly-backend
+    image: khanhsayhi/lockly-backend:v2
+    container_name: lockly-backend-v2
     restart: always
     ports:
       - "8081:8080"

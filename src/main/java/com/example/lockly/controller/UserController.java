@@ -30,7 +30,7 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/user")
+@RequestMapping(ApiPath.API_NOW + "/user")
 @Tag(name = "User Controller", description = "API quản lý user và friend system")
 public class UserController {
 
