@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/profile")
+@RequestMapping(ApiPath.API_NOW + "/profile")
 @Tag(name = "Profile Controller", description = "API quản lý profile người dùng")
 public class ProfileController {
 

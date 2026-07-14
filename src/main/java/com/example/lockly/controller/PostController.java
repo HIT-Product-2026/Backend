@@ -33,7 +33,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(ApiPath.API_V1 + "/post")
+@RequestMapping(ApiPath.API_NOW + "/post")
 @Tag(name = "Post Controller", description = "API quản lý bài viết (post + image MinIO)")
 public class PostController {
 

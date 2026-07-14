@@ -1,5 +1,6 @@
 package com.example.lockly.domain.entity.main;
 
+import com.example.lockly.domain.entity.main.enumEntity.Gender;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,7 @@ import java.util.*;
 public class Profile {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -28,8 +29,8 @@ public class Profile {
     @Column(name = "birthday")
     private LocalDate birthday;
 
-    @Column(columnDefinition = "TEXT")
-    private String hobbies;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
@@ -95,7 +96,6 @@ public class Profile {
 
     // Danh sách thành phố người này từng đi qua
     @ElementCollection
-    @Enumerated(EnumType.STRING)
     @CollectionTable(
             name = "profile_cities",
             joinColumns = @JoinColumn(name = "profile_id")

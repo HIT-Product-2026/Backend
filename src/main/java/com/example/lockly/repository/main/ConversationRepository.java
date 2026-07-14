@@ -19,10 +19,21 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     where c.user1 = :user
        or c.user2 = :user
     order by c.lastMessageTime desc
-""")
+    """)
     List<Conversation> findByUser(@Param("user") User user);
 
     boolean existsByUser1AndUser2(User user1, User user2);
 
     Optional<Conversation> findById(UUID id);
+
+    @Query("""
+    select c
+    from Conversation c
+    where (c.user1 = :user1 and c.user2 = :user2)
+       or (c.user1 = :user2 and c.user2 = :user1)
+    """)
+    Optional<Conversation> findByUsers(
+            @Param("user1") User user1,
+            @Param("user2") User user2
+    );
 }

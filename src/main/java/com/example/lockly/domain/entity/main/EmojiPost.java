@@ -26,7 +26,7 @@ import java.util.UUID;
 public class EmojiPost {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)", name = "id", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,7 +37,7 @@ public class EmojiPost {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private Emoji emoji;
 
     @Column(name = "created_at")
