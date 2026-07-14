@@ -33,6 +33,18 @@
 	</properties>
 	<dependencies>
 
+		<!-- Flyway -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<!-- Flyway mySql -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
+
 		<!-- qdrant -->
 		<dependency>
 			<groupId>io.qdrant</groupId>

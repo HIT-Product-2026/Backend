@@ -32,7 +32,7 @@ public class Message {
     // Nếu là ảnh thì sẽ chứa đường dẫn ở đây
     private String content;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MessageType type = MessageType.TEXT;
 
     @Column(name = "created_at")

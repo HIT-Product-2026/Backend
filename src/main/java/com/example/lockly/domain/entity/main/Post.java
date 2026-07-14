@@ -35,7 +35,7 @@ public class Post {
     @Column(length = 100)
     private String caption;
 
-    @Column(name = "mode_location")
+    @Enumerated(EnumType.STRING)
     private PostModeLocation modeLocation;
 
     @Column
@@ -44,7 +44,7 @@ public class Post {
     @Column
     private Double longitude;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private NsfwStatus nsfw = NsfwStatus.PROCESSING;
 
