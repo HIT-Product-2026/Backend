@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ConversationService {
-    public List<ConversationResponseDto> findAll();
-    public ConversationResponseDto createConversation(CreateConversationRequestDto request);
-    public ConversationResponseDto findById(UUID id);
+    List<ConversationResponseDto> findAll();
+    ConversationResponseDto createConversation(CreateConversationRequestDto request);
+    ConversationResponseDto findById(UUID id);
 }

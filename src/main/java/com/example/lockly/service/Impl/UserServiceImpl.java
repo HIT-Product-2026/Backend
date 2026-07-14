@@ -3,6 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
 import com.example.lockly.constant.ErrorMessage;
+import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -18,10 +19,7 @@ import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.MinIOService;
-import com.example.lockly.service.RedisService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.*;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final MinioProperties props;
     private final RedisService redisService;
     private final AuthService authService;
+    private final ConversationService conversationService;
 
     private final String prefix = "users/avatar";
 
@@ -85,6 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
         @Override
+        @Transactional
         public FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId){
             Friendship friendship = friendshipsRepository
                     .findById(friendshipId)
@@ -97,6 +97,13 @@ public class UserServiceImpl implements UserService {
             User user = userRepository
                     .findById(userId)
                     .orElseThrow(() -> new BadRequestException("User id", userId));
+
+            // Tạo cuộc hôi thoại khi kết bạn
+            conversationService.createConversation(new CreateConversationRequestDto(
+                    userId,
+                    user.getId()
+                    )
+            );
 
             // Chỉ người nhận lời mời mới có thể chấp nhận lời mời
             if (!friendship.getReceiver().getId().equals(user.getId()))
@@ -136,6 +143,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FriendshipsResponseDto unfriend(UUID userId, UUID friendId) {
 
         User user = userRepository.findById(userId)
@@ -153,6 +161,8 @@ public class UserServiceImpl implements UserService {
         }
 
         friendshipsRepository.delete(friendship);
+
+
 
         return FriendshipsResponseDto.from(friendship);
     }
