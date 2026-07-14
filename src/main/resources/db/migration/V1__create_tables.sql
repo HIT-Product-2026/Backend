@@ -48,7 +48,7 @@ CREATE TABLE profiles (
     user_id UUID NOT NULL,
 
     birthday DATE,
-    hobbies TEXT,
+    gender VARCHAR(20),
     phone_number VARCHAR(20),
 
     post_count INT DEFAULT 0,

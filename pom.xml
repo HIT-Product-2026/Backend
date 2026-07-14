@@ -33,6 +33,12 @@
 	</properties>
 	<dependencies>
 
+		<!-- PostgreSql -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+
 		<!-- Flyway -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
