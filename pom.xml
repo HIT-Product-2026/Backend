@@ -36,6 +36,12 @@
 		<!-- Flyway -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<!-- Flyway mySql -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
