@@ -28,7 +28,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping(ApiPath.API_V1 + "/conversations")
+@RequestMapping(ApiPath.API_NOW + "/conversations")
 @Tag(name = "Conversation Controller", description = "API quản lý hội thoại")
 public class ConversationController {
 

@@ -5,7 +5,6 @@ import com.example.lockly.constant.CommonConstant;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.*;
-import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.InvalidatedToken;
@@ -15,14 +14,12 @@ import com.example.lockly.exception.BadRequestException;
 import com.example.lockly.exception.ResourceNotFoundException;
 import com.example.lockly.exception.VsException;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
-import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
-import com.example.lockly.service.ProfileService;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
         Profile profile = Profile.builder()
                 .user(user)
                 .birthday(null)
-                .hobbies(null)
+                .gender(null)
                 .phoneNumber(null)
                 .postCount(0)
                 .build();
@@ -270,7 +267,7 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .id(user.getId())
+                .user(UserResponseDto.from(user))
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
     }

@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Post {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,7 +35,7 @@ public class Post {
     @Column(length = 100)
     private String caption;
 
-    @Column(name = "mode_location")
+    @Enumerated(EnumType.STRING)
     private PostModeLocation modeLocation;
 
     @Column
@@ -44,7 +44,7 @@ public class Post {
     @Column
     private Double longitude;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private NsfwStatus nsfw = NsfwStatus.PROCESSING;
 

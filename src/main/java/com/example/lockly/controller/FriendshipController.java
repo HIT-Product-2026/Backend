@@ -9,6 +9,7 @@ import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
+import com.example.lockly.service.FriendshipService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +30,13 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/friendship")
+@RequestMapping(ApiPath.API_NOW + "/friendship")
 @Tag(name = "Friendship Controller", description = "API quản lý kết bạn")
 public class FriendshipController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final FriendshipService friendshipService;
 
     @PostMapping("/request")
     @Operation(summary = "Gửi lời mời kết bạn")
@@ -51,7 +54,7 @@ public class FriendshipController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Thành công",
-                        userService.sendFriendshipRequest(request)));
+                        friendshipService.sendFriendshipRequest(request)));
     }
 
 
@@ -65,7 +68,7 @@ public class FriendshipController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.acceptAddFriendRequest(user.getId(), friendshipId)));
+                        friendshipService.acceptAddFriendRequest(user.getId(), friendshipId)));
     }
 
 
@@ -79,7 +82,7 @@ public class FriendshipController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.rejectAddFriendRequest(user.getId(), friendshipId)));
+                        friendshipService.rejectAddFriendRequest(user.getId(), friendshipId)));
     }
 
     @PostMapping("/unfriend/{friendId}")
@@ -92,7 +95,7 @@ public class FriendshipController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success("Thành công",
-                        userService.unfriend(user.getId(), friendId)));
+                        friendshipService.unfriend(user.getId(), friendId)));
     }
 
     @GetMapping("/friends")
@@ -111,7 +114,8 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests() {
         User user = authService.getCurrentUser();
 
-        List<FriendshipsResponseDto> result = userService.findFriendRequestRequesterByUserId(user.getId());
+        List<FriendshipsResponseDto> result = friendshipService
+                .findFriendRequestRequesterByUserId(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -128,7 +132,7 @@ public class FriendshipController {
         User user = authService.getCurrentUser();
 
         List<FriendshipsResponseDto> result =
-                userService.findFriendRequestsReceivedByUserId(user.getId());
+                friendshipService.findFriendRequestsReceivedByUserId(user.getId());
 
         return ResponseEntity
                 .ok(ApiResponse.success("Thành công", ListResponse.of(result)));
