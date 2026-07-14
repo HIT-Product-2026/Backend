@@ -18,7 +18,7 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
 
@@ -31,13 +31,13 @@ public class User {
     @Column(length = 100, unique = true, nullable = false)
     private String email;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100, nullable = false, name = "password_hash")
     private String passwordHash;
 
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private UserMode mode;
 
     // Địa chỉ của thiết bị, giúp fe biết cần gửi thông báo đến đâu

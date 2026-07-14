@@ -16,20 +16,10 @@ import java.util.UUID;
 
 public interface UserService{
 
-    List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id);
-    List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId);
     List<UserResponseDto> findFriendsByUserId(UUID userId);
     List<String> findFcmTokenOfFriendsByUserId(UUID userId);
     InputStream getAvatar(UUID userId) throws Exception;
     List<UserSimpleResponseDto> searchFriend(String keywork);
-
-
-    FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId);
-    FriendshipsResponseDto rejectAddFriendRequest( UUID userId, UUID friendshipId);
-    FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request);
-    FriendshipsResponseDto unfriend(UUID userId ,UUID friendId);
-
-
 
     boolean isUserOnlineByUserId(UUID userId);
     boolean isFriendByUserId(UUID userId, UUID friendId);
