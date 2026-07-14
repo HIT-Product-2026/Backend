@@ -75,6 +75,18 @@ services:
       timeout: 5s
       retries: 5
 
+  qdrant:
+    image: qdrant/qdrant:v1.15.4
+    container_name: lockly-qdrant
+    restart: always
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - lockly-network
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: lockly-rabbitmq
@@ -151,9 +163,7 @@ services:
       "
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: khanhsayhi/lockly-backend:develop
     container_name: lockly-backend
     restart: always
     ports:
@@ -191,6 +201,8 @@ services:
         condition: service_completed_successfully
     networks:
       - lockly-network
+    volumes:
+      - /home/Backend:/Backend/
     deploy:
       resources:
         limits:
@@ -215,3 +227,4 @@ volumes:
   redis_data:
   rabbitmq_data:
   minio_data:
+  qdrant_data:
