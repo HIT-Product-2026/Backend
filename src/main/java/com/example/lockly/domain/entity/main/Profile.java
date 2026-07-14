@@ -95,7 +95,6 @@ public class Profile {
 
     // Danh sách thành phố người này từng đi qua
     @ElementCollection
-    @Enumerated(EnumType.STRING)
     @CollectionTable(
             name = "profile_cities",
             joinColumns = @JoinColumn(name = "profile_id")

@@ -37,7 +37,7 @@ public class EmojiPost {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private Emoji emoji;
 
     @Column(name = "created_at")
