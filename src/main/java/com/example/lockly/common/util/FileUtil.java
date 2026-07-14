@@ -14,7 +14,7 @@ public class FileUtil{
     }
 
     public static String getImageUrlApi(String prefix, UUID objectId){
-        return ApiPath.API_V1
+        return ApiPath.API_NOW
                 + "/"
                 + prefix
                 + "/"

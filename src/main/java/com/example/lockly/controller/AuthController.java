@@ -1,6 +1,7 @@
     package com.example.lockly.controller;
 
     import com.example.lockly.common.response.ApiResponse;
+    import com.example.lockly.constant.ApiPath;
     import com.example.lockly.constant.SuccessMessage;
     import com.example.lockly.domain.dto.request.auth.*;
     import com.example.lockly.domain.dto.response.LoginResponseDto;
@@ -20,7 +21,7 @@
     @Validated
     @RestController
     @RequiredArgsConstructor
-    @RequestMapping("/api/v1/auth")
+    @RequestMapping(ApiPath.API_NOW + "auth")
     @Tag(name = "Auth Controller", description = "Đăng ký, Đăng nhập Gmail, Quên mật khẩu")
     public class AuthController {
 

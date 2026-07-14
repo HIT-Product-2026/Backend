@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/message")
+@RequestMapping(ApiPath.API_NOW + "/message")
 @Tag(name = "Message Controller", description = "API quản lý tin nhắn")
 public class MessageController {
 

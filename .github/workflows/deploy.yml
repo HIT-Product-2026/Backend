@@ -28,7 +28,7 @@ jobs:
           context: .
           push: true
           tags: |
-            khanhsayhi/lockly-backend:develop
+            khanhsayhi/lockly-backend:v2
             khanhsayhi/lockly-backend:${{ github.sha }}
 
       - name: Deploy to EC2
@@ -38,8 +38,15 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
+
             cd /home/ubuntu/Backend
 
-            docker compose pull backend
+            git pull origin develop
 
-            docker compose up -d backend
+            docker login \
+              -u "${{ secrets.DOCKERHUB_USERNAME }}" \
+              -p "${{ secrets.DOCKERHUB_TOKEN }}"
+
+            docker compose pull backend
+            docker compose up -d --force-recreate backend

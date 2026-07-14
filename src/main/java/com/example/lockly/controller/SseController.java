@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPath.API_V1 + "/sse")
+@RequestMapping(ApiPath.API_NOW + "/sse")
 @Tag(name = "Sse Controller", description = "Dùng để quản lý Sse")
 public class SseController {
 
