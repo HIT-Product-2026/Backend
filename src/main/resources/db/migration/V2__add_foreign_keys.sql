@@ -92,7 +92,7 @@ REFERENCES users(id)
 ON DELETE CASCADE;
 
 -- =====================================
--- MESSAGE
+-- MESSAGE_TEXT
 -- =====================================
 ALTER TABLE message_text
 ADD CONSTRAINT fk_message_conversation

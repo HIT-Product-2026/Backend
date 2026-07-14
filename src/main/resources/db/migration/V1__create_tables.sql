@@ -2,7 +2,7 @@
 -- USERS
 -- ===========================
 CREATE TABLE users (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
     username VARCHAR(100) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users (
     avatar_url VARCHAR(255),
     mode VARCHAR(50),
     fcm_token VARCHAR(255),
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id),
     CONSTRAINT uk_users_username UNIQUE (username),
@@ -21,8 +21,8 @@ CREATE TABLE users (
 -- POSTS
 -- ===========================
 CREATE TABLE posts (
-    id BINARY(16) NOT NULL,
-    user_id BINARY(16),
+    id UUID NOT NULL,
+    user_id UUID,
 
     bucket VARCHAR(255),
     object_name VARCHAR(255),
@@ -30,12 +30,12 @@ CREATE TABLE posts (
 
     mode_location VARCHAR(50),
 
-    latitude DOUBLE,
-    longitude DOUBLE,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
 
     nsfw VARCHAR(50),
 
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id)
 );
@@ -44,8 +44,8 @@ CREATE TABLE posts (
 -- PROFILES
 -- ===========================
 CREATE TABLE profiles (
-    id BINARY(16) NOT NULL,
-    user_id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
+    user_id UUID NOT NULL,
 
     birthday DATE,
     hobbies TEXT,
@@ -55,13 +55,13 @@ CREATE TABLE profiles (
     current_post_streak INT DEFAULT 0,
     longest_post_streak INT DEFAULT 0,
 
-    latest_post_id BINARY(16),
-    favorite_post_id BINARY(16),
+    latest_post_id UUID,
+    favorite_post_id UUID,
 
     count_post_reup INT DEFAULT 0,
     power INT DEFAULT 0,
 
-    create_at DATETIME,
+    create_at TIMESTAMP,
 
     PRIMARY KEY (id),
 
@@ -72,8 +72,8 @@ CREATE TABLE profiles (
 -- PROFILE VISITED PROFILES
 -- ===========================
 CREATE TABLE profile_visited_profiles (
-    profile_id BINARY(16) NOT NULL,
-    visited_profile_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
+    visited_profile_id UUID NOT NULL,
 
     PRIMARY KEY (profile_id, visited_profile_id)
 );
@@ -82,8 +82,8 @@ CREATE TABLE profile_visited_profiles (
 -- PROFILE VISITORS
 -- ===========================
 CREATE TABLE profile_visitors (
-    profile_id BINARY(16) NOT NULL,
-    visitor_profile_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
+    visitor_profile_id UUID NOT NULL,
 
     PRIMARY KEY (profile_id, visitor_profile_id)
 );
@@ -92,8 +92,8 @@ CREATE TABLE profile_visitors (
 -- PROFILE PHOTOGRAPHED FRIENDS
 -- ===========================
 CREATE TABLE profile_photographed_friends (
-    profile_id BINARY(16) NOT NULL,
-    friend_user_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
+    friend_user_id UUID NOT NULL,
 
     PRIMARY KEY (profile_id, friend_user_id)
 );
@@ -102,7 +102,7 @@ CREATE TABLE profile_photographed_friends (
 -- PROFILE CITIES
 -- ===========================
 CREATE TABLE profile_cities (
-    profile_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
     city VARCHAR(255) NOT NULL,
 
     PRIMARY KEY (profile_id, city)
@@ -112,8 +112,8 @@ CREATE TABLE profile_cities (
 -- PROFILE REUP POSTS
 -- ===========================
 CREATE TABLE profile_reup_posts (
-    profile_id BINARY(16) NOT NULL,
-    post_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
+    post_id UUID NOT NULL,
 
     PRIMARY KEY (profile_id, post_id)
 );
@@ -123,7 +123,7 @@ CREATE TABLE profile_reup_posts (
 -- =====================================
 CREATE TABLE invalidated_token (
     id VARCHAR(255) NOT NULL,
-    expiry_time DATETIME,
+    expiry_time TIMESTAMP,
 
     PRIMARY KEY (id)
 );
@@ -132,15 +132,15 @@ CREATE TABLE invalidated_token (
 -- FRIENDSHIPS
 -- =====================================
 CREATE TABLE friendships (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
 
-    requester_id BINARY(16) NOT NULL,
-    receiver_id BINARY(16) NOT NULL,
+    requester_id UUID NOT NULL,
+    receiver_id UUID NOT NULL,
 
     status VARCHAR(50) NOT NULL,
 
-    created_at DATETIME,
-    updated_at DATETIME,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
 
     PRIMARY KEY (id),
 
@@ -153,17 +153,17 @@ CREATE TABLE friendships (
 -- CONVERSATIONS
 -- =====================================
 CREATE TABLE conversations (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
 
-    user1_id BINARY(16) NOT NULL,
-    user2_id BINARY(16) NOT NULL,
+    user1_id UUID NOT NULL,
+    user2_id UUID NOT NULL,
 
-    last_message_id BINARY(16),
+    last_message_id UUID,
 
     last_message_content TEXT,
-    last_message_time DATETIME,
+    last_message_time TIMESTAMP,
 
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id),
 
@@ -174,16 +174,16 @@ CREATE TABLE conversations (
 -- MESSAGE_TEXT
 -- =====================================
 CREATE TABLE message_text (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
 
-    conversation_id BINARY(16),
-    sender_id BINARY(16) NOT NULL,
+    conversation_id UUID,
+    sender_id UUID NOT NULL,
 
     content TEXT,
 
     type VARCHAR(50),
 
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id)
 );
@@ -192,14 +192,14 @@ CREATE TABLE message_text (
 -- EMOJI POSTS
 -- =====================================
 CREATE TABLE emoji_posts (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
 
-    post_id BINARY(16) NOT NULL,
-    sender_id BINARY(16) NOT NULL,
+    post_id UUID NOT NULL,
+    sender_id UUID NOT NULL,
 
     emoji VARCHAR(50) NOT NULL,
 
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id),
 
@@ -210,15 +210,15 @@ CREATE TABLE emoji_posts (
 -- ACHIEVEMENTS
 -- =====================================
 CREATE TABLE achievements (
-    id BINARY(16) NOT NULL,
+    id UUID NOT NULL,
 
-    profile_id BINARY(16) NOT NULL,
+    profile_id UUID NOT NULL,
 
     achievement_name VARCHAR(50) NOT NULL,
 
     type VARCHAR(50) NOT NULL,
 
-    created_at DATETIME,
+    created_at TIMESTAMP,
 
     PRIMARY KEY (id),
 
