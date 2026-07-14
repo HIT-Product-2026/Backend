@@ -27,7 +27,7 @@ services:
       retries: 5
 
   postgres_vietnam_gis:
-    image: postgres:17
+    image: postgis/postgis:17-3.5
     container_name: lockly-postgres-vietnam-gis
     restart: always
     environment:
@@ -169,7 +169,7 @@ services:
     container_name: lockly-backend-v2
     restart: always
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
@@ -203,8 +203,6 @@ services:
         condition: service_completed_successfully
     networks:
       - lockly-network
-    volumes:
-      - /home/Backend:/Backend/
     deploy:
       resources:
         limits:
@@ -213,7 +211,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || exit 1" ]
       interval: 20s
       timeout: 5s
       retries: 5

@@ -39,14 +39,17 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-
+            
             cd /home/ubuntu/Backend
-
+            
             git pull origin develop
-
+            
             docker login \
               -u "${{ secrets.DOCKERHUB_USERNAME }}" \
               -p "${{ secrets.DOCKERHUB_TOKEN }}"
-
+            
             docker compose pull backend
+            
             docker compose up -d --force-recreate backend
+            
+            docker image prune -f
