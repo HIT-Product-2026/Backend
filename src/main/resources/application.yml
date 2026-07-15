@@ -35,6 +35,9 @@ spring:
     host: qdrant
     port: 6334
 
+server:
+  forward-headers-strategy: framework
+
 resilience4j:
   circuitbreaker:
     instances:
@@ -44,7 +47,7 @@ resilience4j:
         waitDurationInOpenState: 30s
         permittedNumberOfCallsInHalfOpenState: 3
 
-# ================= SECOND DATABASE =================
+#DB Thứ 2
 location:
   datasource:
     url: ${LOCATION_DB_URL_POSTGRE}
