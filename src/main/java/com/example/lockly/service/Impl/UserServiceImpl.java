@@ -2,32 +2,21 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.constant.ErrorMessage;
-import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
-import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
-import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
-import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.domain.entity.main.Friendship;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.BadRequestException;
-import com.example.lockly.exception.DuplicateResourceException;
-import com.example.lockly.exception.ForbiddenException;
 import com.example.lockly.exception.ResourceNotFoundException;
-import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
-import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.*;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,8 +38,6 @@ public class UserServiceImpl implements UserService {
     private final MinioProperties props;
     private final RedisService redisService;
     private final AuthService authService;
-    private final ConversationService conversationService;
-    private final ConversationRepository conversationRepository;
 
     private final String prefix = "users/avatar";
 
@@ -204,7 +191,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public InputStream getAvatar(UUID userId) throws Exception {
+    public InputStream getAvatar(UUID userId){
 
         User user = userRepository
                 .findById(userId)
@@ -225,6 +212,8 @@ public class UserServiceImpl implements UserService {
                 .getContent()
                 .stream()
                 .map(UserSimpleResponseDto::from)
+                // Lọc: chỉ giữ lại những user có ID KHÁC với ID của user hiện tại
+                .filter(u -> !u.userId().equals(user.getId()))
                 .toList();
     }
 }
