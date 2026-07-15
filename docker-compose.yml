@@ -4,8 +4,8 @@ services:
     container_name: lockly-postgres
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USERNAME_POSTGRE}
-      POSTGRES_PASSWORD: ${DB_PASSWORD_POSTGRE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: lockly_db
     ports:
       - "5432:5432"
@@ -31,8 +31,8 @@ services:
     container_name: lockly-postgres-vietnam-gis
     restart: always
     environment:
-      POSTGRES_USER: ${LOCATION_DB_USERNAME_POSTGRE}
-      POSTGRES_PASSWORD: ${LOCATION_DB_PASSWORD_POSTGRE}
+      POSTGRES_USER: ${LOCATION_DB_USERNAME}
+      POSTGRES_PASSWORD: ${LOCATION_DB_PASSWORD}
       POSTGRES_DB: vietnam_gis
     ports:
       - "5433:5432"
@@ -171,12 +171,12 @@ services:
     ports:
       - "8082:8080"
     environment:
-      - DB_URL=${DB_URL_POSTGRE}
-      - DB_USERNAME=${DB_USERNAME_POSTGRE}
-      - DB_PASSWORD=${DB_PASSWORD_POSTGRE}
-      - LOCATION_DB_URL=${LOCATION_DB_URL_POSTGRE}
-      - LOCATION_DB_USERNAME=${LOCATION_DB_USERNAME_POSTGRE}
-      - LOCATION_DB_PASSWORD=${LOCATION_DB_PASSWORD_POSTGRE}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - LOCATION_DB_URL=${LOCATION_DB_URL}
+      - LOCATION_DB_USERNAME=${LOCATION_DB_USERNAME}
+      - LOCATION_DB_PASSWORD=${LOCATION_DB_PASSWORD}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
