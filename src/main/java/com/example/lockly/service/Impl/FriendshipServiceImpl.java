@@ -33,7 +33,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final ConversationService conversationService;
 
     @Override
-    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id){
+    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id) {
         User requester = userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -66,7 +66,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId){
+    public FriendshipsResponseDto acceptAddFriendRequest(UUID userId, UUID friendshipId) {
         Friendship friendship = friendshipsRepository
                 .findById(friendshipId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -75,19 +75,15 @@ public class FriendshipServiceImpl implements FriendshipService {
         if (friendship.getStatus() != FriendshipStatus.SENT)
             throw new BadRequestException("status", friendship.getStatus().name());
 
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
-
         // Tạo cuộc hôi thoại khi kết bạn
         conversationService.createConversation(new CreateConversationRequestDto(
                         userId,
-                        user.getId()
+                        friendship.getReceiver().getId()
                 )
         );
 
         // Chỉ người nhận lời mời mới có thể chấp nhận lời mời
-        if (!friendship.getReceiver().getId().equals(user.getId()))
+        if (!friendship.getReceiver().getId().equals(userId))
             throw new ForbiddenException("You are not allowed to accept this friend request");
 
         friendship.setStatus(FriendshipStatus.ACCEPTED);
@@ -98,7 +94,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public FriendshipsResponseDto rejectAddFriendRequest(UUID userId ,UUID friendshipId){
+    public FriendshipsResponseDto rejectAddFriendRequest(UUID userId, UUID friendshipId) {
         Friendship friendship = friendshipsRepository
                 .findById(friendshipId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friendship", "id", friendshipId));
@@ -112,7 +108,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .orElseThrow(() -> new BadRequestException("User id", userId));
 
         if (!friendship.getReceiver().getId().equals(user.getId())
-                && !friendship.getRequester().getId().equals(user.getId())){
+                && !friendship.getRequester().getId().equals(user.getId())) {
             throw new ForbiddenException("You are not allowed to accept this friend request");
         }
 
@@ -156,7 +152,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional
-    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request){
+    public FriendshipsResponseDto sendFriendshipRequest(CreateFriendshipRequestDto request) {
 
         User requester = userRepository
                 .findById(request.requesterId())
