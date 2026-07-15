@@ -21,7 +21,7 @@
     @Validated
     @RestController
     @RequiredArgsConstructor
-    @RequestMapping(ApiPath.API_NOW + "auth")
+    @RequestMapping(ApiPath.API_NOW + "/auth")
     @Tag(name = "Auth Controller", description = "Đăng ký, Đăng nhập Gmail, Quên mật khẩu")
     public class AuthController {
 
