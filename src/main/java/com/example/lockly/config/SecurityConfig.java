@@ -1,5 +1,6 @@
 package com.example.lockly.config;
 
+import com.example.lockly.constant.ApiPath;
 import com.example.lockly.security.JwtAuthenticationFilter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,13 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/register/send-otp",
-            "/api/v1/auth/register/verify-otp",
-            "/api/v1/auth/login",
-            "/api/v1/auth/forgot-password/send-otp",
-            "/api/v1/auth/forgot-password/verify-otp",  // ← thêm
-            "/api/v1/auth/forgot-password/reset",
-            "/api/v1/auth/logout",                       // ← thêm
+            ApiPath.API_NOW + "/auth/register/send-otp",
+            ApiPath.API_NOW + "/auth/register/verify-otp",
+            ApiPath.API_NOW + "/auth/login",
+            ApiPath.API_NOW + "/auth/forgot-password/send-otp",
+            ApiPath.API_NOW + "/auth/forgot-password/verify-otp",  // ← thêm
+            ApiPath.API_NOW + "/auth/forgot-password/reset",
+            ApiPath.API_NOW + "/auth/logout",                       // ← thêm
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
