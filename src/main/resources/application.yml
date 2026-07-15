@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL_POSTGRE}
+    username: ${DB_USERNAME_POSTGRE}
+    password: ${DB_PASSWORD_POSTGRE}
     driver-class-name: org.postgresql.Driver
 
   flyway:
@@ -44,7 +44,7 @@ resilience4j:
 # ================= SECOND DATABASE (CUSTOM) =================
 location:
   datasource:
-    url: ${LOCATION_DB_URL}
-    username: ${LOCATION_DB_USERNAME}
-    password: ${LOCATION_DB_PASSWORD}
+    url: ${LOCATION_DB_URL_POSTGRE}
+    username: ${LOCATION_DB_USERNAME_POSTGRE}
+    password: ${LOCATION_DB_PASSWORD_POSTGRE}
     driver-class-name: org.postgresql.Driver
