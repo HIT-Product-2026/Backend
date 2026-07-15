@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class RabbitMQConsumer {
             queues = RabbitMQConfig.IMAGE_NSFW_QUEUE,
             concurrency = "1-3"
     )
+    @Transactional
     public void detectNsfw(DetectNsfwPostRequestDto data) {
 
         log.info(
