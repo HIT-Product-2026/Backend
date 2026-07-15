@@ -1,230 +1,50 @@
-services:
-  postgres:
-    image: postgres:17
-    container_name: lockly-postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: lockly_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+backend:
+  image: khanhsayhi/lockly-backend:v2
+  container_name: lockly-backend-v2
+  restart: always
+  ports:
+    - "8082:8080"
+  environment:
+    - DB_URL=${DB_URL_POSTGRE}
+    - DB_USERNAME=${DB_USERNAME_POSTGRE}
+    - DB_PASSWORD=${DB_PASSWORD_POSTGRE}
 
-  postgres_vietnam_gis:
-    image: postgis/postgis:17-3.5
-    container_name: lockly-postgres-vietnam-gis
-    restart: always
-    environment:
-      POSTGRES_USER: ${LOCATION_DB_USERNAME}
-      POSTGRES_PASSWORD: ${LOCATION_DB_PASSWORD}
-      POSTGRES_DB: vietnam_gis
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_vietnam_gis:/var/lib/postgresql/data
-      - ./postgres-init/vietnam_gis:/docker-entrypoint-initdb.d
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    - LOCATION_DB_URL=${LOCATION_DB_URL_POSTGRE}
+    - LOCATION_DB_USERNAME=${LOCATION_DB_USERNAME_POSTGRE}
+    - LOCATION_DB_PASSWORD=${LOCATION_DB_PASSWORD_POSTGRE}
 
-  redis:
-    image: redis:7.0-alpine
-    container_name: lockly-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          memory: 128M
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+    - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+    - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
 
-  qdrant:
-    image: qdrant/qdrant:v1.15.4
-    container_name: lockly-qdrant
-    restart: always
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - qdrant_data:/qdrant/storage
-    networks:
-      - lockly-network
+    - REDIS_HOST=${REDIS_HOST}
+    - REDIS_PORT=${REDIS_PORT}
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: lockly-rabbitmq
-    restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          memory: 128M
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    - RABBITMQ_HOST=${RABBITMQ_HOST}
+    - RABBITMQ_PORT=${RABBITMQ_PORT}
+    - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+    - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
-  minio:
-    image: quay.io/minio/minio:RELEASE.2023-09-04T19-57-37Z
-    container_name: lockly-minio
-    restart: always
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-    volumes:
-      - minio_data:/data
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          memory: 128M
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  minio-init:
-    image: quay.io/minio/mc:latest
-    container_name: lockly-minio-init
-    restart: on-failure
-    depends_on:
-      minio:
-        condition: service_healthy
-    networks:
-      - lockly-network
-    entrypoint: >
-      /bin/sh -c "
-      until /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}; do
-        echo 'Waiting for MinIO...';
-        sleep 2;
-      done;
-      /usr/bin/mc mb myminio/${MINIO_BUCKET_NAME} || true;
-      /usr/bin/mc anonymous set public myminio/${MINIO_BUCKET_NAME} || true;
-      exit 0;
-      "
-
-  backend:
-    image: khanhsayhi/lockly-backend:v2
-    container_name: lockly-backend-v2
-    restart: always
-    ports:
-      - "8082:8080"
-    environment:
-      - DB_URL=${DB_URL}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - LOCATION_DB_URL=${LOCATION_DB_URL}
-      - LOCATION_DB_USERNAME=${LOCATION_DB_USERNAME}
-      - LOCATION_DB_PASSWORD=${LOCATION_DB_PASSWORD}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - RABBITMQ_HOST=${RABBITMQ_HOST}
-      - RABBITMQ_PORT=${RABBITMQ_PORT}
-      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
-      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      postgres_vietnam_gis:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      minio-init:
-        condition: service_completed_successfully
-    networks:
-      - lockly-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 1536M
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || exit 1" ]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-networks:
-  lockly-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-  postgres_vietnam_gis:
-  redis_data:
-  rabbitmq_data:
-  minio_data:
-  qdrant_data:
+    - JWT_SECRET=${JWT_SECRET}
+    - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+    - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+  depends_on:
+    postgres:
+      condition: service_healthy
+    postgres_vietnam_gis:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+  networks:
+    - lockly-network
+  healthcheck:
+    test: ["CMD-SHELL", "curl -f http://localhost:8080/v3/api-docs || exit 1"]
+    interval: 20s
+    timeout: 5s
+    retries: 5
+    start_period: 30s
