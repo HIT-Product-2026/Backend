@@ -8,7 +8,7 @@ import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
-import com.example.lockly.exception.ForbiddenException;
+import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

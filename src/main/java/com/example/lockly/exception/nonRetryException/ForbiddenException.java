@@ -1,6 +1,6 @@
-package com.example.lockly.exception;
+package com.example.lockly.exception.nonRetryException;
 
-public class ForbiddenException extends AppException {
+public class ForbiddenException extends NonRetryableAppException {
 
     public ForbiddenException(String message) {
         super(403, message);
