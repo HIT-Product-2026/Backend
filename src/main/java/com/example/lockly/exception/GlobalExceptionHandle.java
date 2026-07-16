@@ -1,6 +1,9 @@
 package com.example.lockly.exception;
 
 import com.example.lockly.common.response.ApiResponse;
+import com.example.lockly.exception.nonRetryException.BadRequestException;
+import com.example.lockly.exception.nonRetryException.DuplicateResourceException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

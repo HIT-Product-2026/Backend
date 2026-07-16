@@ -1,6 +1,6 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.exception.QdrantException;
+import com.example.lockly.exception.nonRetryException.QdrantException;
 import com.example.lockly.service.QdrantService;
 import io.qdrant.client.PointIdFactory;
 import io.qdrant.client.QdrantClient;
