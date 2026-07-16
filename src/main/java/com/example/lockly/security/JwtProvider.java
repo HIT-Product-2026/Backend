@@ -35,7 +35,7 @@ public class JwtProvider {
     // 1. Tạo JWT Token (Đã chuyển hoàn toàn sang JJWT và BỎ ROLE)
     public String generateToken(User user, long expirationTime) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(user.getId().toString())
                 .setId(UUID.randomUUID().toString()) // jti dùng cho logout/blacklist
                 .claim("userId", user.getId())
                 .claim("email", user.getEmail())
