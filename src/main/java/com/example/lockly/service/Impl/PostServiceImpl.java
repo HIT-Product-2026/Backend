@@ -1,7 +1,9 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
+import com.example.lockly.domain.dto.request.PostCursor;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
@@ -13,9 +15,9 @@ import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.domain.entity.main.EmojiPost;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.User;
-import com.example.lockly.exception.BadRequestException;
-import com.example.lockly.exception.ForbiddenException;
-import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.BadRequestException;
+import com.example.lockly.exception.nonRetryException.ForbiddenException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.UserRepository;
@@ -23,6 +25,10 @@ import com.example.lockly.service.*;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -91,6 +97,17 @@ public class PostServiceImpl implements PostService {
                 .modeLocation(mode)
                 .build();
 
+        // Thêm point cho post (để tiện cho query với PortgreGIS)
+        GeometryFactory geometryFactory =
+                new GeometryFactory(new PrecisionModel(), 4326);
+
+
+        Point point = geometryFactory.createPoint(
+                new Coordinate(request.longitude(), request.latitude())
+        );
+
+        post.setLocation(point);
+
         log.debug("Tạo post thành công");
 
         postsRepository.save(post);
@@ -134,26 +151,37 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getPostByUserId(UUID userId, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    public List<PostResponseDto> getPostByUserId(UUID userId, String cursor) {
+
+        PostCursor cursorDecode = CursorUtil.decode(cursor);
 
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         return postsRepository
-                .findByUserOrderByCreatedAtDesc(user, pageable)
-                .stream()
+                .findByUserWithCursor(
+                        user,
+                        cursorDecode.createdAt(),
+                        cursorDecode.id(),
+                        PageRequest.of(0, pageSize)
+                ).stream()
                 .map(PostResponseDto::from)
                 .toList();
     }
 
-    public List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    public List<PostResponseDto> getFriendPosts(UUID userId, String cursor) {
+
+        PostCursor cursorDecode = CursorUtil.decode(cursor);
 
         return postsRepository
-                .findFriendPosts(userId, FriendshipStatus.ACCEPTED, pageable)
-                .stream()
+                .findFriendPosts(
+                        userId,
+                        FriendshipStatus.ACCEPTED,
+                        cursorDecode.createdAt(),
+                        cursorDecode.id(),
+                        PageRequest.of(0, pageSize)
+                ).stream()
                 .map(PostResponseDto::from)
                 .toList();
     }
