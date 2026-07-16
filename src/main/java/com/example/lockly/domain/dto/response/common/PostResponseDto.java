@@ -5,6 +5,7 @@ import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record PostResponseDto (
@@ -16,7 +17,8 @@ public record PostResponseDto (
     Double longitude,
     PostModeLocation modeLocation,
     NsfwStatus nsfw,
-    String objectName
+    String objectName,
+    LocalDateTime createAt
 ){
 
     public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
@@ -28,7 +30,8 @@ public record PostResponseDto (
                 longitude,
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
-                imageUrl
+                imageUrl,
+                post.getCreatedAt()
         );
     }
 
@@ -41,7 +44,8 @@ public record PostResponseDto (
                 post.getLongitude(),
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
-                null
+                null,
+                post.getCreatedAt()
         );
     }
 
@@ -54,7 +58,8 @@ public record PostResponseDto (
                 dto.longitude(),
                 dto.modeLocation(),
                 nsfw,
-                null
+                null,
+                dto.createAt()
         );
     }
 }

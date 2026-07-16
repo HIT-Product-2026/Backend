@@ -24,8 +24,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
 
     boolean existsByUser1AndUser2(User user1, User user2);
 
-    Optional<Conversation> findById(UUID id);
-
     @Query("""
     select c
     from Conversation c
