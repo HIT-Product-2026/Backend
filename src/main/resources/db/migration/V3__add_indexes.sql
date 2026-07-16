@@ -42,6 +42,3 @@ ON emoji_posts(sender_id);
 
 CREATE INDEX idx_profile
 ON achievements(profile_id);
-
-CREATE INDEX idx_profile_reup_posts_profile_post
-ON profile_reup_posts(profile_id, post_id);
