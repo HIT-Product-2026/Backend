@@ -5,6 +5,7 @@ import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -43,6 +44,9 @@ public class Post {
 
     @Column
     private Double longitude;
+
+    @Column(columnDefinition = "geography(Point,4326)")
+    private Point location;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

@@ -210,91 +210,53 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Cập nhật số bài viết được reup
     @Override
-    public Profile updatePostReupped(Profile profile, Double latitude, Double longitude){
+    public Profile updatePostReupped(
+            Profile profile,
+            Double latitude,
+            Double longitude
+    ){
 
         User user = authService.getCurrentUser();
 
-        // Danh sách bài post thỏa mãn điều kiện
-        List<Post> postCompleteds = new ArrayList<>();
 
-        // Lấy toàn bộ bài post mà friends có
-        final int pageSize = 100;
-        int pageNumber = 0;
-        Slice<Post> slice;
-
-        do {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-            slice = postsRepository.findFriendPosts(
-                    user.getId(),
-                    FriendshipStatus.ACCEPTED,
-                    pageable
-            );
-
-            for (Post post : slice.getContent()) {
-                // Xử lý từng post
-                // Kiểm tra bài post nào thỏa mã điều kiện tiến trình
-                double distance = LocationUtil.calculateDistance(
-                        latitude, longitude,
-                        post.getLatitude(), post.getLongitude()
+        List<Post> postCompleteds =
+                postsRepository.findFriendPostsWithinDistance(
+                        user.getId(),
+                        FriendshipStatus.ACCEPTED,
+                        longitude,
+                        latitude
                 );
 
-                // Khoảng cách dưới 100m là thỏa mãn
-                if (distance <= 100){
-                    postCompleteds.add(post);
-                }
-            }
 
-            pageNumber++;
-        } while (slice.hasNext());
+        if(postCompleteds.isEmpty()){
+            return profile;
+        }
 
 
-        // Kiểm tra xem bài post đã được lưu trong profile chưa
-        Set<UUID> reupPostIds = profile.getReupPostIds();
-
-        List<Post> markedPosts = reupPostIds.isEmpty()
-                ? new ArrayList<>()
-                : postsRepository.findAllById(reupPostIds);
-
-        boolean canUnlock = false;
-
-        // Chỉ cần tìm được 1 candidate hợp lệ
-        for (Post candidate : postCompleteds) {
-
-            if (reupPostIds.contains(candidate.getId())) {
-                continue;
-            }
-
-            boolean farEnough = true;
-
-            for (Post marked : markedPosts) {
-                double distance = LocationUtil.calculateDistance(
-                        candidate.getLatitude(), candidate.getLongitude(),
-                        marked.getLatitude(), marked.getLongitude()
+        boolean canUnlock =
+                postsRepository.existsUnlockablePost(
+                        profile.getId(),
+                        postCompleteds.stream()
+                                .map(Post::getId)
+                                .toList()
                 );
 
-                if (distance < 1000) {
-                    farEnough = false;
-                    break;
-                }
-            }
 
-            if (farEnough) {
-                canUnlock = true;
-                break;
-            }
-        }
+        if(canUnlock){
 
-        // Nếu kích hoạt thành công thì lưu toàn bộ postCompleted
-        if (canUnlock) {
-            profile.setCountPostReup(profile.getCountPostReup() + 1);
-
-            reupPostIds.addAll(
-                    postCompleteds.stream()
-                            .map(Post::getId)
-                            .toList()
+            profile.setCountPostReup(
+                    profile.getCountPostReup()+1
             );
+
+
+            profile.getReupPostIds()
+                    .addAll(
+                            postCompleteds.stream()
+                                    .map(Post::getId)
+                                    .toList()
+                    );
         }
+
 
         return profile;
     }

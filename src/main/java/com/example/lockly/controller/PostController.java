@@ -181,7 +181,7 @@ public class PostController {
     @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
     public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPosts(
             @Parameter(description = "Số trang")
-            @RequestParam(name = "pageNumber") int pageNumber
+            @RequestParam(name = "cursor") String cursor
     ) {
         User user = authService.getCurrentUser();
 
@@ -189,7 +189,7 @@ public class PostController {
                 ApiResponse.success(
                         "Thành công",
                         ListResponse.of(
-                                postService.getFriendPosts(user.getId(), pageNumber)
+                                postService.getFriendPosts(user.getId(), cursor)
                         )
                 )
         );
