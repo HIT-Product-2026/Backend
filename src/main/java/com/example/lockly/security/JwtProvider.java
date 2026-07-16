@@ -35,7 +35,7 @@ public class JwtProvider {
     // 1. Tạo JWT Token (Đã chuyển hoàn toàn sang JJWT và BỎ ROLE)
     public String generateToken(User user, long expirationTime) {
         return Jwts.builder()
-                .setSubject(user.getId().toString())
+                .setSubject(user.getUsername())
                 .setId(UUID.randomUUID().toString()) // jti
                 .claim("id", user.getId().toString())
                 .claim("username", user.getUsername())
