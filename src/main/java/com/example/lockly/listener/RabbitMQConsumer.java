@@ -1,5 +1,6 @@
 package com.example.lockly.listener;
 
+import com.example.lockly.config.MinioProperties;
 import com.example.lockly.config.RabbitMQConfig;
 import com.example.lockly.constant.EventType;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -47,6 +49,7 @@ public class RabbitMQConsumer {
             queues = RabbitMQConfig.IMAGE_NSFW_QUEUE,
             concurrency = "1-3"
     )
+    @Transactional
     public void detectNsfw(DetectNsfwPostRequestDto data) {
         try {
 
