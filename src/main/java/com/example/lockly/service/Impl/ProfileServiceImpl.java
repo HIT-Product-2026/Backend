@@ -9,7 +9,7 @@ import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
-import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.location.GISProvinceRepository;
 import com.example.lockly.repository.main.*;
 import com.example.lockly.service.*;

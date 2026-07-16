@@ -36,10 +36,13 @@ public class JwtProvider {
     public String generateToken(User user, long expirationTime) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
-                .setId(UUID.randomUUID().toString()) // jti dùng cho logout/blacklist
-                .claim("userId", user.getId())
+                .setId(UUID.randomUUID().toString()) // jti
+                .claim("id", user.getId().toString())
+                .claim("username", user.getUsername())
+                .claim("displayName", user.getDisplayName())
                 .claim("email", user.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .claim("mode", user.getMode() != null ? user.getMode().name() : null)
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
