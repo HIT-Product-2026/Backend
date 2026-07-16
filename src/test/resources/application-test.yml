@@ -1,0 +1,78 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+    
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 60000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: test_user
+    password: test_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+logging:
+  level:
+    root: INFO
+    com.example.lockly: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+security:
+  jwt:
+    secret: test_secret_key_for_jwt_token_testing_purposes_only
+    expiration: 86400000  # 24 hours in milliseconds
+
+firebase:
+  config:
+    bucket: test-bucket
+    database-url: https://test-project.firebaseio.com
+
+minio:
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: lockly-test
+
+qdrant:
+  url: http://localhost:6333
+  collection-name: lockly-test
+
+application:
+  name: lockly
+  version: 0.0.1-SNAPSHOT
+
+server:
+  port: 8080

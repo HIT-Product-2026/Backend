@@ -2,10 +2,12 @@ package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
+import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
+import com.example.lockly.domain.dto.request.PostCursor;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
@@ -185,11 +187,24 @@ public class PostController {
     ) {
         User user = authService.getCurrentUser();
 
+        List<PostResponseDto> listPost =  postService.getFriendPosts(user.getId(), cursor);
+
+        String nextCursor = null;
+
+        // Lấy bài viết cuối cùng làm cursor
+        if (!listPost.isEmpty()) {
+            nextCursor = CursorUtil.encode(
+                    PostCursor.from(listPost.get(listPost.size() - 1))
+            );
+        }
+
+
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Thành công",
                         ListResponse.of(
-                                postService.getFriendPosts(user.getId(), cursor)
+                                listPost,
+                                nextCursor
                         )
                 )
         );
