@@ -18,7 +18,7 @@ public interface UserService{
 
     List<UserResponseDto> findFriendsByUserId(UUID userId);
     List<String> findFcmTokenOfFriendsByUserId(UUID userId);
-    InputStream getAvatar(UUID userId) throws Exception;
+    InputStream getAvatar(UUID userId);
     List<UserSimpleResponseDto> searchFriend(String keywork);
 
     boolean isUserOnlineByUserId(UUID userId);

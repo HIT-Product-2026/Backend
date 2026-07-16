@@ -197,6 +197,10 @@ public class UserServiceImpl implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        if (user.getAvatarUrl() == null){
+            return null;
+        }
+
         return minIOService.getFile(user.getAvatarUrl());
     }
 
