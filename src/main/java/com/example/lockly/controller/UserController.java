@@ -2,13 +2,15 @@ package com.example.lockly.controller;
 
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
+import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.PostCursor;
 import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
 import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
-import com.example.lockly.exception.ForbiddenException;
+import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -161,8 +164,8 @@ public class UserController {
             @Parameter(description = "Friend id")
             @PathVariable(name = "friendId") UUID friendId,
 
-            @Parameter(description = "Số trang")
-            @RequestParam(name = "pageNumber") int pageNumber
+            @Parameter(description = "Cursor (null với lần đầu gọi)")
+            @RequestParam(name = "cursor") String cursor
     ) {
         User user = authService.getCurrentUser();
 
@@ -170,11 +173,23 @@ public class UserController {
         if (!isFriend)
             throw new ForbiddenException("User không có người bạn này");
 
+        List<PostResponseDto> listPost =  postService.getPostByUserId(friendId, cursor);
+
+        String nextCursor = null;
+
+        // Lấy bài viết cuối cùng làm cursor
+        if (!listPost.isEmpty()) {
+            nextCursor = CursorUtil.encode(
+                    PostCursor.from(listPost.get(listPost.size() - 1))
+            );
+        }
+
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Thành công",
                         ListResponse.of(
-                                postService.getPostByUserId(friendId, pageNumber)
+                                listPost,
+                                nextCursor
                         )
                 )
         );

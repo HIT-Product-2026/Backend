@@ -1,6 +1,6 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.service.AIService;
 import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.QdrantService;
