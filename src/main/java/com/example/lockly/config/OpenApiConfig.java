@@ -34,7 +34,7 @@ public class OpenApiConfig {
                 return new OpenAPI()
                         .servers(List.of(
                                 new Server()
-                                        .url("http://52.221.198.144:8080")
+                                        .url("https://lockly-api.duckdns.org")
                                         .description("Production")
                         ));
         }
