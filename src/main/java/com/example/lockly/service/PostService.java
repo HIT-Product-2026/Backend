@@ -17,10 +17,10 @@ public interface PostService {
 
     InputStream getPostImage(UUID postId) throws Exception;
     PostResponseDto getPostById(UUID postId);
-    List<PostResponseDto> getPostByUserId(UUID userId, int pageNumber);
+    List<PostResponseDto> getPostByUserId(UUID userId, String cursor);
     LocationPostResponseDto getLocationPost(UUID postId);
     List<EmojiPostResponseDto> getEmojiPosts(List<UUID> postIds);
-    List<PostResponseDto> getFriendPosts(UUID userId, int pageNumber);
+    List<PostResponseDto> getFriendPosts(UUID userId, String cursor);
 
     void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation);
 

@@ -11,6 +11,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record DetectNsfwPostRequestDto(
@@ -40,7 +41,9 @@ public record DetectNsfwPostRequestDto(
         NsfwStatus nsfw,
 
         @NotNull
-        String objectName
+        String objectName,
+
+        LocalDateTime createAt
 ) {
     public static DetectNsfwPostRequestDto from(PostResponseDto dto, String urlFile){
         return new DetectNsfwPostRequestDto(
@@ -51,7 +54,8 @@ public record DetectNsfwPostRequestDto(
                 dto.longitude(),
                 dto.modeLocation(),
                 dto.nsfw(),
-                urlFile
+                urlFile,
+                dto.createAt()
         );
     }
 }

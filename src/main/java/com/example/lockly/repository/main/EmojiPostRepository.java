@@ -54,16 +54,16 @@ public interface EmojiPostRepository extends JpaRepository<EmojiPost, UUID> {
     long countByPost(Post post);
 
     @Query("""
-SELECT new com.example.lockly.domain.dto.response.PostEmojiCount(
-    ep.post,
-    COUNT(ep)
-)
-FROM EmojiPost ep
-WHERE ep.post.user.id = :userId
-  AND ep.post.createdAt >= :from
-GROUP BY ep.post
-ORDER BY COUNT(ep) DESC
-""")
+    SELECT new com.example.lockly.domain.dto.response.PostEmojiCount(
+        ep.post,
+        COUNT(ep)
+    )
+    FROM EmojiPost ep
+    WHERE ep.post.user.id = :userId
+      AND ep.post.createdAt >= :from
+    GROUP BY ep.post
+    ORDER BY COUNT(ep) DESC
+    """)
     List<PostEmojiCount> findTopPostWithEmojiCount(
             @Param("userId") UUID userId,
             @Param("from") LocalDateTime from,

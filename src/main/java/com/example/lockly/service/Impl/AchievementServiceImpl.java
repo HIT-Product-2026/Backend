@@ -7,7 +7,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.AchievementName;
 import com.example.lockly.domain.entity.main.enumEntity.AchievementType;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
-import com.example.lockly.exception.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.main.*;
 import com.example.lockly.service.AchievementService;
 import lombok.RequiredArgsConstructor;
