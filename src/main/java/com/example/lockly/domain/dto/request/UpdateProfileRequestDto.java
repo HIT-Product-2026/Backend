@@ -13,7 +13,7 @@ public record UpdateProfileRequestDto(
                 message = "Birthday must be in format dd/MM/yyyy"
         )
         String birthday,
-        
+
         Gender gender,
 
         @Size(max = 20, message = "phone number must not exceed 20 characters")
