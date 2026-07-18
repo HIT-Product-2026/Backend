@@ -144,7 +144,9 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendshipsRepository.delete(friendship);
 
-        conversationRepository.delete(conversation);
+        if (conversation != null) {
+            conversationRepository.delete(conversation);
+        }
 
         return FriendshipsResponseDto.from(friendship);
     }
