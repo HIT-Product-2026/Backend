@@ -14,7 +14,7 @@ public record UpdateProfileRequestDto(
         )
         String birthday,
 
-        @Size(max = 500, message = "hobbies must not exceed 500 characters")
+        @Size(message = "hobbies must not exceed 500 characters")
         Gender gender,
 
         @Size(max = 20, message = "phone number must not exceed 20 characters")
