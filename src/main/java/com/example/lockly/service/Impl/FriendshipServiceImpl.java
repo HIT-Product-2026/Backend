@@ -137,10 +137,11 @@ public class FriendshipServiceImpl implements FriendshipService {
             throw new BadRequestException("Friendship is not ACCEPTED");
         }
 
+        // Xóa cuộc hội thoại (nếu có)
         Conversation conversation = conversationRepository.findByUsers(
                 user,
                 friend
-        ).orElseThrow(() -> new ResourceNotFoundException("Conversation", "users", userId));
+        ).orElse(null);
 
         friendshipsRepository.delete(friendship);
 
