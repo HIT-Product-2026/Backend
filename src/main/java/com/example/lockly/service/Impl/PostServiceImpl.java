@@ -186,15 +186,17 @@ public class PostServiceImpl implements PostService {
         Slice<Post> posts;
 
         if (cursor == null || cursor.isBlank()) {
-            posts = postsRepository.findFirstPage(
-                    user,
+            posts = postsRepository.findFriendPostsFirstPage(
+                    user.getId(),
+                    FriendshipStatus.ACCEPTED,
                     PageRequest.of(0, pageSize)
             );
         } else {
             PostCursor cursorDecode = CursorUtil.decode(cursor);
 
-            posts = postsRepository.findNextPage(
-                    user,
+            posts = postsRepository.findFriendPostsNextPage(
+                    user.getId(),
+                    FriendshipStatus.ACCEPTED,
                     cursorDecode.createdAt(),
                     cursorDecode.id(),
                     PageRequest.of(0, pageSize)
@@ -206,7 +208,6 @@ public class PostServiceImpl implements PostService {
                 .map(PostResponseDto::from)
                 .toList();
     }
-
     @Override
     @Transactional
     public void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation){
