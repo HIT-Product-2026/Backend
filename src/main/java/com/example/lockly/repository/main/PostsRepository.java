@@ -108,7 +108,7 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
     """, nativeQuery = true)
     List<Post> findFriendPostsWithinDistance(
             @Param("userId") UUID userId,
-            @Param("status") FriendshipStatus status,
+            @Param("status") String status,
             @Param("longitude") Double longitude,
             @Param("latitude") Double latitude
     );
