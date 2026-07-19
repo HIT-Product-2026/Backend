@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -179,33 +180,27 @@ public class PostController {
                 ));
     }
 
-    @GetMapping()
+    @GetMapping
     @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
     public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPosts(
-            @Parameter(description = "Số trang")
-            @RequestParam(name = "cursor") String cursor
+            @Parameter(description = "Thẻ đánh dấu trang")
+            @RequestParam(name = "cursor", required = false) String cursor
     ) {
         User user = authService.getCurrentUser();
 
-        List<PostResponseDto> listPost =  postService.getFriendPosts(user.getId(), cursor);
+        List<PostResponseDto> listPost = postService.getFriendPosts(user, cursor);
 
         String nextCursor = null;
-
-        // Lấy bài viết cuối cùng làm cursor
         if (!listPost.isEmpty()) {
             nextCursor = CursorUtil.encode(
                     PostCursor.from(listPost.get(listPost.size() - 1))
             );
         }
 
-
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Thành công",
-                        ListResponse.of(
-                                listPost,
-                                nextCursor
-                        )
+                        ListResponse.of(listPost, nextCursor)
                 )
         );
     }
