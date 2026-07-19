@@ -31,6 +31,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -149,23 +150,33 @@ public class PostServiceImpl implements PostService {
         }
         return PostResponseDto.from(post);
     }
-
     @Override
     public List<PostResponseDto> getPostByUserId(UUID userId, String cursor) {
 
-        PostCursor cursorDecode = CursorUtil.decode(cursor);
-
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "id", userId));
 
-        return postsRepository
-                .findByUserWithCursor(
-                        user,
-                        cursorDecode.createdAt(),
-                        cursorDecode.id(),
-                        PageRequest.of(0, pageSize)
-                ).stream()
+        Slice<Post> posts;
+
+        if (cursor == null || cursor.isBlank()) {
+            posts = postsRepository.findFirstPage(
+                    user,
+                    PageRequest.of(0, pageSize)
+            );
+        } else {
+            PostCursor cursorDecode = CursorUtil.decode(cursor);
+
+            posts = postsRepository.findNextPage(
+                    user,
+                    cursorDecode.createdAt(),
+                    cursorDecode.id(),
+                    PageRequest.of(0, pageSize)
+            );
+        }
+
+        return posts.stream()
                 .map(PostResponseDto::from)
                 .toList();
     }
