@@ -3,6 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.DateUtil;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.common.util.LocationUtil;
+import com.example.lockly.domain.dto.query.ProvinceInfo;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
 import com.example.lockly.domain.entity.main.Post;
@@ -194,9 +195,16 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public Profile updateCityVisited(Profile profile, Double latitude, Double longitude){
 
-        String cityCode = gisProvinceRepository
-                .findProvinceCodeByLocation(latitude, longitude)
+        ProvinceInfo provinceInfo = gisProvinceRepository
+                .findProvinceByLocation(latitude, longitude)
                 .orElse(null);
+
+        // Nếu địa điểm nằm ngoài vũ trụ thì chịu, không cập nhật được
+        if (provinceInfo == null){
+            return profile;
+        }
+
+        String cityCode = provinceInfo.getCode();
 
         // Thêm 1 thành phố đã đi (có set nên không sợ trùng)
         if (cityCode != null){

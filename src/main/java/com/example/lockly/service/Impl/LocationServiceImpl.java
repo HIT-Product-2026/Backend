@@ -1,8 +1,11 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
+import com.example.lockly.domain.dto.query.ProvinceInfo;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.repository.location.GISProvinceRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.LocationService;
 import com.example.lockly.service.RedisService;
@@ -18,6 +21,7 @@ public class LocationServiceImpl implements LocationService {
 
     private final RedisService redisService;
     private final AuthService authService;
+    private final GISProvinceRepository gisProvinceRepository;
 
     @Override
     public boolean isDropRequest(Double longitude, Double latitude){
@@ -98,7 +102,11 @@ public class LocationServiceImpl implements LocationService {
         return false;
     }
 
-    public void updateCityVisited(Double latitude, Double longitude){
+    @Override
+    public String getProvinceFullName(Double latitude, Double longitude) {
 
+        return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
+                .map(ProvinceInfo::getFullName)
+                .orElse(null);
     }
 }

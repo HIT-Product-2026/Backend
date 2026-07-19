@@ -181,18 +181,28 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    public List<PostResponseDto> getFriendPosts(UUID userId, String cursor) {
+    public List<PostResponseDto> getFriendPosts(User user, String cursor) {
 
-        PostCursor cursorDecode = CursorUtil.decode(cursor);
+        Slice<Post> posts;
 
-        return postsRepository
-                .findFriendPosts(
-                        userId,
-                        FriendshipStatus.ACCEPTED,
-                        cursorDecode.createdAt(),
-                        cursorDecode.id(),
-                        PageRequest.of(0, pageSize)
-                ).stream()
+        if (cursor == null || cursor.isBlank()) {
+            posts = postsRepository.findFirstPage(
+                    user,
+                    PageRequest.of(0, pageSize)
+            );
+        } else {
+            PostCursor cursorDecode = CursorUtil.decode(cursor);
+
+            posts = postsRepository.findNextPage(
+                    user,
+                    cursorDecode.createdAt(),
+                    cursorDecode.id(),
+                    PageRequest.of(0, pageSize)
+            );
+        }
+
+        return posts.getContent()
+                .stream()
                 .map(PostResponseDto::from)
                 .toList();
     }
