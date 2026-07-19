@@ -58,7 +58,7 @@ public record PostResponseDto (
                 dto.longitude(),
                 dto.modeLocation(),
                 nsfw,
-                dto.objectName(), 
+                dto.objectName(),
                 dto.createAt()
         );
     }
