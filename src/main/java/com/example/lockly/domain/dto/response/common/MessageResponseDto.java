@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class MessageResponseDto {
-
+    UUID id;
     UserResponseDto sender;
     //Nếu là ảnh thì content sẽ chứa api của ảnh
     String content;
@@ -23,6 +24,7 @@ public class MessageResponseDto {
 
     public static MessageResponseDto from(Message message){
         return new MessageResponseDto(
+                message.getId(),
                 UserResponseDto.from(message.getSender()),
                 message.getContent(),
                 message.getType(),
@@ -32,6 +34,7 @@ public class MessageResponseDto {
 
     public static MessageResponseDto from(Message message, String imageUrl) {
         return new MessageResponseDto(
+                message.getId(),
                 UserResponseDto.from(message.getSender()),
                 imageUrl,
                 message.getType(),
