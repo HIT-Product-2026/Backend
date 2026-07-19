@@ -162,14 +162,16 @@ public class PostServiceImpl implements PostService {
 
         if (cursor == null || cursor.isBlank()) {
             posts = postsRepository.findFirstPage(
-                    user,
+                    user.getId(),
+                    FriendshipStatus.ACCEPTED,
                     PageRequest.of(0, pageSize)
             );
         } else {
             PostCursor cursorDecode = CursorUtil.decode(cursor);
 
             posts = postsRepository.findNextPage(
-                    user,
+                    user.getId(),
+                    FriendshipStatus.ACCEPTED,
                     cursorDecode.createdAt(),
                     cursorDecode.id(),
                     PageRequest.of(0, pageSize)
