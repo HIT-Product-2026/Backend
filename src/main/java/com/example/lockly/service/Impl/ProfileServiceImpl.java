@@ -219,16 +219,16 @@ public class ProfileServiceImpl implements ProfileService {
         User user = authService.getCurrentUser();
 
 
-        List<Post> postCompleteds =
+        List<Post> completedPosts =
                 postsRepository.findFriendPostsWithinDistance(
                         user.getId(),
-                        FriendshipStatus.ACCEPTED,
+                        FriendshipStatus.ACCEPTED.name(),
                         longitude,
                         latitude
                 );
 
 
-        if(postCompleteds.isEmpty()){
+        if(completedPosts.isEmpty()){
             return profile;
         }
 
@@ -236,7 +236,7 @@ public class ProfileServiceImpl implements ProfileService {
         boolean canUnlock =
                 postsRepository.existsUnlockablePost(
                         profile.getId(),
-                        postCompleteds.stream()
+                        completedPosts.stream()
                                 .map(Post::getId)
                                 .toList()
                 );
@@ -251,7 +251,7 @@ public class ProfileServiceImpl implements ProfileService {
 
             profile.getReupPostIds()
                     .addAll(
-                            postCompleteds.stream()
+                            completedPosts.stream()
                                     .map(Post::getId)
                                     .toList()
                     );
