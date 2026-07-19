@@ -78,7 +78,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         // Tạo cuộc hôi thoại khi kết bạn
         conversationService.createConversation(new CreateConversationRequestDto(
                         userId,
-                        friendship.getReceiver().getId()
+                        friendship.getRequester().getId()
                 )
         );
 

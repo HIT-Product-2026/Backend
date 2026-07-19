@@ -38,6 +38,18 @@ spring:
 server:
   forward-headers-strategy: framework
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus
+
+  endpoint:
+    prometheus:
+      enabled: true
+
 resilience4j:
   circuitbreaker:
     instances:
