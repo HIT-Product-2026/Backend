@@ -107,10 +107,6 @@ public class LocationServiceImpl implements LocationService {
 
         return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
                 .map(ProvinceInfo::getFullName)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Province",
-                        "location",
-                        latitude + "," + longitude
-                ));
+                .orElse(null);
     }
 }
