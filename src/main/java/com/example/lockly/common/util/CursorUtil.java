@@ -4,6 +4,7 @@ import com.example.lockly.domain.dto.request.PostCursor;
 import com.example.lockly.exception.nonRetryException.InvalidCursorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
@@ -12,7 +13,8 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class CursorUtil {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
 
     // Post Cursor
