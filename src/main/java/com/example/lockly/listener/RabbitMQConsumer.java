@@ -52,6 +52,9 @@ public class RabbitMQConsumer {
     @Transactional
     public void detectNsfw(DetectNsfwPostRequestDto data) {
         try {
+            log.info("Detect NSFW message: {}", data);
+            log.info("Post id: {}", data.postId());
+            log.info("Object name: {}", data.objectName());
 
             boolean isNsfw = aiService.detectNsfw(data.objectName());
 
