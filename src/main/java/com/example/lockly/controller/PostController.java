@@ -188,14 +188,18 @@ public class PostController {
     ) {
         User user = authService.getCurrentUser();
 
+        log.debug("curor: " + cursor);
+
         List<PostResponseDto> listPost = postService.getFriendPosts(user, cursor);
 
-        String nextCursor = null;
-        if (!listPost.isEmpty()) {
-            nextCursor = CursorUtil.encode(
-                    PostCursor.from(listPost.get(listPost.size() - 1))
-            );
-        }
+            String nextCursor = null;
+            if (!listPost.isEmpty()) {
+                nextCursor = CursorUtil.encode(
+                        PostCursor.from(listPost.get(listPost.size() - 1))
+                );
+            }
+
+        log.debug("Decode sucessful");
 
         return ResponseEntity.ok(
                 ApiResponse.success(

@@ -210,6 +210,7 @@ public class PostServiceImpl implements PostService {
                 .map(PostResponseDto::from)
                 .toList();
     }
+
     @Override
     @Transactional
     public void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation){

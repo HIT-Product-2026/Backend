@@ -19,6 +19,9 @@ public class CursorUtil {
 
     public static String encode(PostCursor cursor){
 
+        if (cursor == null)
+            return null;
+
         try {
             String json = mapper.writeValueAsString(cursor);
 
