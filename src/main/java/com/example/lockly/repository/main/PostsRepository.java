@@ -20,19 +20,39 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
     SELECT p
     FROM Post p
     JOIN FETCH p.user
-    WHERE p.user = :user
+    WHERE p.user.id = :userId
+       OR p.user.id IN (
+            SELECT CASE
+                WHEN f.requester.id = :userId THEN f.receiver.id
+                ELSE f.requester.id
+            END
+            FROM Friendship f
+            WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
+              AND f.status = :status
+       )
     ORDER BY p.createdAt DESC, p.id DESC
     """)
     Slice<Post> findFirstPage(
-            @Param("user") User user,
+            @Param("userId") UUID userId,
+            @Param("status") FriendshipStatus status,
             Pageable pageable
     );
-
     @Query("""
     SELECT p
     FROM Post p
     JOIN FETCH p.user
-    WHERE p.user = :user
+    WHERE (
+            p.user.id = :userId
+            OR p.user.id IN (
+                SELECT CASE
+                    WHEN f.requester.id = :userId THEN f.receiver.id
+                    ELSE f.requester.id
+                END
+                FROM Friendship f
+                WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
+                  AND f.status = :status
+            )
+          )
     AND (
         p.createdAt < :cursorCreatedAt
         OR (
@@ -43,7 +63,8 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
     ORDER BY p.createdAt DESC, p.id DESC
     """)
     Slice<Post> findNextPage(
-            @Param("user") User user,
+            @Param("userId") UUID userId,
+            @Param("status") FriendshipStatus status,
             @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
             @Param("cursorId") UUID cursorId,
             Pageable pageable
