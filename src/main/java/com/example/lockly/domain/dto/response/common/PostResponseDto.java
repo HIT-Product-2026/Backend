@@ -44,7 +44,7 @@ public record PostResponseDto (
                 post.getLongitude(),
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
-                null,
+                post.getObjectName(),
                 post.getCreatedAt()
         );
     }
@@ -58,7 +58,7 @@ public record PostResponseDto (
                 dto.longitude(),
                 dto.modeLocation(),
                 nsfw,
-                null,
+                dto.objectName(), 
                 dto.createAt()
         );
     }
