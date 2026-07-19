@@ -15,22 +15,34 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PostsRepository extends JpaRepository<Post, UUID> {
+
+    @Query("""
+    SELECT p
+    FROM Post p
+    JOIN FETCH p.user
+    WHERE p.user = :user
+    ORDER BY p.createdAt DESC, p.id DESC
+    """)
+    Slice<Post> findFirstPage(
+            @Param("user") User user,
+            Pageable pageable
+    );
+
     @Query("""
     SELECT p
     FROM Post p
     JOIN FETCH p.user
     WHERE p.user = :user
     AND (
-        :cursorCreatedAt IS NULL
-        OR p.createdAt < :cursorCreatedAt
+        p.createdAt < :cursorCreatedAt
         OR (
             p.createdAt = :cursorCreatedAt
             AND p.id < :cursorId
         )
     )
     ORDER BY p.createdAt DESC, p.id DESC
-""")
-    Slice<Post> findByUserWithCursor(
+    """)
+    Slice<Post> findNextPage(
             @Param("user") User user,
             @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
             @Param("cursorId") UUID cursorId,
