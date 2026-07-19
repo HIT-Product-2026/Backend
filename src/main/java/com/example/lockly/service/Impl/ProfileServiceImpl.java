@@ -72,11 +72,9 @@ public class ProfileServiceImpl implements ProfileService {
 
         LocalDate birthday = DateUtil.parseDdMmYyyy(request.birthday());
 
-        profile = Profile.builder()
-                .birthday(birthday)
-                .gender(request.gender())
-                .phoneNumber(request.phoneNumber())
-                .build();
+        profile.setBirthday(birthday);
+        profile.setGender(request.gender());
+        profile.setPhoneNumber(request.phoneNumber());
 
         profileRepository.save(profile);
     }
