@@ -165,7 +165,7 @@ public class UserController {
             @PathVariable(name = "friendId") UUID friendId,
 
             @Parameter(description = "Cursor (null với lần đầu gọi)")
-            @RequestParam(name = "cursor") String cursor
+            @RequestParam(name = "cursor", required = false) String cursor
     ) {
         User user = authService.getCurrentUser();
 
