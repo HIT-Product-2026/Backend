@@ -55,7 +55,7 @@ public class MessageController {
             @RequestParam("file")
             MultipartFile file
 
-    ) throws Exception {
+    ){
 
         SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 

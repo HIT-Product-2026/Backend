@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
-    public MessageResponseDto sendTextMessage(SendTextMessageRequestDto request);
-    public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request) throws Exception;
-    public List<MessageResponseDto> findMessagesByConversationId(UUID conversationId);
-    public MessageResponseDto findMessageById(UUID id);
-    public InputStream findImageMessageById(UUID id) throws Exception;
+    MessageResponseDto sendTextMessage(SendTextMessageRequestDto request);
+    MessageResponseDto sendImageMessage(SendImageMessageRequestDto request);
+    List<MessageResponseDto> findMessagesByConversationId(UUID conversationId);
+    MessageResponseDto findMessageById(UUID id);
+    InputStream findImageMessageById(UUID id);
 }

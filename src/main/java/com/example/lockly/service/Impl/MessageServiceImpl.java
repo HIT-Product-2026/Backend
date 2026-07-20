@@ -80,7 +80,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request) throws Exception{
+    public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request){
         User user = authService.getCurrentUser();
 
         Conversation conversation = conversationRepository
@@ -167,7 +167,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public InputStream findImageMessageById(UUID id) throws Exception{
+    public InputStream findImageMessageById(UUID id){
         Message message = messageRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message", "id", id));
