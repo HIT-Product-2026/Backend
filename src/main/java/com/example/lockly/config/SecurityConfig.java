@@ -39,6 +39,10 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
+
+            // Monitoring
+            "/actuator/health",
+            "/actuator/prometheus"
     };
 
     @Bean
@@ -48,7 +52,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // [2] Không dùng Session — stateless hoàn toàn
-                .sessionManagement(session ->
+                .sessionManagement(session ->       
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
