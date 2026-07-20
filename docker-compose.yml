@@ -20,6 +20,17 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: lockly-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME:
+        postgresql://${DB_USERNAME_POSTGRE}:${DB_PASSWORD_POSTGRE}@postgres:5432/lockly_db?sslmode=disable
+    expose:
+      - "9187"
+    networks:
+      - lockly-network
+
   postgres_vietnam_gis:
     image: postgis/postgis:17-3.5
     container_name: lockly-postgres-vietnam-gis
@@ -66,6 +77,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS:
+        "-rabbit prometheus.return_per_object_metrics true"
     # Port 5672 để expose nội bộ cho BE. Port 15672 giữ lại ports để bạn vào Web UI từ máy host.
     expose:
       - "5672"
@@ -153,6 +166,84 @@ services:
     networks:
       - lockly-network
 
+
+  prometheus:
+    image: prom/prometheus:v3.0.0
+    container_name: lockly-prometheus
+    restart: always
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    expose:
+      - "9090"
+    networks:
+      - lockly-network
+
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: lockly-loki
+    restart: always
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    expose:
+      - "3100"
+    networks:
+      - lockly-network
+
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: lockly-promtail
+    restart: always
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - lockly-network
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: lockly-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - lockly-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: lockly-cadvisor
+    restart: always
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - "8080"
+    networks:
+      - lockly-network
+
   backend:
     image: khanhsayhi/lockly-backend:v2
     container_name: lockly-backend-v2
@@ -209,3 +300,6 @@ volumes:
   rabbitmq_data:
   minio_data:
   qdrant_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:

@@ -15,7 +15,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Message {
+public class
+Message {
 
     @Id
     @Column(nullable = false, updatable = false)
