@@ -2,12 +2,14 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WebSocketServiceImpl implements WebSocketService {
 
@@ -18,6 +20,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             UUID conversationId,
             Object payload
     ) {
+        log.debug("Gửi message cho conversation id: " + conversationId);
 
         messagingTemplate.convertAndSend(
                 "/topic/conversation/" + conversationId,
