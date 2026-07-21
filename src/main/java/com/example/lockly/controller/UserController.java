@@ -26,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
@@ -148,14 +149,18 @@ public class UserController {
     public ResponseEntity<byte[]> getAvatar(
             @Parameter(description = "ID user")
             @PathVariable("user_id") UUID userId
-    ) throws Exception {
+    ) throws IOException {
 
-        InputStream inputStream = userService.getAvatar(userId);
+        try (InputStream inputStream = userService.getAvatar(userId)) {
 
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(inputStream.readAllBytes());
+            if (inputStream == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(inputStream.readAllBytes());
+        }
     }
 
     @GetMapping("/{friendId}/posts")

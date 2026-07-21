@@ -60,7 +60,7 @@ public class PostController {
             @Parameter(description = "Vĩ độ")
             @RequestParam("latitude") Double latitude
 
-    ) throws Exception {
+    ) {
 
         CreatePostRequestDto request = new CreatePostRequestDto(
                 file,
