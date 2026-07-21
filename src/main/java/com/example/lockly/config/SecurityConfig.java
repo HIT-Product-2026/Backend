@@ -39,6 +39,10 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
+
+            // Monitoring
+            "/actuator/health",
+            "/actuator/prometheus"
     };
 
     @Bean
@@ -55,6 +59,7 @@ public class SecurityConfig {
                 // [3] Phân quyền endpoint
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers("/ws", "/ws/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
