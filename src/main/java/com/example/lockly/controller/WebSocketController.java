@@ -6,13 +6,17 @@ import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.repository.main.UserRepository;
+import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
@@ -34,10 +38,15 @@ public class WebSocketController {
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
+            Authentication authentication,
             @Valid SendTextMessageRequestDto request
     ) {
+        CustomUserDetails details =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        User user = details.getUser();
         // Lưu vào db
-        MessageResponseDto response = messageService.sendTextMessage(request);
+        MessageResponseDto response = messageService.sendTextMessage(request, user);
 
         // Response cho client
         webSocketService.sendTextMessage(
@@ -49,11 +58,16 @@ public class WebSocketController {
 
     @MessageMapping("/chat.sendImage")
     public void sendImageMessage(
+            Authentication authentication,
             @Valid SendImageMessageRequestDto request
-
     ) {
+        CustomUserDetails details =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        User user = details.getUser();
+
         //Request để lưu vào db trước rồi gửi imageUrl qua đây
-        MessageResponseDto response = messageService.sendImageMessage(request);
+        MessageResponseDto response = messageService.sendImageMessage(request, user);
 
         // Trả kết quả qua socket
         webSocketService.sendImageMessage(

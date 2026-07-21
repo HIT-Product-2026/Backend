@@ -5,6 +5,8 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class MessageController {
 
     private final MessageService messageService;
+    private final AuthService authService;
 
     @PostMapping("/text")
     @Operation(summary = "Gửi text message", description = "Gửi tin nhắn văn bản")
@@ -34,11 +37,13 @@ public class MessageController {
             SendTextMessageRequestDto request
     ) {
 
+        User user = authService.getCurrentUser();
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.created(
                                 "Gửi tin nhắn thành công",
-                                messageService.sendTextMessage(request)
+                                messageService.sendTextMessage(request, user)
                         )
                 );
     }
@@ -59,9 +64,11 @@ public class MessageController {
 
         SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 
+        User user = authService.getCurrentUser();
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Gửi ảnh thành công", messageService.sendImageMessage(request)));
+                .body(ApiResponse.created("Gửi ảnh thành công", messageService.sendImageMessage(request, user)));
     }
 
     @GetMapping("/{message_id}")

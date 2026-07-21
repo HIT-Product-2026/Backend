@@ -50,8 +50,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponseDto sendTextMessage(SendTextMessageRequestDto request){
-        User user = authService.getCurrentUser();
+    public MessageResponseDto sendTextMessage(SendTextMessageRequestDto request, User user){
 
         Conversation conversation = conversationRepository
                 .findById(request.conversationId())
@@ -80,8 +79,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request){
-        User user = authService.getCurrentUser();
+    public MessageResponseDto sendImageMessage(SendImageMessageRequestDto request, User user){
 
         Conversation conversation = conversationRepository
                 .findById(request.conversationId())
