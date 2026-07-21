@@ -1,6 +1,7 @@
 package com.example.lockly.controller;
 
-import com.example.lockly.domain.dto.request.SendImageMessageSocketRequestDto;
+import com.example.lockly.common.util.FileUtil;
+import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
@@ -39,22 +40,26 @@ public class WebSocketController {
         MessageResponseDto response = messageService.sendTextMessage(request);
 
         // Response cho client
-        webSocketService.sendTextMessage(request.conversationId(), response);
+        webSocketService.sendTextMessage(
+                request.conversationId(),
+                response
+        );
     }
 
 
     @MessageMapping("/chat.sendImage")
     public void sendImageMessage(
-            @Valid SendImageMessageSocketRequestDto request
+            @Valid SendImageMessageRequestDto request
 
     ) {
         //Request để lưu vào db trước rồi gửi imageUrl qua đây
+        MessageResponseDto response = messageService.sendImageMessage(request);
 
         // Trả kết quả qua socket
         webSocketService.sendImageMessage(
                 request.conversationId(),
-                request.imageUrl());
-
+                response
+        );
     }
 
     @MessageMapping("/share.location")
