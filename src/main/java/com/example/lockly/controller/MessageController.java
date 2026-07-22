@@ -52,17 +52,9 @@ public class MessageController {
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Gửi image message", description = "Upload ảnh để gửi tin nhắn")
     public ResponseEntity<ApiResponse<MessageResponseDto>> sendImageMessage(
-            @Parameter(description = "ID conversation")
-            @RequestParam("conversationId")
-            UUID conversationId,
-
-            @Parameter(description = "File ảnh")
-            @RequestParam("file")
-            MultipartFile file
-
+            @RequestBody
+            SendImageMessageRequestDto request
     ){
-
-        SendImageMessageRequestDto request = new SendImageMessageRequestDto(conversationId, file);
 
         User user = authService.getCurrentUser();
 
