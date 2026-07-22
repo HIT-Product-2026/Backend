@@ -18,5 +18,4 @@ public record ListResponse<T>(
     public static <T> ListResponse<T> of(List<T> items, String cursor) {
         return new ListResponse<>(items.size(), items, cursor);
     }
-
 }

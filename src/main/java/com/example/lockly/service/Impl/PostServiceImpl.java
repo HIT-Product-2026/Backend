@@ -3,7 +3,7 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.MinioProperties;
-import com.example.lockly.domain.dto.request.PostCursor;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
@@ -30,7 +30,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,7 +166,7 @@ public class PostServiceImpl implements PostService {
                     PageRequest.of(0, pageSize)
             );
         } else {
-            PostCursor cursorDecode = CursorUtil.decode(cursor);
+            Cursor cursorDecode = CursorUtil.decode(cursor);
 
             posts = postsRepository.findNextPage(
                     user.getId(),
@@ -194,7 +193,7 @@ public class PostServiceImpl implements PostService {
                     PageRequest.of(0, pageSize)
             );
         } else {
-            PostCursor cursorDecode = CursorUtil.decode(cursor);
+            Cursor cursorDecode = CursorUtil.decode(cursor);
 
             posts = postsRepository.findFriendPostsNextPage(
                     user.getId(),
