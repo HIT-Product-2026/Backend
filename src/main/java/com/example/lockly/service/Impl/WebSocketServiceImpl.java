@@ -14,7 +14,6 @@ import java.util.UUID;
 public class WebSocketServiceImpl implements WebSocketService {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final
 
     @Override
     public void sendTextMessage(
