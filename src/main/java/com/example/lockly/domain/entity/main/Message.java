@@ -36,12 +36,16 @@ Message {
     @Enumerated(EnumType.STRING)
     private MessageType type = MessageType.TEXT;
 
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private boolean isRead = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
-    void prePersist(){
-        if (id == null){
+    void prePersist() {
+        if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
         createdAt = LocalDateTime.now();
