@@ -14,4 +14,5 @@ public interface AuthService {
     void verifyOtpForgotPassword(VerifyOtpRequestDto request);
     void resetPassword(ResetPasswordRequestDto request);
     User getCurrentUser();
+    LoginResponseDto refreshToken(RefreshTokenRequestDto refreshToken);
 }
