@@ -4,7 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.PostCursor;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
 import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
@@ -185,7 +185,7 @@ public class UserController {
         // Lấy bài viết cuối cùng làm cursor
         if (!listPost.isEmpty()) {
             nextCursor = CursorUtil.encode(
-                    PostCursor.from(listPost.get(listPost.size() - 1))
+                    Cursor.from(listPost.get(listPost.size() - 1))
             );
         }
 

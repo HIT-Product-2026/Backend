@@ -1,8 +1,11 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.common.util.FileUtil;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
+import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.Message;
@@ -18,6 +21,8 @@ import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +39,9 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final AuthService authService;
     private final MinIOService minIOService;
+
     private final String prefix = "message";
+    private final Integer pageSize = 10;
 
     private void validateSender(Conversation conversation, User sender){
         if(!conversation.getUser1().getId().equals(sender.getId())
@@ -120,7 +127,11 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public List<MessageResponseDto> findMessagesByConversationId(UUID conversationId){
+    public MessagePageResponse findMessagesByConversationId(
+            UUID conversationId,
+            String cursor,
+            Integer pageSize
+    ){
         Conversation conversation = conversationRepository
                 .findById(conversationId)
                 .orElseThrow(() -> new BadRequestException("conversation id", conversationId));
@@ -129,27 +140,40 @@ public class MessageServiceImpl implements MessageService {
 
         validateSender(conversation, user);
 
-        List<Message> messageList = messageRepository.findByConversationId(conversation.getId());
+        Slice<Message> messageList;
 
-        // content lưu trong message là đường dẫn trong minIO, nhưng trả về thì phải trả về url api để fe gọi
-        return messageList.stream()
-                .map(message -> {
+        if (pageSize == null)
+            pageSize = this.pageSize;
 
-                    MessageResponseDto dto =
-                            MessageResponseDto.from(message);
+        if (cursor == null || cursor.isBlank()){
+            messageList = messageRepository.findByConversationFirstPage(
+                    conversationId,
+                    PageRequest.of(0, pageSize)
+            );
+        } else {
+            Cursor cursorDecode = CursorUtil.decode(cursor);
 
-                    if(message.getType() == MessageType.IMAGE){
+            messageList = messageRepository.findByConversationNextPage(
+                    conversationId,
+                    cursorDecode.createdAt(),
+                    cursorDecode.id(),
+                    PageRequest.of(0, pageSize)
+            );
+        }
 
-                        dto.setContent(
-                                FileUtil.getImageUrlApi(
-                                        prefix,
-                                        message.getId()
-                                )
-                        );
-                    }
-                    return dto;
-                })
-                .toList();
+        List<Message> listMessage = messageList.getContent();
+
+        String nextCursor = null;
+        if (!listMessage.isEmpty()) {
+            nextCursor = CursorUtil.encode(
+                    Cursor.from(listMessage.get(listMessage.size() - 1))
+            );
+        }
+
+        return MessagePageResponse.from(
+                listMessage,
+                nextCursor
+        );
     }
 
     @Override

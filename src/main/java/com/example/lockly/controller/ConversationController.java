@@ -4,6 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
+import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
@@ -78,6 +79,10 @@ public class ConversationController {
     @GetMapping("/conversations")
     @Operation(summary = "Lấy danh sách hội thoại của user")
     public ResponseEntity<ApiResponse<ListResponse<ConversationResponseDto>>> getConversations(
+            @Parameter(description = "Số lượng conversation muốn nhận (mặc định là 10)")
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+
+            @RequestParam(name = "cursor", required = false) String cursor
     ) {
 
         List<ConversationResponseDto> result = conversationService.findAll();
@@ -87,15 +92,24 @@ public class ConversationController {
                 .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
-    @GetMapping("/{conversation_id}/messages")
+    @GetMapping("/messages")
     public ResponseEntity<ApiResponse<ListResponse<MessageResponseDto>>> findMessagesByConversationId(
-            @PathVariable("conversation_id") UUID conversationId
+            @RequestParam(name = "conversation_id") UUID conversationId,
+            @RequestParam(name = "cursor", required = false) String cursor,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize
     ) {
-        List<MessageResponseDto> result =
-                messageService.findMessagesByConversationId(conversationId);
+        MessagePageResponse result =
+                messageService.findMessagesByConversationId(
+                        conversationId,
+                        cursor,
+                        pageSize
+                );
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
+                .body(ApiResponse.success("Thành công", ListResponse.of(
+                        result.messages(),
+                        result.nextCursor()
+                )));
     }
 }

@@ -1,5 +1,7 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.CursorUtil;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.entity.main.Conversation;
@@ -11,6 +13,8 @@ import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +28,8 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserRepository userRepository;
     private final AuthService authService;
 
+//    private final int pageSize = 10;
+
     @Override
     public List<ConversationResponseDto> findAll(){
         User user = authService.getCurrentUser();
@@ -34,6 +40,29 @@ public class ConversationServiceImpl implements ConversationService {
                 .map(ConversationResponseDto::from)
                 .toList();
     }
+//
+//    public List<ConversationResponseDto> findConversationByUser(
+//            String cursor,
+//            Integer pageSize,
+//            User user
+//    ){
+//        if (pageSize == null){
+//            pageSize = this.pageSize;
+//        }
+//
+//        Slice<Conversation> conversations;
+//
+//        if (cursor == null || cursor.isBlank()){
+//            conversations = conversationRepository.findByUserFirstPage(
+//                    user.getId(),
+//                    PageRequest.of(0, pageSize)
+//            );
+//        } else {
+//            Cursor cursorDecode = CursorUtil.decode(cursor);
+//
+//            conversations =
+//        }
+//    }
 
     @Override
     public ConversationResponseDto createConversation(CreateConversationRequestDto request){
