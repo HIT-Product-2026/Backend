@@ -1,6 +1,7 @@
 package com.example.lockly.security;
 
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.TokenType;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -33,7 +34,7 @@ public class JwtProvider {
     String secretKey;
 
     // 1. Tạo JWT Token (Đã chuyển hoàn toàn sang JJWT và BỎ ROLE)
-    public String generateToken(User user, long expirationTime) {
+    public String generateToken(User user, long expirationTime, TokenType type) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setId(UUID.randomUUID().toString()) // jti
@@ -42,6 +43,7 @@ public class JwtProvider {
                 .claim("displayName", user.getDisplayName())
                 .claim("email", user.getEmail())
                 .claim("mode", user.getMode() != null ? user.getMode().name() : null)
+                .claim("type", type)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -51,6 +53,12 @@ public class JwtProvider {
     // Tạo secret key dạng mã hóa từ chuỗi cấu hình cấu hình trong application.properties
     private Key getSignInKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+    // Lấy loại token (ACCESS / REFRESH)
+    public TokenType extractTokenType(String token) {
+        String type = extractAllClaims(token).get("type", String.class);
+        return TokenType.valueOf(type);
     }
 
     // Lấy username (subject) từ JWT

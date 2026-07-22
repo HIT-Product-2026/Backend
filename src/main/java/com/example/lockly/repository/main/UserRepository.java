@@ -44,4 +44,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             String keyword,
             Pageable pageable
     );
+
+    Optional<User> findByUsername(String username);
 }

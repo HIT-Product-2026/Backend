@@ -100,4 +100,20 @@
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.RESET_PASSWORD_SUCCESS));
         }
+
+        @PostMapping("/refresh")
+        @Operation(
+                summary = "Làm mới Access Token",
+                description = "Nhận Refresh Token và cấp Access Token mới"
+        )
+        public ResponseEntity<ApiResponse<LoginResponseDto>> refreshToken(
+                @Valid @RequestBody RefreshTokenRequestDto request
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(ApiResponse.success(
+                            SuccessMessage.Auth.REFRESH_TOKEN_SUCCESS,
+                            authService.refreshToken(request)
+                    ));
+        }
     }
