@@ -11,6 +11,9 @@ public record SendTextMessageRequestDto(
         UUID conversationId,
 
         @NotBlank
-        String content
+        String content,
+
+        @NotBlank
+        Boolean isRead
 ) {
 }

@@ -1,6 +1,5 @@
 package com.example.lockly.controller;
 
-import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
@@ -35,6 +33,7 @@ public class WebSocketController {
     private final UserRepository userRepository;
     private final LocationService locationService;
     private final UserService userService;
+    private final ConversationService conversationService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -48,10 +47,22 @@ public class WebSocketController {
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
 
-        // Response cho client
+        // Response cho client thông qua topic chat
         webSocketService.sendTextMessage(
                 request.conversationId(),
                 response
+        );
+
+        // Lấy user còn lại trong coversation
+        // Vì người đó mới là người cần nhận thông báo về tin nhắn)
+        User userOther = conversationService.getOtherUser(
+                request.conversationId(),
+                user.getId()
+        );
+
+        webSocketService.pubMessageToConversations(
+            user.getUsername(),
+            response
         );
     }
 
