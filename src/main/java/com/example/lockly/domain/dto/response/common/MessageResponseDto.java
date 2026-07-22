@@ -21,6 +21,7 @@ public class MessageResponseDto {
     String content;
     MessageType type;
     LocalDateTime createdAt;
+    Boolean isRead;
 
     public static MessageResponseDto from(Message message){
         return new MessageResponseDto(
@@ -28,7 +29,8 @@ public class MessageResponseDto {
                 UserResponseDto.from(message.getSender()),
                 message.getContent(),
                 message.getType(),
-                message.getCreatedAt()
+                message.getCreatedAt(),
+                message.isRead()
         );
     }
 
@@ -38,7 +40,8 @@ public class MessageResponseDto {
                 UserResponseDto.from(message.getSender()),
                 imageUrl,
                 message.getType(),
-                message.getCreatedAt()
+                message.getCreatedAt(),
+                message.isRead()
         );
     }
 }
