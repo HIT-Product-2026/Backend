@@ -1,6 +1,5 @@
 package com.example.lockly.controller;
 
-import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 

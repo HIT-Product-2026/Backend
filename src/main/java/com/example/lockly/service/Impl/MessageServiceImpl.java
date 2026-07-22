@@ -68,6 +68,7 @@ public class MessageServiceImpl implements MessageService {
                 .sender(user)
                 .type(MessageType.TEXT)
                 .content(request.content().trim())
+                .isRead(request.isRead())
                 .build();
 
         conversation.setLastMessageTime(LocalDateTime.now());
@@ -105,6 +106,7 @@ public class MessageServiceImpl implements MessageService {
                     .sender(user)
                     .type(MessageType.IMAGE)
                     .content(objectName)
+                    .isRead(request.isRead())
                     .build();
 
             // Cập nhật thời gian của tin nhắn cuối
