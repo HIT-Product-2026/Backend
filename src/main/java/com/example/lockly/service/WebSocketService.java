@@ -7,4 +7,6 @@ public interface WebSocketService {
     void sendImageMessage(UUID conversationId, Object payload);
     void shareLocationToFriend(UUID userId, Object payload);
     void shareOnlineToFriend(UUID userId, Object payload);
+
+    void pubMessageToConversations(String user, Object payload);
 }

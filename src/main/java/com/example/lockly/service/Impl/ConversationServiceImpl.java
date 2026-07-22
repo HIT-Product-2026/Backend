@@ -73,4 +73,24 @@ public class ConversationServiceImpl implements ConversationService {
         return ConversationResponseDto.from(conversation);
     }
 
+
+    @Override
+    public User getOtherUser(UUID conversationId, UUID currentUserId) {
+
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
+                .orElseThrow(() -> new BadRequestException("Conversation id", conversationId));
+
+        if (conversation.getUser1().getId().equals(currentUserId)) {
+            return conversation.getUser2();
+        }
+
+        if (conversation.getUser2().getId().equals(currentUserId)) {
+            return conversation.getUser1();
+        }
+
+        throw new BadRequestException(
+                "User không thuộc conversation này"
+        );
+    }
 }

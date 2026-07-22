@@ -33,6 +33,7 @@ public class WebSocketController {
     private final UserRepository userRepository;
     private final LocationService locationService;
     private final UserService userService;
+    private final ConversationService conversationService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -46,10 +47,22 @@ public class WebSocketController {
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
 
-        // Response cho client
+        // Response cho client thông qua topic chat
         webSocketService.sendTextMessage(
                 request.conversationId(),
                 response
+        );
+
+        // Lấy user còn lại trong coversation
+        // Vì người đó mới là người cần nhận thông báo về tin nhắn)
+        User userOther = conversationService.getOtherUser(
+                request.conversationId(),
+                user.getId()
+        );
+
+        webSocketService.pubMessageToConversations(
+            user.getUsername(),
+            response
         );
     }
 

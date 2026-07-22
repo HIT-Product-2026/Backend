@@ -14,6 +14,7 @@ import java.util.UUID;
 public class WebSocketServiceImpl implements WebSocketService {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final
 
     @Override
     public void sendTextMessage(
@@ -36,6 +37,20 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         messagingTemplate.convertAndSend(
                 "/topic/conversation/" + conversationId,
+                payload
+        );
+    }
+
+    @Override
+    public void pubMessageToConversations(
+            String user,
+            Object payload
+    ){
+
+
+        messagingTemplate.convertAndSendToUser(
+                user,
+                "/queue/conversation",
                 payload
         );
     }
