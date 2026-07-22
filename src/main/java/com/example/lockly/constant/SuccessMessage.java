@@ -9,6 +9,7 @@ public class SuccessMessage {
         public static final String SEND_OTP_SUCCESS = "Mã OTP đã được gửi về Gmail của bạn. Vui lòng kiểm tra trong vòng 5 phút.";
         public static final String VERIFY_OTP_SUCCESS = "Xác thực OTP thành công.";
         public static final String RESET_PASSWORD_SUCCESS = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.";
+        public static final String REFRESH_TOKEN_SUCCESS = "Cấp phát access token thành công";
     }
 
     public static class User {

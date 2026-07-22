@@ -10,8 +10,10 @@ import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.InvalidatedToken;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.TokenType;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.UnauthorizedException;
 import com.example.lockly.exception.nonRetryException.VsException;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
 import com.example.lockly.repository.main.ProfileRepository;
@@ -28,6 +30,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,15 +54,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordUtil passwordUtil;
     private final RedisService redisService;
     private final ProfileRepository profileRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    static final String REGISTER_PREFIX        = "register:";
-    static final Duration REGISTER_TTL         = Duration.ofMinutes(5);
-
-    static final String FORGOT_PREFIX          = "forgot:";
-    static final String FORGOT_VERIFIED_PREFIX = "forgot:verified:";
-    static final Duration FORGOT_OTP_TTL       = Duration.ofMinutes(5);
-    static final Duration FORGOT_VERIFIED_TTL  = Duration.ofMinutes(10);
+    private final UserDetailsService userDetailsService;
 
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -69,56 +65,66 @@ public class AuthServiceImpl implements AuthService {
     public void sendOtpForRegister(RegisterRequestDto request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new BadRequestException("Email đã tồn tại / Email đã được đăng ký.");
+            throw new BadRequestException("Email đã tồn tại.");
         }
 
-        String otpCode = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
-        redisTemplate.opsForValue().set(REGISTER_PREFIX + request.email(), otpCode, REGISTER_TTL);
-        redisTemplate.opsForValue().set(REGISTER_PREFIX + "pwd:" + request.email(), passwordUtil.hash(request.password()), REGISTER_TTL);
-        log.info("[Register Bước 1] Lưu Redis email={}", request.email());
-        emailService.sendOtpEmail(request.email(), otpCode, "đăng ký");
+        String otpCode = String.valueOf(
+                SECURE_RANDOM.nextInt(900000) + 100000
+        );
+
+        redisService.saveRegister(
+                request.email(),
+                RegisterCacheDto.builder()
+                        .otp(otpCode)
+                        .passwordHash(passwordUtil.hash(request.password()))
+                        .build()
+        );
+
+        emailService.sendOtpEmail(
+                request.email(),
+                otpCode,
+                "đăng ký"
+        );
     }
 
     @Override
     @Transactional
     public UserResponseDto verifyOtpAndRegister(VerifyOtpRequestDto request) {
-        String otpKey = REGISTER_PREFIX + request.email();
-        String pwdKey = REGISTER_PREFIX + "pwd:" + request.email();
 
-        Object rawOtp = redisTemplate.opsForValue().get(otpKey);
-        if (rawOtp == null || !rawOtp.toString().equals(request.otp())) {
-            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        RegisterCacheDto registerCache = redisService.getRegister(request.email());
+
+        if (registerCache == null) {
+            throw new BadRequestException("Phiên đăng ký đã hết hạn. Vui lòng thử lại.");
         }
 
-        Object rawPwd = redisTemplate.opsForValue().get(pwdKey);
-        if (rawPwd == null) {
-            throw new BadRequestException("Phiên đăng ký đã hết hạn. Vui lòng thử lại.");
+        if (!registerCache.otp().equals(request.otp())) {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
         String displayName = request.email().split("@")[0];
 
-        // Username là 1 dãy số ngẫu nhiên 10 chữ số
+        // Username là chuỗi ngẫu nhiên 10 chữ số
         Random random = new Random();
         String username;
 
-       do {
-            StringBuilder rawUsername = new StringBuilder();
+        do {
+            StringBuilder builder = new StringBuilder();
 
             for (int i = 0; i < 10; i++) {
-                rawUsername.append(random.nextInt(10));
+                builder.append(random.nextInt(10));
             }
 
-            username = rawUsername.toString();
-       } while (userRepository.existsByUsername(username)); // Đảm bảo username không bị trùng
+            username = builder.toString();
+
+        } while (userRepository.existsByUsername(username));
 
         User user = User.builder()
                 .username(username)
                 .displayName(displayName)
                 .email(request.email())
-                .passwordHash(rawPwd.toString())
+                .passwordHash(registerCache.passwordHash())
                 .build();
 
-        // Tạo profile
         Profile profile = Profile.builder()
                 .user(user)
                 .birthday(null)
@@ -128,13 +134,11 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-        log.info("[Register Bước 2] Đã tạo user mới, email={}", request.email());
-
         profileRepository.save(profile);
 
-        redisTemplate.delete(otpKey);
-        redisTemplate.delete(pwdKey);
-        log.info("[Register Bước 2] Đã xóa Redis key email={}", request.email());
+        redisService.deleteRegister(request.email());
+
+        log.info("[Register] Đăng ký thành công, email={}", request.email());
 
         return UserResponseDto.from(user);
     }
@@ -204,65 +208,93 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Email chưa được đăng ký.");
         }
 
-        String otpCode  = String.valueOf(SECURE_RANDOM.nextInt(900000) + 100000);
-        String redisKey = FORGOT_PREFIX + request.email();
+        String otpCode = String.valueOf(
+                SECURE_RANDOM.nextInt(900000) + 100000
+        );
 
-        redisTemplate.opsForValue().set(redisKey, otpCode, FORGOT_OTP_TTL);
-        log.info("[ForgotPassword Bước 1] Lưu Redis key={}", redisKey);
+        redisService.saveForgotPassword(
+                request.email(),
+                ForgotPasswordCacheDto.builder()
+                        .otp(otpCode)
+                        .build()
+        );
 
-        emailService.sendOtpEmail(request.email(), otpCode, "đặt lại mật khẩu");
+        log.info("[ForgotPassword Bước 1] Lưu Redis email={}", request.email());
+
+        emailService.sendOtpEmail(
+                request.email(),
+                otpCode,
+                "đặt lại mật khẩu"
+        );
     }
 
     @Override
     @Transactional
     public void verifyOtpForgotPassword(VerifyOtpRequestDto request) {
 
-        String redisKey = FORGOT_PREFIX + request.email();
-        Object raw = redisTemplate.opsForValue().get(redisKey);
+        ForgotPasswordCacheDto cache = redisService.getForgotPassword(request.email());
 
-        if (raw == null || !raw.toString().equals(request.otp())) {
+        if (cache == null || !cache.otp().equals(request.otp())) {
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        redisTemplate.delete(redisKey);
-        redisTemplate.opsForValue().set(FORGOT_VERIFIED_PREFIX + request.email(), "true", FORGOT_VERIFIED_TTL);
+        redisService.deleteForgotPassword(request.email());
+
+        redisService.saveForgotPasswordVerified(request.email());
+
         log.info("[ForgotPassword Bước 2] Xác thực OTP thành công, email={}", request.email());
     }
-
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
-        String verifiedKey = FORGOT_VERIFIED_PREFIX + request.email();
-        Object verified = redisTemplate.opsForValue().get(verifiedKey);
 
-        if (verified == null) {
+        Boolean verified = redisService.isForgotPasswordVerified(request.email());
+
+        if (!Boolean.TRUE.equals(verified)) {
             throw new BadRequestException("Phiên xác thực đã hết hạn. Vui lòng gửi lại OTP.");
         }
 
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.email()));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "email", request.email()));
 
         user.setPasswordHash(passwordUtil.hash(request.newPassword()));
 
         userRepository.save(user);
-        redisTemplate.delete(verifiedKey);
+
+        redisService.deleteForgotPasswordVerified(request.email());
+
         log.info("[ForgotPassword Bước 3] Đặt lại mật khẩu thành công, email={}", request.email());
     }
 
     private LoginResponseDto buildLoginResponse(User user) {
 
-        String accessToken  = jwtProvider.generateToken(user, ACCESS_TOKEN_EXPIRATION);
-        String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_EXPIRATION);
-
-        String jwtId = jwtProvider.extractTokenId(accessToken);
-
-        // Lưu token vào redis
-        redisTemplate.opsForValue().set(
-                "user_token:" + user.getId(),
-                jwtId,
-                Duration.ofMillis(ACCESS_TOKEN_EXPIRATION)
+        String accessToken = jwtProvider.generateToken(
+                user,
+                ACCESS_TOKEN_EXPIRATION,
+                TokenType.ACCESS
         );
 
+        String refreshToken = jwtProvider.generateToken(
+                user,
+                REFRESH_TOKEN_EXPIRATION,
+                TokenType.REFRESH
+        );
+
+        String accessJti = jwtProvider.extractTokenId(accessToken);
+        String refreshJti = jwtProvider.extractTokenId(refreshToken);
+
+        redisService.saveAccessToken(
+                user.getId(),
+                accessJti,
+                ACCESS_TOKEN_EXPIRATION
+        );
+
+        redisService.saveRefreshToken(
+                user.getId(),
+                refreshJti,
+                REFRESH_TOKEN_EXPIRATION
+        );
 
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
@@ -288,5 +320,55 @@ public class AuthServiceImpl implements AuthService {
         }
 
         throw new RuntimeException("Invalid authentication principal");
+    }
+
+    @Override
+    @Transactional
+    public LoginResponseDto refreshToken(RefreshTokenRequestDto request) {
+
+        // Lấy Refresh Token từ request
+        String refreshToken = request.refeshToken();
+
+        // Lấy username từ JWT
+        String username = jwtProvider.extractUsername(refreshToken);
+
+        // Token không chứa username => JWT không hợp lệ
+        if (username == null) {
+            throw new UnauthorizedException("Refresh token không hợp lệ.");
+        }
+
+        // Load thông tin user để phục vụ xác thực JWT
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // Kiểm tra chữ ký, thời hạn và blacklist của JWT
+        if (!jwtProvider.isTokenValid(refreshToken, userDetails)) {
+            throw new UnauthorizedException("Refresh token không hợp lệ.");
+        }
+
+        // Chỉ cho phép sử dụng Refresh Token để gọi API refresh
+        TokenType type = jwtProvider.extractTokenType(refreshToken);
+        if (type != TokenType.REFRESH) {
+            throw new UnauthorizedException("Đây không phải Refresh Token.");
+        }
+
+        // Lấy User từ database
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UnauthorizedException("Không tìm thấy người dùng."));
+
+        // Lấy jti của Refresh Token gửi lên
+        String refreshJti = jwtProvider.extractTokenId(refreshToken);
+
+        // Lấy jti của Refresh Token hiện tại đang được lưu trong Redis
+        String redisRefreshJti = redisService.getRefreshToken(user.getId());
+
+        // Refresh Token đã bị thay thế hoặc hết hạn trong Redis
+        if (!refreshJti.equals(redisRefreshJti)) {
+            throw new UnauthorizedException("Refresh token đã hết hiệu lực.");
+        }
+
+        // Sinh Access Token và Refresh Token mới,
+        // đồng thời cập nhật lại jti mới vào Redis
+        return buildLoginResponse(user);
     }
 }

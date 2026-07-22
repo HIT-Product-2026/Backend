@@ -1,6 +1,6 @@
 package com.example.lockly.common.util;
 
-import com.example.lockly.domain.dto.request.PostCursor;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.exception.nonRetryException.InvalidCursorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ public class CursorUtil {
 
     // Post Cursor
 
-    public static String encode(PostCursor cursor){
+    public static String encode(Cursor cursor){
 
         if (cursor == null)
             return null;
@@ -37,10 +37,10 @@ public class CursorUtil {
     }
 
 
-    public static PostCursor decode(String token){
+    public static Cursor decode(String token){
 
         if (token == null || token.isBlank()) {
-            return new PostCursor(null, null);
+            return new Cursor(null, null);
         }
 
         try {
@@ -49,7 +49,7 @@ public class CursorUtil {
                     StandardCharsets.UTF_8
             );
 
-            return mapper.readValue(json, PostCursor.class);
+            return mapper.readValue(json, Cursor.class);
         } catch (Exception e) {
             throw new InvalidCursorException(e);
         }

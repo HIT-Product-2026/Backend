@@ -7,7 +7,7 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
-import com.example.lockly.domain.dto.request.PostCursor;
+import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -192,12 +191,12 @@ public class PostController {
 
         List<PostResponseDto> listPost = postService.getFriendPosts(user, cursor);
 
-            String nextCursor = null;
-            if (!listPost.isEmpty()) {
-                nextCursor = CursorUtil.encode(
-                        PostCursor.from(listPost.get(listPost.size() - 1))
-                );
-            }
+        String nextCursor = null;
+        if (!listPost.isEmpty()) {
+            nextCursor = CursorUtil.encode(
+                    Cursor.from(listPost.get(listPost.size() - 1))
+            );
+        }
 
         log.debug("Decode sucessful");
 
