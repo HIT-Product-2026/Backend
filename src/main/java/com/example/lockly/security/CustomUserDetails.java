@@ -1,19 +1,28 @@
 package com.example.lockly.security;
 
 import com.example.lockly.domain.entity.main.User;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
+@Getter
+@Setter
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final UUID id;
+    private final String username;
+    private final String passwordHash;
 
     public CustomUserDetails(User user) {
-        this.user = user;
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.passwordHash = user.getPasswordHash();
     }
 
     @Override
@@ -23,12 +32,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPasswordHash();
+        return passwordHash;
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return username;
     }
 
     @Override
@@ -49,9 +58,5 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public User getUser() {
-        return user;
     }
 }

@@ -316,7 +316,9 @@ public class AuthServiceImpl implements AuthService {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof CustomUserDetails userDetails) {
-            return userDetails.getUser();
+            return userRepository.findById(userDetails.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", userDetails.getId()));
+
         }
 
         throw new RuntimeException("Invalid authentication principal");
