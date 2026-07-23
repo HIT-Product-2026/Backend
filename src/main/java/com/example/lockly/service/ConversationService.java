@@ -12,4 +12,5 @@ public interface ConversationService {
     ConversationResponseDto createConversation(CreateConversationRequestDto request);
     ConversationResponseDto findById(UUID id);
     User getOtherUser(UUID conversationId, UUID currentUserId);
+    String getOtherUsername(UUID conversationId, UUID currentUserId);
 }
