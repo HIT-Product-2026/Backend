@@ -76,4 +76,14 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
             @Param("cursorId") UUID cursorId,
             Pageable pageable
     );
+
+    @Query("""
+    select c
+    from Conversation c
+    join fetch c.user1 u1
+    join fetch c.user2 u2
+    left join fetch c.lastMessage lm
+    where c.id = :id
+""")
+    Optional<Conversation> findByIdWithUsersAndLastMessage(@Param("id") UUID id);
 }

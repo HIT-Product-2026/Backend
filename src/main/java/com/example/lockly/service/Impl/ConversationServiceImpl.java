@@ -8,6 +8,7 @@ import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.DuplicateResourceException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.AuthService;
@@ -40,29 +41,19 @@ public class ConversationServiceImpl implements ConversationService {
                 .map(ConversationResponseDto::from)
                 .toList();
     }
-//
-//    public List<ConversationResponseDto> findConversationByUser(
-//            String cursor,
-//            Integer pageSize,
-//            User user
-//    ){
-//        if (pageSize == null){
-//            pageSize = this.pageSize;
-//        }
-//
-//        Slice<Conversation> conversations;
-//
-//        if (cursor == null || cursor.isBlank()){
-//            conversations = conversationRepository.findByUserFirstPage(
-//                    user.getId(),
-//                    PageRequest.of(0, pageSize)
-//            );
-//        } else {
-//            Cursor cursorDecode = CursorUtil.decode(cursor);
-//
-//            conversations =
-//        }
-//    }
+
+    @Override
+    public String getOtherUsername(UUID conversationId, UUID currentUserId) {
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow();
+
+        if (conversation.getUser1().getId().equals(currentUserId)) {
+            return conversation.getUser2().getUsername();
+        }
+
+        return conversation.getUser1().getUsername();
+    }
 
     @Override
     public ConversationResponseDto createConversation(CreateConversationRequestDto request){
@@ -103,23 +94,21 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
 
-    @Override
-    public User getOtherUser(UUID conversationId, UUID currentUserId) {
+    public User getOtherUser(UUID conversationId, UUID userId) {
 
-        Conversation conversation = conversationRepository
-                .findById(conversationId)
-                .orElseThrow(() -> new BadRequestException("Conversation id", conversationId));
+        Conversation conversation =
+                conversationRepository.findByIdWithUsersAndLastMessage(conversationId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Conversation",
+                                        "id",
+                                        conversationId
+                                ));
 
-        if (conversation.getUser1().getId().equals(currentUserId)) {
+        if (conversation.getUser1().getId().equals(userId)) {
             return conversation.getUser2();
         }
 
-        if (conversation.getUser2().getId().equals(currentUserId)) {
-            return conversation.getUser1();
-        }
-
-        throw new BadRequestException(
-                "User không thuộc conversation này"
-        );
+        return conversation.getUser1();
     }
 }
