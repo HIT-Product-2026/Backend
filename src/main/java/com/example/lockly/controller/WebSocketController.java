@@ -14,6 +14,7 @@ import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 @Tag(name = "WebSockets", description = "Quản lý chức năng realtime")
 public class WebSocketController {
@@ -44,12 +46,14 @@ public class WebSocketController {
 
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
+        log.debug("Lưu thành công");
 
         // Response cho client thông qua topic chat
         webSocketService.sendTextMessage(
                 request.conversationId(),
                 response
         );
+        log.debug("Gửi thành công");
 
         // Lấy user còn lại trong coversation
         // Vì người đó mới là người cần nhận thông báo về tin nhắn)
@@ -63,6 +67,7 @@ public class WebSocketController {
             userOther.getUsername(),
             response
         );
+        log.debug("Gửi thông báo thành công");
     }
 
 
