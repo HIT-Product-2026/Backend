@@ -1,13 +1,13 @@
 package com.example.lockly.listener;
 
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-
-import java.security.Principal;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -18,14 +18,17 @@ public class WebSocketConsumer {
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
 
-        Principal principal = event.getUser();
+        Authentication authentication = (Authentication) event.getUser();
 
-        if (principal == null) {
+        if (authentication == null) {
             return;
         }
 
-        UUID userId = UUID.fromString(principal.getName());
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
 
-        redisService.saveUserOnline(userId, false);
+        User user = userDetails.getUser();
+
+        redisService.saveUserOnline(user.getId(), false);
     }
 }
