@@ -21,6 +21,7 @@ import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
@@ -142,6 +144,8 @@ public class MessageServiceImpl implements MessageService {
             String cursor,
             Integer pageSize
     ){
+        log.debug("Bắt đầu lấy message theo conversation id");
+
         Conversation conversation = conversationRepository
                 .findById(conversationId)
                 .orElseThrow(() -> new BadRequestException("conversation id", conversationId));
@@ -152,15 +156,21 @@ public class MessageServiceImpl implements MessageService {
 
         Slice<Message> messageList;
 
+        log.debug("pageSize: " + pageSize);
+        log.debug("cursor: " + cursor);
+
         if (pageSize == null)
             pageSize = this.pageSize;
 
         if (cursor == null || cursor.isBlank()){
+            log.debug("Lấy trang message đầu trong phân trang");
             messageList = messageRepository.findByConversationFirstPage(
                     conversationId,
                     PageRequest.of(0, pageSize)
             );
         } else {
+            log.debug("Lấy trang message tiếp theo trong phân trang");
+
             Cursor cursorDecode = CursorUtil.decode(cursor);
 
             messageList = messageRepository.findByConversationNextPage(
@@ -179,6 +189,8 @@ public class MessageServiceImpl implements MessageService {
                     Cursor.from(listMessage.get(listMessage.size() - 1))
             );
         }
+
+        log.debug("nextCursor: " + nextCursor);
 
         return MessagePageResponse.from(
                 listMessage,

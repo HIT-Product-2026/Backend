@@ -7,7 +7,6 @@ import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
