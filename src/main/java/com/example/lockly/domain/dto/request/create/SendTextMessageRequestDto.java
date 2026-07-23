@@ -13,7 +13,7 @@ public record SendTextMessageRequestDto(
         @NotBlank
         String content,
 
-        @NotBlank
+        @NotNull
         Boolean isRead
 ) {
 }

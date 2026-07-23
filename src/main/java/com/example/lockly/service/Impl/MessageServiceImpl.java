@@ -82,6 +82,11 @@ public class MessageServiceImpl implements MessageService {
 
         messageRepository.save(message);
 
+        conversation.setLastMessage(message);
+        conversation.setLastMessageTime(message.getCreatedAt());
+
+        conversationRepository.save(conversation);
+
         return MessageResponseDto.from(message);
     }
 
@@ -120,6 +125,11 @@ public class MessageServiceImpl implements MessageService {
             conversation.setLastMessageTime(LocalDateTime.now());
 
             messageRepository.save(message);
+
+            conversation.setLastMessage(message);
+            conversation.setLastMessageTime(message.getCreatedAt());
+
+            conversationRepository.save(conversation);
 
             return MessageResponseDto.from(messageRepository.save(message));
 
