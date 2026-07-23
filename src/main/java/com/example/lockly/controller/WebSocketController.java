@@ -7,6 +7,7 @@ import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.*;
@@ -157,6 +158,11 @@ public class WebSocketController {
             throw new RuntimeException("Authentication is null");
         }
 
-        return ((CustomUserDetails) authentication.getPrincipal()).getUser();
+        CustomUserDetails details =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        return userRepository.findById(details.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "id", details.getId()));
     }
 }
