@@ -14,12 +14,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-
-import java.security.Principal;
-import java.util.UUID;
 
 @Validated
 @Controller
@@ -37,13 +35,12 @@ public class WebSocketController {
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
-            Authentication authentication,
+            SimpMessageHeaderAccessor headerAccessor,
             @Valid SendTextMessageRequestDto request
     ) {
-        CustomUserDetails details =
-                (CustomUserDetails) authentication.getPrincipal();
 
-        User user = details.getUser();
+        User user = getCurrentUser(headerAccessor);
+
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
 
@@ -60,8 +57,9 @@ public class WebSocketController {
                 user.getId()
         );
 
+        // Gửi thông báo sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
-            user.getUsername(),
+            userOther.getUsername(),
             response
         );
     }
@@ -69,13 +67,11 @@ public class WebSocketController {
 
     @MessageMapping("/chat.sendImage")
     public void sendImageMessage(
-            Authentication authentication,
+            SimpMessageHeaderAccessor headerAccessor,
             @Valid SendImageMessageRequestDto request
     ) {
-        CustomUserDetails details =
-                (CustomUserDetails) authentication.getPrincipal();
 
-        User user = details.getUser();
+        User user = getCurrentUser(headerAccessor);
 
         //Request để lưu vào db trước rồi gửi imageUrl qua đây
         MessageResponseDto response = messageService.sendImageMessage(request, user);
@@ -85,60 +81,82 @@ public class WebSocketController {
                 request.conversationId(),
                 response
         );
+
+        // Lấy user còn lại trong coversation
+        // Vì người đó mới là người cần nhận thông báo về tin nhắn)
+        User userOther = conversationService.getOtherUser(
+                request.conversationId(),
+                user.getId()
+        );
+
+        // Gửi thông báo sang màn của người nhận tin nhắn
+        webSocketService.pubMessageToConversations(
+                userOther.getUsername(),
+                response
+        );
     }
 
     @MessageMapping("/share.location")
     public void sendLocationToUserFriends(
-            Principal principal,
+            SimpMessageHeaderAccessor headerAccessor,
             Double longitude,
             Double latitude
     ){
-        if (principal == null || principal.getName() == null) return;
+
+        User user = getCurrentUser(headerAccessor);
 
         if (longitude == null || latitude == null) return;
 
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
         if (locationService.isDropRequest(longitude, latitude)) return;
 
-        UUID userId = UUID.fromString(principal.getName());
+        UserCacheDto userDto = redisService.getUser(user.getId());
 
-        UserCacheDto user = redisService.getUser(userId);
-
-        if (user == null) {
-            user = UserCacheDto.from(userRepository.findById(userId).orElseThrow());
-            redisService.saveUser(user);
+        if (userDto == null) {
+            userDto = UserCacheDto.from(userRepository.findById(user.getId()).orElseThrow());
+            redisService.saveUser(userDto);
         }
 
         // Lưu vào redis
-        redisService.saveUserLocation(user.id(), latitude, longitude);
+        redisService.saveUserLocation(userDto.id(), latitude, longitude);
 
-        if (user.mode() == UserMode.PRIVATE)
+        if (userDto.mode() == UserMode.PRIVATE)
             return;
 
-        LocationUserResponseDto response = redisService.getUserLocation(user.id());
+        LocationUserResponseDto response = redisService.getUserLocation(userDto.id());
 
         // Chuyển lên topic cá nhân
-        webSocketService.shareLocationToFriend(user.id(), response);
+        webSocketService.shareLocationToFriend(userDto.id(), response);
     }
 
     @MessageMapping("/online")
-    public void IsUserOnline(Principal principal){
+    public void IsUserOnline(SimpMessageHeaderAccessor headerAccessor){
 
-        UUID userId = UUID.fromString(principal.getName());
+        User user = getCurrentUser(headerAccessor);
 
-        UserCacheDto user = redisService.getUser(userId);
+        UserCacheDto userDto = redisService.getUser(user.getId());
 
-        if (user == null) {
-            user = UserCacheDto.from(userRepository.findById(userId).orElseThrow());
-            redisService.saveUser(user);
+        if (userDto == null) {
+            userDto = UserCacheDto.from(userRepository.findById(user.getId()).orElseThrow());
+            redisService.saveUser(userDto);
         }
 
-        boolean isOnline = userService.isUserOnlineByUserId(user.id());
+        boolean isOnline = userService.isUserOnlineByUserId(userDto.id());
 
         // Redis lưu trạng thái online
-        redisService.saveUserOnline(user.id(), isOnline);
+        redisService.saveUserOnline(userDto.id(), isOnline);
 
         // Chuyển lên topic cá nhân
-        webSocketService.shareOnlineToFriend(user.id(), isOnline);
+        webSocketService.shareOnlineToFriend(userDto.id(), isOnline);
+    }
+
+    private User getCurrentUser(SimpMessageHeaderAccessor headerAccessor) {
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+
+        if (authentication == null) {
+            throw new RuntimeException("Authentication is null");
+        }
+
+        return ((CustomUserDetails) authentication.getPrincipal()).getUser();
     }
 }
