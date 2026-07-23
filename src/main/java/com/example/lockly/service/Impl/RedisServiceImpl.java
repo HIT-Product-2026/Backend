@@ -67,8 +67,9 @@ public class RedisServiceImpl implements RedisService {
         );
     }
 
-    public UserCacheDto getUser(String username) {
-        return (UserCacheDto) redisTemplate.opsForValue().get("user:" + username);
+    @Override
+    public UserCacheDto getUser(UUID userId) {
+        return (UserCacheDto) redisTemplate.opsForValue().get("user:" + userId);
     }
 
     @Override
