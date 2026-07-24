@@ -6,6 +6,7 @@ import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
@@ -65,25 +66,24 @@ public class WebSocketController {
                 user.getId()
         );
 
-        ConversationResponseDto conversationResponse =
-                ConversationResponseDto.from(
-                        conversationRepository
-                                .findById(response.getConversationId())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                        "Conversation",
-                                        "conversation id",
-                                        response.getConversationId()
-                                ))
-                );
+        Conversation conversation = conversationRepository
+                .findByIdWithUsers(response.getConversationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Conversation",
+                        "conversation id",
+                        response.getConversationId()
+                ));
+
+        ConversationResponseDto dto =
+                ConversationResponseDto.from(conversation);
 
         // Gửi thông báo sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
             userOther.getUsername(),
-            conversationResponse
+            dto
         );
         log.debug("Gửi thông báo thành công");
     }
-
 
     @MessageMapping("/chat.sendImage")
     public void sendImageMessage(
@@ -93,26 +93,37 @@ public class WebSocketController {
 
         User user = getCurrentUser(headerAccessor);
 
-        //Request để lưu vào db trước rồi gửi imageUrl qua đây
+        // Lưu vào DB
         MessageResponseDto response = messageService.sendImageMessage(request, user);
 
-        // Trả kết quả qua socket
+        // Gửi tin nhắn vào màn hình chat
         webSocketService.sendImageMessage(
                 request.conversationId(),
                 response
         );
 
-        // Lấy user còn lại trong coversation
-        // Vì người đó mới là người cần nhận thông báo về tin nhắn)
+        // Lấy username của người còn lại
         User userOther = conversationService.getOtherUser(
                 request.conversationId(),
                 user.getId()
         );
 
-        // Gửi thông báo sang màn của người nhận tin nhắn
+        // Lấy conversation đã fetch user1, user2
+        Conversation conversation = conversationRepository
+                .findByIdWithUsers(response.getConversationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Conversation",
+                        "conversation id",
+                        response.getConversationId()
+                ));
+
+        ConversationResponseDto dto =
+                ConversationResponseDto.from(conversation);
+
+        // Gửi cập nhật danh sách conversation cho người nhận
         webSocketService.pubMessageToConversations(
                 userOther.getUsername(),
-                response
+                dto
         );
     }
 
