@@ -46,7 +46,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             Object payload
     ){
 
-
+        log.debug("Đã gửi thông báo đến client");
         messagingTemplate.convertAndSendToUser(
                 user,
                 "/queue/conversation",
