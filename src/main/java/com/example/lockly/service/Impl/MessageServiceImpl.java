@@ -80,12 +80,11 @@ public class MessageServiceImpl implements MessageService {
                 .isRead(request.isRead())
                 .build();
 
-        conversation.setLastMessageTime(LocalDateTime.now());
-
         messageRepository.save(message);
 
         conversation.setLastMessage(message);
         conversation.setLastMessageTime(message.getCreatedAt());
+        conversation.setLastMessageContent(message.getContent());
 
         conversationRepository.save(conversation);
 
@@ -123,13 +122,11 @@ public class MessageServiceImpl implements MessageService {
                     .isRead(request.isRead())
                     .build();
 
-            // Cập nhật thời gian của tin nhắn cuối
-            conversation.setLastMessageTime(LocalDateTime.now());
-
             messageRepository.save(message);
 
             conversation.setLastMessage(message);
             conversation.setLastMessageTime(message.getCreatedAt());
+            conversation.setLastMessageContent("Đã gửi 1 ảnh");
 
             conversationRepository.save(conversation);
 
