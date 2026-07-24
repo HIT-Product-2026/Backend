@@ -86,4 +86,13 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     where c.id = :id
 """)
     Optional<Conversation> findByIdWithUsersAndLastMessage(@Param("id") UUID id);
+
+    @Query("""
+    select c
+    from Conversation c
+    join fetch c.user1
+    join fetch c.user2
+    where c.id = :id
+    """)
+    Optional<Conversation> findByIdWithUsers(UUID id);
 }
