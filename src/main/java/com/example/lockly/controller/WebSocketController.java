@@ -4,10 +4,12 @@ import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
+import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.service.*;
@@ -35,6 +37,7 @@ public class WebSocketController {
     private final LocationService locationService;
     private final UserService userService;
     private final ConversationService conversationService;
+    private final ConversationRepository conversationRepository;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -62,10 +65,21 @@ public class WebSocketController {
                 user.getId()
         );
 
+        ConversationResponseDto conversationResponse =
+                ConversationResponseDto.from(
+                        conversationRepository
+                                .findById(response.getConversationId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Conversation",
+                                        "conversation id",
+                                        response.getConversationId()
+                                ))
+                );
+
         // Gửi thông báo sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
             userOther.getUsername(),
-            response
+            conversationResponse
         );
         log.debug("Gửi thông báo thành công");
     }

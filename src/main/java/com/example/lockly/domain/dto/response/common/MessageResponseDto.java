@@ -17,6 +17,7 @@ import java.util.UUID;
 public class MessageResponseDto {
     UUID id;
     UserResponseDto sender;
+    UUID conversationId;
     //Nếu là ảnh thì content sẽ chứa api của ảnh
     String content;
     MessageType type;
@@ -27,6 +28,7 @@ public class MessageResponseDto {
         return new MessageResponseDto(
                 message.getId(),
                 UserResponseDto.from(message.getSender()),
+                message.getConversation().getId(),
                 message.getContent(),
                 message.getType(),
                 message.getCreatedAt(),
@@ -38,6 +40,7 @@ public class MessageResponseDto {
         return new MessageResponseDto(
                 message.getId(),
                 UserResponseDto.from(message.getSender()),
+                message.getConversation().getId(),
                 imageUrl,
                 message.getType(),
                 message.getCreatedAt(),
