@@ -9,10 +9,32 @@ positions:
 
 scrape_configs:
   - job_name: docker
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: docker
-          env: production
-          __path__: /var/lib/docker/containers/*/*.log
+
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+
+    relabel_configs:
+      # Tên container
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: container
+
+      # Image
+      - source_labels: ['__meta_docker_container_image']
+        target_label: image
+
+      # Docker Compose service
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: service
+
+      # Docker Compose project
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: compose_project
+
+      # Đường dẫn log
+      - source_labels: ['__meta_docker_container_log_path']
+        target_label: __path__
+
+    pipeline_stages:
+      - docker: {}
