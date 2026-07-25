@@ -21,15 +21,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtChannelInterceptor jwtChannelInterceptor;
 
-    @Bean
-    public TaskScheduler messageBrokerTaskScheduler() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
-        scheduler.setThreadNamePrefix("ws-heartbeat-");
-        scheduler.initialize();
-        return scheduler;
-    }
-
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
@@ -47,8 +38,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker(
                 "/topic",
                 "/queue"
-        ).setTaskScheduler(messageBrokerTaskScheduler())
-                .setHeartbeatValue(new long[]{10000, 10000}); // 10s
+        ).setHeartbeatValue(new long[]{10000, 10000}); // 10s
+        
         registry.setUserDestinationPrefix("/user");
     }
 
