@@ -12,7 +12,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.messaging.simp.config.ChannelRegistration;
-
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
@@ -20,6 +19,21 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtChannelInterceptor jwtChannelInterceptor;
+    private final TaskScheduler websocketHeartbeatScheduler;
+
+
+    @Bean
+    public TaskScheduler websocketHeartbeatScheduler() {
+        ThreadPoolTaskScheduler scheduler =
+                new ThreadPoolTaskScheduler();
+
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("ws-heartbeat-");
+        scheduler.initialize();
+
+        return scheduler;
+    }
+
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -29,19 +43,26 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws-sockjs")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+
         log.debug("Connect WebSocket");
     }
 
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
+
         registry.setApplicationDestinationPrefixes("/app");
+
         registry.enableSimpleBroker(
-                "/topic",
-                "/queue"
-        ).setHeartbeatValue(new long[]{10000, 10000}); // 10s
-        
+                        "/topic",
+                        "/queue"
+                )
+                .setTaskScheduler(websocketHeartbeatScheduler)
+                .setHeartbeatValue(new long[]{10000, 10000});
+
         registry.setUserDestinationPrefix("/user");
     }
+
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
