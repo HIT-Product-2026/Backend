@@ -44,10 +44,10 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         JOIN FETCH m.sender
         WHERE m.conversation.id = :conversationId
           AND (
-                m.createdAt > :cursorCreatedAt
+                m.createdAt < :cursorCreatedAt
                 OR (
                     m.createdAt = :cursorCreatedAt
-                    AND m.id > :cursorId
+                    AND m.id < :cursorId
                 )
           )
         ORDER BY m.createdAt DESC, m.id DESC
