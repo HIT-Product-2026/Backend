@@ -15,7 +15,16 @@ scrape_configs:
         refresh_interval: 5s
 
     relabel_configs:
-      # Tên container
+      # Chỉ giữ các container có log path
+      - source_labels: ['__meta_docker_container_log_path']
+        regex: '(.+)'
+        action: keep
+
+      # Đường dẫn log
+      - source_labels: ['__meta_docker_container_log_path']
+        target_label: __path__
+
+      # Tên container (bỏ dấu / ở đầu)
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: container
@@ -26,15 +35,11 @@ scrape_configs:
 
       # Docker Compose service
       - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
-        target_label: service
+        target_label: compose_service
 
       # Docker Compose project
       - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
         target_label: compose_project
-
-      # Đường dẫn log
-      - source_labels: ['__meta_docker_container_log_path']
-        target_label: __path__
 
     pipeline_stages:
       - docker: {}
