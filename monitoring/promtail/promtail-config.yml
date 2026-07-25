@@ -12,34 +12,23 @@ scrape_configs:
 
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
-        refresh_interval: 5s
 
     relabel_configs:
-      # Chỉ giữ các container có log path
-      - source_labels: ['__meta_docker_container_log_path']
-        regex: '(.+)'
-        action: keep
+      - target_label: job
+        replacement: docker
 
-      # Đường dẫn log
-      - source_labels: ['__meta_docker_container_log_path']
-        target_label: __path__
-
-      # Tên container (bỏ dấu / ở đầu)
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: container
 
-      # Image
       - source_labels: ['__meta_docker_container_image']
         target_label: image
 
-      # Docker Compose service
       - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
         target_label: compose_service
 
-      # Docker Compose project
-      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
-        target_label: compose_project
+      - source_labels: ['__meta_docker_container_log_path']
+        target_label: __path__
 
     pipeline_stages:
       - docker: {}

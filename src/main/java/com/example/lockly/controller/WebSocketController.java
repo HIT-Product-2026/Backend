@@ -4,7 +4,7 @@ import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
-import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.dto.response.common.ConversationRealtimeResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
@@ -74,8 +74,8 @@ public class WebSocketController {
                         response.getConversationId()
                 ));
 
-        ConversationResponseDto dto =
-                ConversationResponseDto.from(conversation);
+        ConversationRealtimeResponseDto dto =
+                ConversationRealtimeResponseDto.from(conversation);
 
         // Gửi thông báo sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
@@ -117,8 +117,8 @@ public class WebSocketController {
                         response.getConversationId()
                 ));
 
-        ConversationResponseDto dto =
-                ConversationResponseDto.from(conversation);
+        ConversationRealtimeResponseDto dto =
+                ConversationRealtimeResponseDto.from(conversation);
 
         // Gửi cập nhật danh sách conversation cho người nhận
         webSocketService.pubMessageToConversations(
