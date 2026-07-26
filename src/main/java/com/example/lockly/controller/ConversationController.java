@@ -6,7 +6,6 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
-import com.example.lockly.domain.dto.response.common.ConversationSimpleResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
