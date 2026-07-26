@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "message_text")
+@Table(name = "messages")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,7 +29,9 @@ public class Message {
     @JoinColumn(name = "sender_id")
     private User sender;
 
-    // Nếu là ảnh thì sẽ chứa đường dẫn ở đây
+    @Column(name = "object_name")
+    private String objectName;
+
     private String content;
 
     @Enumerated(EnumType.STRING)

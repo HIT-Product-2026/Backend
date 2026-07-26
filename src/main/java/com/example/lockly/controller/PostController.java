@@ -50,14 +50,14 @@ public class PostController {
             @Parameter(description = "File image")
             @RequestParam("file") MultipartFile file,
 
-            @Parameter(description = "Nội dung bài viết")
-            @RequestParam(value = "caption", required = false) String caption,
-
             @Parameter(description = "Kinh độ")
             @RequestParam("longitude") Double longitude,
 
             @Parameter(description = "Vĩ độ")
-            @RequestParam("latitude") Double latitude
+            @RequestParam("latitude") Double latitude,
+
+            @Parameter(description = "Nội dung bài viết")
+            @RequestParam(value = "caption", required = false) String caption
 
     ) {
 
@@ -85,7 +85,7 @@ public class PostController {
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
         rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(
                 response,
-                response.objectName())
+                response.urlImage())
         );
 
         log.debug("Detect thành công");

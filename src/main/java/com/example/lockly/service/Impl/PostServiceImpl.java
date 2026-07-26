@@ -85,6 +85,8 @@ public class PostServiceImpl implements PostService {
         // Lưu ảnh vào minIO
         minIOService.saveFile(file, objectName);
 
+        String urlImage = minIOService.generatePresignedUrl(objectName);
+
         log.debug("Lưu ảnh thành công");
 
         // Set mode cho bài post
@@ -128,9 +130,14 @@ public class PostServiceImpl implements PostService {
         log.debug("Tiến trình cập nhật thành công");
 
         if (mode == PostModeLocation.PRIVATE)
-            return PostResponseDto.from(post, FileUtil.getImageUrlApi(prefix, post.getId()), null, null);
+            return PostResponseDto.from(
+                    post,
+                    minIOService.generatePresignedUrl(post.getObjectName()),
+                    null,
+                    null
+            );
 
-        return PostResponseDto.from(post);
+        return PostResponseDto.from(post, urlImage);
     }
 
     @Override
@@ -149,13 +156,15 @@ public class PostServiceImpl implements PostService {
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        String imageUrl = FileUtil.getImageUrlApi(prefix, postId);
+        String objectName = post.getObjectName();
+
+        String urlImage = minIOService.generatePresignedUrl(objectName);
 
         // Public mới trả tọa độ, không thì null
         if (post.getModeLocation() == PostModeLocation.PRIVATE){
-            return PostResponseDto.from(post, imageUrl, null, null);
+            return PostResponseDto.from(post, urlImage, null, null);
         }
-        return PostResponseDto.from(post);
+        return PostResponseDto.from(post, urlImage);
     }
 
     @Override
@@ -211,7 +220,8 @@ public class PostServiceImpl implements PostService {
         return listPost.stream()
                 .map(post -> PostDetailResponseDto.from(
                         post,
-                        conversationMap.get(post.getUser().getId())
+                        conversationMap.get(post.getUser().getId()),
+                        minIOService.generatePresignedUrl(post.getObjectName())
                 ))
                 .toList();
     }
@@ -265,7 +275,8 @@ public class PostServiceImpl implements PostService {
         return listPost.stream()
                 .map(post -> PostDetailResponseDto.from(
                         post,
-                        conversationMap.get(post.getUser().getId())
+                        conversationMap.get(post.getUser().getId()),
+                        minIOService.generatePresignedUrl(post.getObjectName())
                 ))
                 .toList();
     }

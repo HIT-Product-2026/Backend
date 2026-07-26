@@ -16,10 +16,11 @@ public record PostDetailResponseDto(
         Double longitude,
         PostModeLocation modeLocation,
         NsfwStatus nsfw,
+        String urlImage,
         ConversationSimpleResponseDto conversation,
         LocalDateTime createAt
 ){
-    public static PostDetailResponseDto from(Post post, Conversation conversation) {
+    public static PostDetailResponseDto from(Post post, Conversation conversation, String urlImage) {
         return new PostDetailResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
@@ -28,6 +29,7 @@ public record PostDetailResponseDto(
                 post.getLongitude(),
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
+                urlImage,
                 ConversationSimpleResponseDto.from(conversation),
                 post.getCreatedAt()
         );

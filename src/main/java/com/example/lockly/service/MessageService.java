@@ -4,9 +4,11 @@ import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
+import com.example.lockly.domain.entity.main.Message;
 import com.example.lockly.domain.entity.main.User;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
@@ -19,4 +21,5 @@ public interface MessageService {
     );
     MessageResponseDto findMessageById(UUID id);
     InputStream findImageMessageById(UUID id);
+    MessagePageResponse buildMessageResponseDtos(List<Message> messages, String nextCursor);
 }
