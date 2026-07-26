@@ -42,7 +42,32 @@ public class RabbitMQConsumer {
             concurrency = "1-5"
     )
     public void sendFcmNotification(FcmNotificationRequestDto message) {
-        fcmService.sendToManySilent(message);
+
+        try {
+
+            fcmService.sendToManySilent(message);
+
+            log.info("[RabbitMQ][DONE] Send FCM");
+
+        }
+        catch (NonRetryableAppException e) {
+
+            log.error("[RabbitMQ][DROP] {}", e.getMessage(), e);
+
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+        catch (RetryableAppException e) {
+
+            log.error("[RabbitMQ][RETRY] {}", e.getMessage(), e);
+
+            throw e;
+        }
+        catch (Exception e) {
+
+            log.error("[RabbitMQ][UNKNOWN]", e);
+
+            throw e;
+        }
     }
 
     @RabbitListener(
