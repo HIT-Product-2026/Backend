@@ -4,6 +4,7 @@ import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
+import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
@@ -18,10 +19,10 @@ public interface PostService {
 
     InputStream getPostImage(UUID postId) throws Exception;
     PostResponseDto getPostById(UUID postId);
-    List<PostResponseDto> getPostByUserId(UUID userId, String cursor);
+    List<PostDetailResponseDto> getPostByUserId(UUID userId, String cursor);
     LocationPostResponseDto getLocationPost(UUID postId);
     List<EmojiPostResponseDto> getEmojiPosts(List<UUID> postIds);
-    List<PostResponseDto> getFriendPosts(User user, String cursor);
+    List<PostDetailResponseDto> getFriendPosts(User user, String cursor);
 
     void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation);
 

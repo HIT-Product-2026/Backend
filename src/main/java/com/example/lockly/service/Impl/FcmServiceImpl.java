@@ -30,16 +30,20 @@ public class FcmServiceImpl implements FcmService {
             return;
         }
 
+        log.info("FCM Tokens: {}", fcmTokens);
+
+        for (int i = 0; i < fcmTokens.size(); i++) {
+            log.info("token[{}] = {}", i, fcmTokens.get(i));
+        }
+
+
         try {
             MulticastMessage message =
                     MulticastMessage.builder()
-
                             .addAllTokens(fcmTokens)
-
                             .putData("sender_id", data.senderId().toString())
                             .putData("post_id", data.postId().toString())
                             .putData("type", data.type().name())
-
                             .build();
 
             BatchResponse batchResponse =
@@ -55,16 +59,5 @@ public class FcmServiceImpl implements FcmService {
         } catch (Exception e){
             throw new RuntimeException("Failed to send FCM message", e);
         }
-    }
-
-
-    @Override
-    public FcmNotificationRequestDto createFcmNotificationRequest(UUID senderId, UUID postId, List<String> fcmTokens){
-        return new FcmNotificationRequestDto(
-                senderId,
-                postId,
-                FcmMessageType.POST,
-                fcmTokens
-        );
     }
 }

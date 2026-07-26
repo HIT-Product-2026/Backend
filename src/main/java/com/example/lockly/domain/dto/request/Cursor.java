@@ -1,5 +1,6 @@
 package com.example.lockly.domain.dto.request;
 
+import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.Message;
 
@@ -10,7 +11,7 @@ public record Cursor(
         LocalDateTime createdAt,
         UUID id
 ) {
-    public static Cursor from(PostResponseDto dto){
+    public static Cursor from(PostDetailResponseDto dto){
         return new Cursor(
                 dto.createAt(),
                 dto.id()
