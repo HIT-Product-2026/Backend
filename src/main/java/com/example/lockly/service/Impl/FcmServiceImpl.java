@@ -2,6 +2,7 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
+import com.example.lockly.exception.nonRetryException.InvalidFcmRequestException;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
 import com.google.firebase.messaging.BatchResponse;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.xml.validation.Validator;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +22,50 @@ import java.util.UUID;
 public class FcmServiceImpl implements FcmService {
 
     private final AuthService authService;
+
+    private void validate(FcmNotificationRequestDto data) {
+
+        if (data == null) {
+            throw new InvalidFcmRequestException("FCM request is null");
+        }
+
+        if (data.senderId() == null) {
+            throw new InvalidFcmRequestException("Sender ID is required");
+        }
+
+        if (data.postId() == null) {
+            throw new InvalidFcmRequestException("Post ID is required");
+        }
+
+        if (data.type() == null) {
+            throw new InvalidFcmRequestException("FCM message type is required");
+        }
+
+        List<String> tokens = data.fcmToken();
+
+        if (tokens == null) {
+            throw new InvalidFcmRequestException("FCM token list is required");
+        }
+
+        if (tokens.size() > 500) {
+            throw new InvalidFcmRequestException("FCM token list cannot exceed 500 items");
+        }
+
+        for (int i = 0; i < tokens.size(); i++) {
+
+            if (tokens.get(i) == null) {
+                throw new InvalidFcmRequestException(
+                        "FCM token at index " + i + " is null"
+                );
+            }
+
+            if (tokens.get(i).isBlank()) {
+                throw new InvalidFcmRequestException(
+                        "FCM token at index " + i + " is blank"
+                );
+            }
+        }
+    }
 
     @Override
     public void sendToManySilent(FcmNotificationRequestDto data){
