@@ -8,7 +8,10 @@ import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
+import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
@@ -18,6 +21,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.UserRepository;
@@ -37,7 +41,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +55,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final PostsRepository postsRepository;
+    private final ConversationRepository conversationRepository;
     private final AuthService authService;
     private final EmojiPostRepository emojiPostRepository;
     private final ProfileService profileService;
@@ -149,11 +157,11 @@ public class PostServiceImpl implements PostService {
         }
         return PostResponseDto.from(post);
     }
-    @Override
-    public List<PostResponseDto> getPostByUserId(UUID userId, String cursor) {
 
-        User user = userRepository
-                .findById(userId)
+    @Override
+    public List<PostDetailResponseDto> getPostByUserId(UUID userId, String cursor) {
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User", "id", userId));
 
@@ -177,12 +185,39 @@ public class PostServiceImpl implements PostService {
             );
         }
 
-        return posts.stream()
-                .map(PostResponseDto::from)
+        // Danh sách post
+        List<Post> listPost = posts.getContent();
+
+        // Danh sách userId của chủ post
+        List<UUID> userIds = listPost.stream()
+                .map(Post::getUser)
+                .map(User::getId)
+                .distinct()
+                .toList();
+
+        // Conversation giữa user hiện tại và các chủ post
+        List<Conversation> conversationList =
+                conversationRepository.findByUserIdAndUserIds(user.getId(), userIds);
+
+        // Map<userId, Conversation>
+        Map<UUID, Conversation> conversationMap = conversationList.stream()
+                .collect(Collectors.toMap(
+                        c -> c.getUser1().getId().equals(user.getId())
+                                ? c.getUser2().getId()
+                                : c.getUser1().getId(),
+                        Function.identity()
+                ));
+
+        return listPost.stream()
+                .map(post -> PostDetailResponseDto.from(
+                        post,
+                        conversationMap.get(post.getUser().getId())
+                ))
                 .toList();
     }
 
-    public List<PostResponseDto> getFriendPosts(User user, String cursor) {
+    @Override
+    public List<PostDetailResponseDto> getFriendPosts(User user, String cursor) {
 
         Slice<Post> posts;
 
@@ -204,9 +239,34 @@ public class PostServiceImpl implements PostService {
             );
         }
 
-        return posts.getContent()
-                .stream()
-                .map(PostResponseDto::from)
+        // Lấy ds post
+        List<Post> listPost = posts.getContent();
+
+        // Lấy ds user của post
+        List<UUID> userIds = listPost.stream()
+                .map(Post::getUser)
+                .map(User::getId)
+                .distinct()
+                .toList();
+
+        // Lấy ds conversation của user
+        List<Conversation> conversationList =
+                conversationRepository.findByUserIdAndUserIds(user.getId(), userIds);
+
+        // Tạo Map<userId, Conversation>
+        Map<UUID, Conversation> conversationMap = conversationList.stream()
+                .collect(Collectors.toMap(
+                        c -> c.getUser1().getId().equals(user.getId())
+                                ? c.getUser2().getId()
+                                : c.getUser1().getId(),
+                        Function.identity()
+                ));
+
+        return listPost.stream()
+                .map(post -> PostDetailResponseDto.from(
+                        post,
+                        conversationMap.get(post.getUser().getId())
+                ))
                 .toList();
     }
 

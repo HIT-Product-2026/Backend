@@ -6,6 +6,7 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
+import com.example.lockly.domain.dto.response.common.ConversationSimpleResponseDto;
 import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
@@ -95,6 +96,7 @@ public class ConversationController {
     }
 
     @GetMapping("/messages")
+    @Operation(summary = "Lấy danh sách message của conversation")
     public ResponseEntity<ApiResponse<ListResponse<MessageResponseDto>>> findMessagesByConversationId(
             @RequestParam(name = "conversation_id") UUID conversationId,
             @RequestParam(name = "cursor", required = false) String cursor,
@@ -116,4 +118,10 @@ public class ConversationController {
                         result.nextCursor()
                 )));
     }
+
+//    @GetMapping("/users")
+//    @Operation(summary = "Lấy danh sách conversationId theo danh sách userId")
+//    public ResponseEntity<ApiResponse<ListResponse<ConversationSimpleResponseDto>>> findConversationsByUserIds (
+//
+//    )
 }

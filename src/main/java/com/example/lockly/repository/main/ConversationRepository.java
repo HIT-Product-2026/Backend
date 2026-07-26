@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -95,4 +96,15 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     where c.id = :id
     """)
     Optional<Conversation> findByIdWithUsers(UUID id);
+
+    @Query("""
+    SELECT c
+    FROM Conversation c
+    WHERE (c.user1.id = :userId AND c.user2.id IN :userIds)
+       OR (c.user2.id = :userId AND c.user1.id IN :userIds)
+    """)
+    List<Conversation> findByUserIdAndUserIds(
+            @Param("userId") UUID userId,
+            @Param("userIds") Collection<UUID> userIds
+    );
 }
