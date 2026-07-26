@@ -16,6 +16,7 @@ import com.example.lockly.service.*;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -136,6 +138,15 @@ public class UserServiceImpl implements UserService {
     public List<String> findFcmTokenOfFriendsByUserId(UUID userId){
 
         List<UserResponseDto> friends = findFriendsByUserId(userId);
+
+        friends.forEach(friend ->
+                log.info(
+                        "Friend: id={}, name={}, token={}",
+                        friend.id(),
+                        friend.displayName(),
+                        friend.fcmToken()
+                )
+        );
 
         return friends.stream()
                 .map(UserResponseDto::fcmToken)
