@@ -18,6 +18,7 @@ public record PostResponseDto (
     PostModeLocation modeLocation,
     NsfwStatus nsfw,
     String urlImage,
+    String objectName,
     LocalDateTime createAt
 ){
 
@@ -31,6 +32,7 @@ public record PostResponseDto (
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
                 imageUrl,
+                post.getObjectName(),
                 post.getCreatedAt()
         );
     }
@@ -45,6 +47,7 @@ public record PostResponseDto (
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
                 urlImage,
+                post.getObjectName(),
                 post.getCreatedAt()
         );
     }
@@ -59,6 +62,7 @@ public record PostResponseDto (
                 dto.modeLocation(),
                 nsfw,
                 urlImage,
+                dto.objectName(),
                 dto.createAt()
         );
     }
