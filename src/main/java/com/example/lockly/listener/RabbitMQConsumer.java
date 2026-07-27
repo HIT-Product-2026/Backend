@@ -1,6 +1,5 @@
 package com.example.lockly.listener;
 
-import com.example.lockly.config.MinioProperties;
 import com.example.lockly.config.RabbitMQConfig;
 import com.example.lockly.constant.EventType;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
