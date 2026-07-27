@@ -1,11 +1,7 @@
 package com.example.lockly.exception;
 
 import com.example.lockly.common.response.ApiResponse;
-import com.example.lockly.exception.nonRetryException.BadRequestException;
-import com.example.lockly.exception.nonRetryException.DuplicateResourceException;
-import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,35 +14,31 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandle {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(404, ex.getMessage()));
-    }
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex) {
 
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateResource(DuplicateResourceException ex) {
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(409, ex.getMessage()));
-    }
+        // Log toàn bộ stack trace nếu có cause
+        log.error("Application exception", ex);
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBadRequest(BadRequestException ex) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(400, ex.getMessage()));
+                .status(ex.getStatus())
+                .body(ApiResponse.error(
+                        ex.getStatus().value(),
+                        ex.getMessage()
+                ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handValidationError(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleValidationError(MethodArgumentNotValidException ex) {
+
         Map<String, String> errors = new LinkedHashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             String field = error.getField();
-            String code = error.getCode(); // tên annotation: NotBlank, NotNull, Size, Pattern...
-            boolean isEmptyCheck = "NotBlank".equals(code) || "NotNull".equals(code);
+            String code = error.getCode();
+
+            boolean isEmptyCheck =
+                    "NotBlank".equals(code) || "NotNull".equals(code);
 
             if (!errors.containsKey(field) || isEmptyCheck) {
                 errors.put(field, error.getDefaultMessage());
@@ -55,26 +47,19 @@ public class GlobalExceptionHandle {
 
         String combinedMessage = String.join(", ", errors.values());
 
-        return ResponseEntity
-                .badRequest()
+        return ResponseEntity.badRequest()
                 .body(ApiResponse.error(400, combinedMessage));
     }
-
-    // Exception chung
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<ApiResponse<Void>> handleRuntime(RuntimeException ex) {
-//        return ResponseEntity
-//                .status(HttpStatus.BAD_REQUEST)
-//                .body(ApiResponse.error(400, ex.getMessage()));
-//    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
 
-        log.error("Lỗi hệ thống", ex);
+        log.error("Unexpected exception", ex);
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, ex.getMessage()));
+        return ResponseEntity.internalServerError()
+                .body(ApiResponse.error(
+                        500,
+                        "Đã xảy ra lỗi hệ thống."
+                ));
     }
 }

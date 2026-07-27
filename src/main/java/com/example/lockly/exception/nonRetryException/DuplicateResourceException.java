@@ -1,10 +1,17 @@
 package com.example.lockly.exception.nonRetryException;
 
+import org.springframework.http.HttpStatus;
+
 public class DuplicateResourceException extends NonRetryableAppException {
-    public DuplicateResourceException(String resourceName, String fieldValue, Object findValue){
-        super(409, String.format("%s tìm thấy giá trị trùng với %s: %s", resourceName, fieldValue, findValue));
+
+    public DuplicateResourceException(String resourceName, String fieldName, Object value) {
+        super(
+                HttpStatus.CONFLICT,
+                String.format("%s đã tồn tại với %s: %s", resourceName, fieldName, value)
+        );
     }
-    public DuplicateResourceException(String message){
-        super(409, message);
+
+    public DuplicateResourceException(String message) {
+        super(HttpStatus.CONFLICT, message);
     }
 }
