@@ -17,7 +17,7 @@ public record PostResponseDto (
     Double longitude,
     PostModeLocation modeLocation,
     NsfwStatus nsfw,
-    String objectName,
+    String urlImage,
     LocalDateTime createAt
 ){
 
@@ -35,7 +35,7 @@ public record PostResponseDto (
         );
     }
 
-    public static PostResponseDto from(Post post) {
+    public static PostResponseDto from(Post post, String urlImage) {
         return new PostResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
@@ -44,12 +44,12 @@ public record PostResponseDto (
                 post.getLongitude(),
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
-                post.getObjectName(),
+                urlImage,
                 post.getCreatedAt()
         );
     }
 
-    public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw){
+    public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw, String urlImage){
         return new PostResponseDto(
                 dto.postId(),
                 dto.user(),
@@ -58,7 +58,7 @@ public record PostResponseDto (
                 dto.longitude(),
                 dto.modeLocation(),
                 nsfw,
-                dto.objectName(),
+                urlImage,
                 dto.createAt()
         );
     }

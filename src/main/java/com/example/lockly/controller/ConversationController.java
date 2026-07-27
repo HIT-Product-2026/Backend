@@ -95,6 +95,7 @@ public class ConversationController {
     }
 
     @GetMapping("/messages")
+    @Operation(summary = "Lấy danh sách message của conversation")
     public ResponseEntity<ApiResponse<ListResponse<MessageResponseDto>>> findMessagesByConversationId(
             @RequestParam(name = "conversation_id") UUID conversationId,
             @RequestParam(name = "cursor", required = false) String cursor,
@@ -116,4 +117,10 @@ public class ConversationController {
                         result.nextCursor()
                 )));
     }
+
+//    @GetMapping("/users")
+//    @Operation(summary = "Lấy danh sách conversationId theo danh sách userId")
+//    public ResponseEntity<ApiResponse<ListResponse<ConversationSimpleResponseDto>>> findConversationsByUserIds (
+//
+//    )
 }

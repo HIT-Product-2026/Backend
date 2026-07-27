@@ -7,6 +7,7 @@ import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
 import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
+import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
@@ -165,7 +166,7 @@ public class UserController {
 
     @GetMapping("/{friendId}/posts")
     @Operation(summary = "Lấy danh sách bài viết theo friend", description = "Trả về list post của friend")
-    public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPostByFriendId(
+    public ResponseEntity<ApiResponse<ListResponse<PostDetailResponseDto>>> getPostByFriendId(
             @Parameter(description = "Friend id")
             @PathVariable(name = "friendId") UUID friendId,
 
@@ -178,7 +179,7 @@ public class UserController {
         if (!isFriend)
             throw new ForbiddenException("User không có người bạn này");
 
-        List<PostResponseDto> listPost =  postService.getPostByUserId(friendId, cursor);
+        List<PostDetailResponseDto> listPost =  postService.getPostByUserId(friendId, cursor);
 
         String nextCursor = null;
 

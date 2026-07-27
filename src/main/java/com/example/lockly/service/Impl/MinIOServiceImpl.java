@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -25,6 +26,7 @@ public class MinIOServiceImpl implements MinIOService {
     private final MinioClient minioClient;
     private final MinioProperties props;
 
+    @Override
     public void saveFile(MultipartFile file, String objectName){
         try {
             InputStream is = file.getInputStream();
@@ -85,6 +87,7 @@ public class MinIOServiceImpl implements MinIOService {
         }
     }
 
+    @Override
     public void deleteFile(String objectName) {
 
         try {
@@ -101,20 +104,36 @@ public class MinIOServiceImpl implements MinIOService {
     }
 
     // Hàm tạo ra 1 url cho phép lấy dữ liệu từ minIO mà không cần public storage
+    @Override
     public String generatePresignedUrl(String objectName) {
+
+        if (objectName == null)
+            return null;
+
         try {
+
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET.GET)
+                            .method(Method.GET)
                             .bucket(props.getBucketName())
                             .object(objectName)
-                            .expiry(60 * 60)
+                            .expiry(1, TimeUnit.HOURS)
                             .build()
             );
-        } catch (Exception e){
-            e.printStackTrace();
+
+        } catch (Exception e) {
+
+            log.error(
+                    "[MinIO] Cannot generate presigned url for {}",
+                    objectName,
+                    e
+            );
+
+            throw new RuntimeException(
+                    "Cannot generate presigned url",
+                    e
+            );
         }
-        return null;
     }
 
 
