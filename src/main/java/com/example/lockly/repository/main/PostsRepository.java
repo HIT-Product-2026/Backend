@@ -20,20 +20,11 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
     SELECT p
     FROM Post p
     JOIN FETCH p.user
-    WHERE p.user.id IN (
-        SELECT CASE
-            WHEN f.requester.id = :userId THEN f.receiver.id
-            ELSE f.requester.id
-        END
-        FROM Friendship f
-        WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
-          AND f.status = :status
-    )
+    WHERE p.user.id = :userId
     ORDER BY p.createdAt DESC, p.id DESC
     """)
     Slice<Post> findFirstPage(
             @Param("userId") UUID userId,
-            @Param("status") FriendshipStatus status,
             Pageable pageable
     );
 
@@ -41,27 +32,18 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
     SELECT p
     FROM Post p
     JOIN FETCH p.user
-    WHERE p.user.id IN (
-        SELECT CASE
-            WHEN f.requester.id = :userId THEN f.receiver.id
-            ELSE f.requester.id
-        END
-        FROM Friendship f
-        WHERE (f.requester.id = :userId OR f.receiver.id = :userId)
-          AND f.status = :status
-    )
-    AND (
-        p.createdAt < :cursorCreatedAt
-        OR (
-            p.createdAt = :cursorCreatedAt
-            AND p.id < :cursorId
-        )
-    )
+    WHERE p.user.id = :userId
+      AND (
+          p.createdAt < :cursorCreatedAt
+          OR (
+              p.createdAt = :cursorCreatedAt
+              AND p.id < :cursorId
+          )
+      )
     ORDER BY p.createdAt DESC, p.id DESC
     """)
     Slice<Post> findNextPage(
             @Param("userId") UUID userId,
-            @Param("status") FriendshipStatus status,
             @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
             @Param("cursorId") UUID cursorId,
             Pageable pageable
@@ -90,6 +72,7 @@ public interface PostsRepository extends JpaRepository<Post, UUID> {
             @Param("status") FriendshipStatus status,
             Pageable pageable
     );
+
     @Query("""
     SELECT p
     FROM Post p
