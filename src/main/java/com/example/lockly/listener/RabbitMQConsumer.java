@@ -14,6 +14,7 @@ import com.example.lockly.exception.retryException.RetryableAppException;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.service.AIService;
 import com.example.lockly.service.FcmService;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class RabbitMQConsumer {
     private final AIService aiService;
     private final SseService sseService;
     private final PostsRepository postsRepository;
+    private final MinIOService minIOService;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -42,7 +44,32 @@ public class RabbitMQConsumer {
             concurrency = "1-5"
     )
     public void sendFcmNotification(FcmNotificationRequestDto message) {
-        fcmService.sendToManySilent(message);
+
+        try {
+
+            fcmService.sendToManySilent(message);
+
+            log.info("[RabbitMQ][DONE] Send FCM");
+
+        }
+        catch (NonRetryableAppException e) {
+
+            log.error("[RabbitMQ][DROP] {}", e.getMessage(), e);
+
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+        catch (RetryableAppException e) {
+
+            log.error("[RabbitMQ][RETRY] {}", e.getMessage(), e);
+
+            throw e;
+        }
+        catch (Exception e) {
+
+            log.error("[RabbitMQ][UNKNOWN]", e);
+
+            throw e;
+        }
     }
 
     @RabbitListener(
@@ -73,7 +100,9 @@ public class RabbitMQConsumer {
             post.setNsfw(nsfw);
             postsRepository.save(post);
 
-            PostResponseDto response = PostResponseDto.from(data, nsfw);
+            String urlImage = minIOService.generatePresignedUrl(post.getObjectName());
+
+            PostResponseDto response = PostResponseDto.from(data, nsfw, urlImage);
 
             sseService.push(
                     data.user().id().toString(),

@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,6 +74,7 @@ public class MessageServiceImpl implements MessageService {
         Message message = Message.builder()
                 .conversation(conversation)
                 .sender(user)
+                .objectName(null)
                 .type(MessageType.TEXT)
                 .content(request.content().trim())
                 .isRead(request.isRead())
@@ -88,7 +88,7 @@ public class MessageServiceImpl implements MessageService {
 
         conversationRepository.save(conversation);
 
-        return MessageResponseDto.from(message);
+        return MessageResponseDto.from(message, null);
     }
 
     @Override
@@ -110,27 +110,33 @@ public class MessageServiceImpl implements MessageService {
 
         String objectName = FileUtil.getObjectNameFile(prefix, messageId);
 
-            // Save file
-            minIOService.saveFile(request.file(), objectName);
+        // Save file
+        minIOService.saveFile(request.file(), objectName);
 
-            Message message = Message.builder()
-                    .id(messageId)
-                    .conversation(conversation)
-                    .sender(user)
-                    .type(MessageType.IMAGE)
-                    .content(objectName)
-                    .isRead(request.isRead())
-                    .build();
+        Message message = Message.builder()
+                .id(messageId)
+                .conversation(conversation)
+                .sender(user)
+                .type(MessageType.IMAGE)
+                .content(null)
+                .objectName(objectName)
+                .isRead(request.isRead())
+                .build();
 
-            messageRepository.save(message);
+        messageRepository.save(message);
 
-            conversation.setLastMessage(message);
-            conversation.setLastMessageTime(message.getCreatedAt());
-            conversation.setLastMessageContent("Đã gửi 1 ảnh");
+        conversation.setLastMessage(message);
+        conversation.setLastMessageTime(message.getCreatedAt());
+        conversation.setLastMessageContent("Đã gửi 1 ảnh");
 
-            conversationRepository.save(conversation);
+        conversationRepository.save(conversation);
 
-            return MessageResponseDto.from(messageRepository.save(message));
+        String imageUrl = minIOService.generatePresignedUrl(message.getObjectName());
+
+        return MessageResponseDto.from(
+                messageRepository.save(message),
+                imageUrl
+        );
 
     }
 
@@ -189,7 +195,7 @@ public class MessageServiceImpl implements MessageService {
 
         log.debug("nextCursor: " + nextCursor);
 
-        return MessagePageResponse.from(
+        return this.buildMessageResponseDtos(
                 listMessage,
                 nextCursor
         );
@@ -201,9 +207,15 @@ public class MessageServiceImpl implements MessageService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message", "id", id));
 
-        MessageResponseDto dto = MessageResponseDto.from(message);
-        if(message.getType() == MessageType.IMAGE){
-            dto.setContent(FileUtil.getImageUrlApi(prefix, message.getId()));
+        MessageResponseDto dto;
+
+        if (message.getType() == MessageType.IMAGE){
+            dto = MessageResponseDto.from(
+                    message,
+                    minIOService.generatePresignedUrl(message.getObjectName())
+            );
+        } else {
+            dto = MessageResponseDto.from(message, null);
         }
 
         return dto;
@@ -219,5 +231,20 @@ public class MessageServiceImpl implements MessageService {
             throw new BadRequestException("Id này không phải là của image message");
 
         return minIOService.getFile(message.getContent());
+    }
+
+    @Override
+    public MessagePageResponse buildMessageResponseDtos(List<Message> messages, String nextCursor){
+        List<MessageResponseDto> messageDtos = messages.stream()
+                .map(message -> MessageResponseDto.from(
+                        message,
+                        minIOService.generatePresignedUrl(message.getObjectName()))
+                ).toList();
+
+
+        return MessagePageResponse.from(
+                messageDtos,
+                nextCursor
+        );
     }
 }

@@ -12,6 +12,7 @@ import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
 import com.example.lockly.domain.dto.request.create.ReactEmojiToPostRequestDto;
 import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
+import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.example.lockly.domain.entity.main.User;
@@ -40,7 +41,6 @@ import java.util.UUID;
 public class PostController {
 
     private final PostService postService;
-    private final UserService userService;
     private final AuthService authService;
     private final RabbitMQService rabbitMQService;
 
@@ -50,14 +50,14 @@ public class PostController {
             @Parameter(description = "File image")
             @RequestParam("file") MultipartFile file,
 
-            @Parameter(description = "Nội dung bài viết")
-            @RequestParam("caption") String caption,
-
             @Parameter(description = "Kinh độ")
             @RequestParam("longitude") Double longitude,
 
             @Parameter(description = "Vĩ độ")
-            @RequestParam("latitude") Double latitude
+            @RequestParam("latitude") Double latitude,
+
+            @Parameter(description = "Nội dung bài viết")
+            @RequestParam(value = "caption", required = false) String caption
 
     ) {
 
@@ -71,22 +71,21 @@ public class PostController {
         log.debug("Chuẩn bị tạo bài viết");
         PostResponseDto response = postService.createPost(request);
 
-        log.debug("Tạo bài viế thành công");
+        log.debug("Tạo bài viết thành công");
         User user = authService.getCurrentUser();
 
-        // Lấy danh sách fcm của bạn bè
-        List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(user.getId());
-        log.debug("Lấy fcm list thành công");
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
-                FcmNotificationRequestDto.from(user.getId(), response.id(), fcmTokens)
+                user.getId(),
+                response.id()
         );
+
         log.debug("Thông báo fcm thành công");
 
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
         rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(
                 response,
-                response.objectName())
+                response.urlImage())
         );
 
         log.debug("Detect thành công");
@@ -181,7 +180,7 @@ public class PostController {
 
     @GetMapping
     @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
-    public ResponseEntity<ApiResponse<ListResponse<PostResponseDto>>> getPosts(
+    public ResponseEntity<ApiResponse<ListResponse<PostDetailResponseDto>>> getPosts(
             @Parameter(description = "Thẻ đánh dấu trang")
             @RequestParam(name = "cursor", required = false) String cursor
     ) {
@@ -189,7 +188,7 @@ public class PostController {
 
         log.debug("curor: " + cursor);
 
-        List<PostResponseDto> listPost = postService.getFriendPosts(user, cursor);
+        List<PostDetailResponseDto> listPost = postService.getFriendPosts(user, cursor);
 
         String nextCursor = null;
         if (!listPost.isEmpty()) {

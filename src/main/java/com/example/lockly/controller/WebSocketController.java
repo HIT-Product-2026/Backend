@@ -67,11 +67,11 @@ public class WebSocketController {
         );
 
         Conversation conversation = conversationRepository
-                .findByIdWithUsers(response.getConversationId())
+                .findByIdWithUsers(response.conversationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Conversation",
                         "conversation id",
-                        response.getConversationId()
+                        response.conversationId()
                 ));
 
         ConversationRealtimeResponseDto dto =
@@ -110,11 +110,11 @@ public class WebSocketController {
 
         // Lấy conversation đã fetch user1, user2
         Conversation conversation = conversationRepository
-                .findByIdWithUsers(response.getConversationId())
+                .findByIdWithUsers(response.conversationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Conversation",
                         "conversation id",
-                        response.getConversationId()
+                        response.conversationId()
                 ));
 
         ConversationRealtimeResponseDto dto =
