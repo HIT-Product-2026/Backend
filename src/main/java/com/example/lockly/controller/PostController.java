@@ -103,17 +103,16 @@ public class PostController {
 
     @GetMapping("/{post_id}/image")
     @Operation(summary = "Lấy ảnh bài viết", description = "Trả về image binary từ MinIO")
-    public ResponseEntity<byte[]> getImage(
+    public ResponseEntity<ApiResponse<String>> getImage(
             @Parameter(description = "ID bài viết")
             @PathVariable("post_id") UUID postId
     ) throws Exception {
 
-        InputStream inputStream = postService.getPostImage(postId);
+        String presignedUrl = postService.getPostImage(postId);
 
         return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(inputStream.readAllBytes());
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", presignedUrl));
     }
 
     @PatchMapping("/{post_id}/mode")

@@ -17,7 +17,7 @@ public interface PostService {
     PostResponseDto createPost(CreatePostRequestDto request);
     void sendEmoji(ReactEmojiToPostRequestDto request);
 
-    InputStream getPostImage(UUID postId) throws Exception;
+    String getPostImage(UUID postId) throws Exception;
     PostResponseDto getPostById(UUID postId);
     List<PostDetailResponseDto> getPostByUserId(UUID userId, String cursor);
     LocationPostResponseDto getLocationPost(UUID postId);

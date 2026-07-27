@@ -141,13 +141,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public InputStream getPostImage(UUID postId) throws Exception {
+    public String getPostImage(UUID postId) {
 
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        return minIOService.getFile(post.getObjectName());
+        return minIOService.generatePresignedUrl(post.getObjectName());
     }
 
     @Override
