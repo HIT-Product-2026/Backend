@@ -146,7 +146,7 @@ services:
         sleep 2;
       done;
       /usr/bin/mc mb myminio/${MINIO_BUCKET_NAME} || true;
-      /usr/bin/mc anonymous set public myminio/${MINIO_BUCKET_NAME} || true;
+      /usr/bin/mc anonymous set private myminio/${MINIO_BUCKET_NAME} || true;
       "
 
   nginx:

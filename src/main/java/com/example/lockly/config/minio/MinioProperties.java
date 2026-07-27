@@ -1,4 +1,4 @@
-package com.example.lockly.config;
+package com.example.lockly.config.minio;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class MinioProperties {
+    private String publicEndpoint;
 
     private String endpoint;
     private String accessKey;

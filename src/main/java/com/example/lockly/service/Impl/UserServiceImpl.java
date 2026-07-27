@@ -1,7 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
-import com.example.lockly.config.MinioProperties;
+import com.example.lockly.config.minio.MinioProperties;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

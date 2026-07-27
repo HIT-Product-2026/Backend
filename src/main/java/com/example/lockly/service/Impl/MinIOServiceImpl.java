@@ -1,6 +1,7 @@
 package com.example.lockly.service.Impl;
 
-import com.example.lockly.config.MinioProperties;
+import com.example.lockly.config.minio.MinioProperties;
+import com.example.lockly.config.minio.PublicMinio;
 import com.example.lockly.exception.nonRetryException.InvalidConfigurationException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.exception.nonRetryException.UnauthorizedException;
@@ -13,7 +14,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MinIOServiceImpl implements MinIOService {
+
+    @PublicMinio
+    private final MinioClient publicMinioClient;
 
     private final MinioClient minioClient;
     private final MinioProperties props;
@@ -222,7 +225,7 @@ public class MinIOServiceImpl implements MinIOService {
 
         try {
 
-            return minioClient.getPresignedObjectUrl(
+            return publicMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(props.getBucketName())
