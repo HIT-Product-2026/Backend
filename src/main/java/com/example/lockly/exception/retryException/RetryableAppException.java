@@ -1,15 +1,15 @@
 package com.example.lockly.exception.retryException;
 
 import com.example.lockly.exception.AppException;
+import org.springframework.http.HttpStatus;
 
-public class RetryableAppException extends AppException {
+public abstract class RetryableAppException extends AppException {
 
-    public RetryableAppException(int errorCode, String message) {
-        super(errorCode, message);
+    protected RetryableAppException(HttpStatus status, String message, Throwable cause) {
+        super(status, message, cause);
     }
 
-    public RetryableAppException(int errorCode, String message, Throwable cause) {
-        super(errorCode, message);
-        initCause(cause);
+    protected RetryableAppException(HttpStatus status, String message) {
+        super(status, message);
     }
 }

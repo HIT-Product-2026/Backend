@@ -1,15 +1,15 @@
 package com.example.lockly.exception.nonRetryException;
 
 import com.example.lockly.exception.AppException;
+import org.springframework.http.HttpStatus;
 
-public class NonRetryableAppException extends AppException {
+public abstract class NonRetryableAppException extends AppException {
 
-    public NonRetryableAppException(int errorCode, String message) {
-        super(errorCode, message);
+    protected NonRetryableAppException(HttpStatus status, String message, Throwable cause) {
+        super(status, message, cause);
     }
 
-    public NonRetryableAppException(int errorCode, String message, Throwable cause) {
-        super(errorCode, message);
-        initCause(cause);
+    protected NonRetryableAppException(HttpStatus status, String message) {
+        super(status, message);
     }
 }
