@@ -45,7 +45,7 @@ public record DetectNsfwPostRequestDto(
 
         LocalDateTime createAt
 ) {
-    public static DetectNsfwPostRequestDto from(PostResponseDto dto, String urlFile){
+    public static DetectNsfwPostRequestDto from(PostResponseDto dto){
         return new DetectNsfwPostRequestDto(
                 dto.id(),
                 dto.user(),
@@ -54,7 +54,7 @@ public record DetectNsfwPostRequestDto(
                 dto.longitude(),
                 dto.modeLocation(),
                 dto.nsfw(),
-                urlFile,
+                dto.objectName(),
                 dto.createAt()
         );
     }

@@ -83,10 +83,7 @@ public class PostController {
         log.debug("Thông báo fcm thành công");
 
         // Đẩy vào queue (Client cần mở cổng sse để nhận response)
-        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(
-                response,
-                response.urlImage())
-        );
+        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(response));
 
         log.debug("Detect thành công");
         return ResponseEntity

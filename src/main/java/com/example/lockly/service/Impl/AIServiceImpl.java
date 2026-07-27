@@ -32,9 +32,8 @@ public class AIServiceImpl implements AIService {
             throw new ResourceNotFoundException("File", "objectName", objectName);
         }
 
-        Boolean isNsfw = requestAIService.detectNsfw(file);
+        return requestAIService.detectNsfw(file);
 
-        return isNsfw;
     }
 
     @Override
