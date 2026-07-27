@@ -165,7 +165,7 @@ public class UserController {
     }
 
     @GetMapping("/{friendId}/posts")
-    @Operation(summary = "Lấy danh sách bài viết theo friend", description = "Trả về list post của friend")
+    @Operation(summary = "Lấy danh sách bài viết theo userId", description = "Trả về list post của friend")
     public ResponseEntity<ApiResponse<ListResponse<PostDetailResponseDto>>> getPostByFriendId(
             @Parameter(description = "Friend id")
             @PathVariable(name = "friendId") UUID friendId,

@@ -179,7 +179,6 @@ public class PostServiceImpl implements PostService {
         if (cursor == null || cursor.isBlank()) {
             posts = postsRepository.findFirstPage(
                     user.getId(),
-                    FriendshipStatus.ACCEPTED,
                     PageRequest.of(0, pageSize)
             );
         } else {
@@ -187,7 +186,6 @@ public class PostServiceImpl implements PostService {
 
             posts = postsRepository.findNextPage(
                     user.getId(),
-                    FriendshipStatus.ACCEPTED,
                     cursorDecode.createdAt(),
                     cursorDecode.id(),
                     PageRequest.of(0, pageSize)

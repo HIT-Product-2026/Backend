@@ -179,7 +179,10 @@ public class PostController {
     }
 
     @GetMapping
-    @Operation(summary = "Lấy danh sách bài viết theo user", description = "Trả về list post của user")
+    @Operation(
+            summary = "Lấy danh sách bài viết của bạn bè và user của user (reels)",
+            description = "Trả về list post của user"
+    )
     public ResponseEntity<ApiResponse<ListResponse<PostDetailResponseDto>>> getPosts(
             @Parameter(description = "Thẻ đánh dấu trang")
             @RequestParam(name = "cursor", required = false) String cursor
