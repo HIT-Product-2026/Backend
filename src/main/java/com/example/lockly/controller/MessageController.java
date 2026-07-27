@@ -10,15 +10,13 @@ import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.main.ConversationRepository;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.ConversationService;
-import com.example.lockly.service.MessageService;
-import com.example.lockly.service.WebSocketService;
+import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.N;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +37,7 @@ public class MessageController {
     private final WebSocketService webSocketService;
     private final ConversationService conversationService;
     private final ConversationRepository conversationRepository;
+    private final NotificationService notificationService;
 
 //    @PostMapping("/text")
 //    @Operation(summary = "Gửi text message", description = "Gửi tin nhắn văn bản")
@@ -59,7 +58,7 @@ public class MessageController {
 //    }
 
 
-    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/image")
     @Operation(summary = "Gửi image message", description = "Upload ảnh để gửi tin nhắn")
     public ResponseEntity<ApiResponse<MessageResponseDto>> sendImageMessage(
             @RequestBody
@@ -99,6 +98,13 @@ public class MessageController {
         webSocketService.pubMessageToConversations(
                 userOther.getUsername(),
                 dto
+        );
+
+        // Gửi thông báo
+        notificationService.sendMessageNotification(
+                userOther.getFcmToken(),
+                response,
+                conversation.getId()
         );
 
         return ResponseEntity

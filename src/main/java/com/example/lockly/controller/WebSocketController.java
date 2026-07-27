@@ -51,7 +51,7 @@ public class WebSocketController {
 
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
-        log.debug("Lưu thành công");
+        log.info("Lưu thành công");
 
         // Response cho client thông qua topic chat
         webSocketService.sendTextMessage(
@@ -83,13 +83,15 @@ public class WebSocketController {
             userOther.getUsername(),
             dto
         );
-        log.debug("Gửi response thành công");
+        log.info("Gửi response thành công");
 
+        // Gửi thông báo
         notificationService.sendMessageNotification(
                 userOther.getFcmToken(),
                 response,
                 conversation.getId()
         );
+        log.info("Gửi thông báo thành công");
     }
 
     @MessageMapping("/chat.sendImage")
@@ -108,6 +110,7 @@ public class WebSocketController {
                 request.conversationId(),
                 response
         );
+        log.info("Gửi thành công");
 
         // Lấy username của người còn lại
         User userOther = conversationService.getOtherUser(
@@ -132,11 +135,15 @@ public class WebSocketController {
                 userOther.getUsername(),
                 dto
         );
+        log.debug("Gửi response thành công");
 
-        // Gửi thông báo đến nguười nhận
-        try {
-
-        }
+        // Gửi thông báo
+        notificationService.sendMessageNotification(
+                userOther.getFcmToken(),
+                response,
+                conversation.getId()
+        );
+        log.debug("Gửi thông báo thành công");
     }
 
     @MessageMapping("/share.location")
