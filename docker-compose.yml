@@ -89,11 +89,6 @@ services:
       - ./rabbitmq-conf.d:/etc/rabbitmq/conf.d:ro
     networks:
       - lockly-network
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   qdrant:
     image: qdrant/qdrant:v1.15.4
@@ -283,8 +278,6 @@ services:
       postgres_vietnam_gis:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
