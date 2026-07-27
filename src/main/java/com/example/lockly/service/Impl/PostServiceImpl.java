@@ -265,8 +265,27 @@ public class PostServiceImpl implements PostService {
                         c -> c.getUser1().getId().equals(user.getId())
                                 ? c.getUser2().getId()
                                 : c.getUser1().getId(),
-                        Function.identity()
+                        Function.identity(),
+                        (oldValue, newValue) -> oldValue
                 ));
+
+        // debug
+        log.debug("userIds = " + userIds);
+        log.debug("conversation users:");
+
+        conversationList.forEach(c -> {
+            log.debug(
+                    c.getUser1().getId() + " - " + c.getUser2().getId()
+            );
+        });
+
+        listPost.forEach(p -> {
+            log.debug(
+                    "post owner: " + p.getUser().getId()
+                            + " conversation: "
+                            + conversationMap.get(p.getUser().getId())
+            );
+        });
 
         return listPost.stream()
                 .map(post -> PostDetailResponseDto.from(

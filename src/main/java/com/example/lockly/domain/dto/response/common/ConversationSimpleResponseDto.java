@@ -10,6 +10,10 @@ public record ConversationSimpleResponseDto(
         UserResponseDto user2
 ) {
     public static ConversationSimpleResponseDto from(Conversation conversation){
+        if (conversation == null) {
+            return null;
+        }
+
         return new ConversationSimpleResponseDto(
                 conversation.getId(),
                 UserResponseDto.from(conversation.getUser1()),
