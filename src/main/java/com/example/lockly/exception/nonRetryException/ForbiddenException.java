@@ -1,12 +1,17 @@
 package com.example.lockly.exception.nonRetryException;
 
+import org.springframework.http.HttpStatus;
+
 public class ForbiddenException extends NonRetryableAppException {
 
     public ForbiddenException(String message) {
-        super(403, message);
+        super(HttpStatus.FORBIDDEN, message);
     }
 
-    public ForbiddenException(String fieldValue, Object findValue) {
-        super(403, String.format("Không có quyền truy cập với %s: %s", fieldValue, findValue));
+    public ForbiddenException(String fieldName, Object value) {
+        super(
+                HttpStatus.FORBIDDEN,
+                String.format("Không có quyền truy cập với %s: %s", fieldName, value)
+        );
     }
 }

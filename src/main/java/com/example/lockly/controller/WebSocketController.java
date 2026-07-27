@@ -39,6 +39,7 @@ public class WebSocketController {
     private final UserService userService;
     private final ConversationService conversationService;
     private final ConversationRepository conversationRepository;
+    private final NotificationService notificationService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -50,7 +51,7 @@ public class WebSocketController {
 
         // Lưu vào db
         MessageResponseDto response = messageService.sendTextMessage(request, user);
-        log.debug("Lưu thành công");
+        log.info("Lưu thành công");
 
         // Response cho client thông qua topic chat
         webSocketService.sendTextMessage(
@@ -77,12 +78,20 @@ public class WebSocketController {
         ConversationRealtimeResponseDto dto =
                 ConversationRealtimeResponseDto.from(conversation);
 
-        // Gửi thông báo sang màn của người nhận tin nhắn
+        // Gửi response sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
             userOther.getUsername(),
             dto
         );
-        log.debug("Gửi thông báo thành công");
+        log.info("Gửi response thành công");
+
+        // Gửi thông báo
+        notificationService.sendMessageNotification(
+                userOther.getFcmToken(),
+                response,
+                conversation.getId()
+        );
+        log.info("Gửi thông báo thành công");
     }
 
     @MessageMapping("/chat.sendImage")
@@ -101,6 +110,7 @@ public class WebSocketController {
                 request.conversationId(),
                 response
         );
+        log.info("Gửi thành công");
 
         // Lấy username của người còn lại
         User userOther = conversationService.getOtherUser(
@@ -125,6 +135,15 @@ public class WebSocketController {
                 userOther.getUsername(),
                 dto
         );
+        log.debug("Gửi response thành công");
+
+        // Gửi thông báo
+        notificationService.sendMessageNotification(
+                userOther.getFcmToken(),
+                response,
+                conversation.getId()
+        );
+        log.debug("Gửi thông báo thành công");
     }
 
     @MessageMapping("/share.location")

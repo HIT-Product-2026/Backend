@@ -1,14 +1,22 @@
 package com.example.lockly.exception;
 
-public class AppException extends RuntimeException {
-    private final int errorCode;
+import org.springframework.http.HttpStatus;
 
-    public AppException(int errorCode, String message){
-        super(message);
-        this.errorCode = errorCode;
+public abstract class AppException extends RuntimeException {
+
+    private final HttpStatus status;
+
+    protected AppException(HttpStatus status, String message, Throwable cause) {
+        super(message, cause);
+        this.status = status;
     }
 
-    public int getErrorCode() {
-        return  errorCode;
+    protected AppException(HttpStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }

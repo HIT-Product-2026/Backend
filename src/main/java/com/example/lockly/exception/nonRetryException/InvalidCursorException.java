@@ -1,14 +1,10 @@
 package com.example.lockly.exception.nonRetryException;
 
+import org.springframework.http.HttpStatus;
+
 public class InvalidCursorException extends NonRetryableAppException {
 
-    private static final int ERROR_CODE = 1001;
-
     public InvalidCursorException() {
-        super(ERROR_CODE, "Invalid cursor");
-    }
-
-    public InvalidCursorException(Throwable cause) {
-        super(ERROR_CODE, "Invalid cursor", cause);
+        super(HttpStatus.BAD_REQUEST, "Cursor không hợp lệ.");
     }
 }
