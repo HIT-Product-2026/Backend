@@ -1,8 +1,13 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.config.MinioProperties;
+import com.example.lockly.exception.nonRetryException.InvalidConfigurationException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.exception.nonRetryException.UnauthorizedException;
+import com.example.lockly.exception.retryException.MinIOException;
 import com.example.lockly.service.MinIOService;
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,15 +54,69 @@ public class MinIOServiceImpl implements MinIOService {
 
     @Override
     public InputStream getFile(String objectName) {
+
+        log.info("[MinIO] Download objectName={}", objectName);
+
         try {
+
             return minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(props.getBucketName())
                             .object(objectName)
                             .build()
             );
+
+        } catch (ErrorResponseException e) {
+
+            String code = e.errorResponse().code();
+
+            switch (code) {
+
+                case "NoSuchKey" ->
+                        throw new ResourceNotFoundException(
+                                "Không tìm thấy tệp '" + objectName + "' trong MinIO.",
+                                e
+                        );
+
+                case "NoSuchBucket" ->
+                        throw new InvalidConfigurationException(
+                                "Bucket '" + props.getBucketName() + "' không tồn tại.",
+                                e
+                        );
+
+                case "XMinioInvalidObjectName",
+                     "InvalidBucketName" ->
+                        throw new InvalidConfigurationException(
+                                "Object name hoặc bucket name không hợp lệ.",
+                                e
+                        );
+
+                case "AccessDenied" ->
+                        throw new UnauthorizedException(
+                                "Không có quyền truy cập vào MinIO.",
+                                e
+                        );
+
+                default ->
+                        throw new RuntimeException(
+                                "MinIO trả về lỗi: " + code,
+                                e
+                        );
+            }
+
+        } catch (IOException e) {
+
+            throw new MinIOException(
+                    "Không thể kết nối hoặc đọc dữ liệu từ MinIO.",
+                    e
+            );
+
         } catch (Exception e) {
-            throw new RuntimeException("Cannot read file from MinIO", e);
+
+            throw new RuntimeException(
+                    "Lỗi không xác định khi đọc tệp từ MinIO.",
+                    e
+            );
         }
     }
 
@@ -68,6 +127,7 @@ public class MinIOServiceImpl implements MinIOService {
         log.info("[MinIO] Download objectName={}", objectName);
 
         try {
+
             InputStream inputStream = minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(props.getBucketName())
@@ -82,8 +142,58 @@ public class MinIOServiceImpl implements MinIOService {
                     inputStream
             );
 
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot read file from MinIO", e);
+        } catch (ErrorResponseException e) {
+
+            String code = e.errorResponse().code();
+
+            switch (code) {
+
+                case "NoSuchKey" ->
+                        throw new ResourceNotFoundException(
+                                "Không tìm thấy tệp '" + objectName + "' trong MinIO.",
+                                e
+                        );
+
+                case "NoSuchBucket" ->
+                        throw new InvalidConfigurationException(
+                                "Bucket '" + props.getBucketName() + "' không tồn tại.",
+                                e
+                        );
+
+                case "XMinioInvalidObjectName",
+                     "InvalidBucketName" ->
+                        throw new InvalidConfigurationException(
+                                "Object name hoặc bucket name không hợp lệ.",
+                                e
+                        );
+
+                case "AccessDenied" ->
+                        throw new UnauthorizedException(
+                                "Không có quyền truy cập vào MinIO.",
+                                e
+                        );
+
+                default ->
+                        throw new RuntimeException(
+                                "MinIO trả về lỗi: " + code,
+                                e
+                        );
+            }
+
+        } catch (IOException e) {
+
+            // Lỗi mạng / server -> có thể retry
+            throw new MinIOException(
+                    "Không thể kết nối hoặc đọc dữ liệu từ MinIO.",
+                    e
+            );
+
+        }  catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Lỗi không xác định khi đọc tệp từ MinIO.",
+                    e
+            );
         }
     }
 

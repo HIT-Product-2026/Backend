@@ -42,7 +42,7 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
     private final LocationService locationService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
     private final PostService postService;
 
 
@@ -73,9 +73,7 @@ public class UserController {
         // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
         boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude);
         if (isUpdateFromUknownLocation) {
-            String jwtId = (String) redisTemplate.opsForValue().get(
-                    "user_token:" + user.getId()
-            );
+            String jwtId = redisService.getAccessToken(user.getId());
             // logout
             authService.logout(LogoutRequestDto.from(jwtId));
 
@@ -147,21 +145,16 @@ public class UserController {
 
     @GetMapping("/{user_id}/avatar")
     @Operation(summary = "Lấy ảnh đại diện", description = "Trả về image binary từ MinIO")
-    public ResponseEntity<byte[]> getAvatar(
+    public ResponseEntity<ApiResponse<String>> getAvatar(
             @Parameter(description = "ID user")
             @PathVariable("user_id") UUID userId
-    ) throws IOException {
+    ) {
 
-        try (InputStream inputStream = userService.getAvatar(userId)) {
+        String presignedUrl = userService.getAvatar(userId);
 
-            if (inputStream == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(inputStream.readAllBytes());
-        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", presignedUrl));
     }
 
     @GetMapping("/{friendId}/posts")

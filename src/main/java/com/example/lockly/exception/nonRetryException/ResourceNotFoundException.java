@@ -10,4 +10,12 @@ public class ResourceNotFoundException extends NonRetryableAppException {
                 String.format("%s không tìm thấy với %s: %s", resourceName, fieldName, value)
         );
     }
+
+    public ResourceNotFoundException(String message, Throwable cause) {
+        super(
+                HttpStatus.NOT_FOUND,
+                message,
+                cause
+        );
+    }
 }

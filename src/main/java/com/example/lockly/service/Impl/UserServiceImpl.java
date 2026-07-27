@@ -202,7 +202,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public InputStream getAvatar(UUID userId){
+    public String getAvatar(UUID userId){
 
         User user = userRepository
                 .findById(userId)
@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
         if (user.getAvatarUrl() == null)
             throw new ResourceNotFoundException("Avatar", "userId", userId);;
 
-        return minIOService.getFile(user.getAvatarUrl());
+        return minIOService.generatePresignedUrl(user.getAvatarUrl());
     }
 
     @Override
