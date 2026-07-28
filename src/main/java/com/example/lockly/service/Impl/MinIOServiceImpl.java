@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MinIOServiceImpl implements MinIOService {
 
     @PublicMinio
