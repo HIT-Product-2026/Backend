@@ -30,14 +30,16 @@ public class MinioConfig {
     @PublicMinio
     public MinioClient publicMinioClient(MinioProperties props) {
 
-        log.info("Public endpoint property: {}", props.getPublicEndpoint());
-
-        return MinioClient.builder()
+        MinioClient client = MinioClient.builder()
                 .endpoint(props.getPublicEndpoint())
                 .credentials(
                         props.getAccessKey(),
                         props.getSecretKey()
                 )
                 .build();
+
+        log.info("Public MinIO client created");
+
+        return client;
     }
 }
