@@ -36,6 +36,7 @@ public class SecurityConfig {
             ApiPath.API_NOW + "/auth/forgot-password/verify-otp",  // ← thêm
             ApiPath.API_NOW + "/auth/forgot-password/reset",
             ApiPath.API_NOW + "/auth/logout",                       // ← thêm
+            ApiPath.API_NOW + "/auth/refresh",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",

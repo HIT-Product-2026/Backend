@@ -163,7 +163,7 @@ public class WebSocketController {
         if (longitude == null || latitude == null) return;
 
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
-        if (locationService.isDropRequest(longitude, latitude)) return;
+        if (locationService.isDropRequest(longitude, latitude, user)) return;
 
         log.debug("Request hợp lệ");
 
