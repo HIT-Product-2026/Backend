@@ -10,17 +10,18 @@ import com.example.lockly.service.AuthService;
 import com.example.lockly.service.LocationService;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
 
     private final RedisService redisService;
-    private final AuthService authService;
     private final GISProvinceRepository gisProvinceRepository;
 
     @Override
@@ -29,6 +30,9 @@ public class LocationServiceImpl implements LocationService {
         final long timeLimit = 10;
 
         LocationUserResponseDto dto = redisService.getUserLocation(user.getId());
+
+        log.info("user id: " + dto.userId());
+        log.info("last time: " + dto.lastActiveAt());
 
         if (longitude == null || latitude == null)
             return true; // Drop request do client cung cấp thiếu tọa độ
@@ -39,6 +43,8 @@ public class LocationServiceImpl implements LocationService {
         long duration = Duration
                 .between(LocalDateTime.now(), dto.lastActiveAt())
                 .toSeconds();
+
+        log.info("duration: " + duration);
 
         // Tần suất request trên timeLimit thì chấp nhận (tính bằng giây)
         if (duration > timeLimit)
@@ -55,6 +61,8 @@ public class LocationServiceImpl implements LocationService {
                 latitude1, longitude1,
                 latitude2, longitude2
                 );
+
+        log.info("distance: " + distance);
 
         // Di chuyển ít hơn distanceLimit thì drop
         if (distance < distanceLimit)

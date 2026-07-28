@@ -160,7 +160,8 @@ public class WebSocketController {
         Double longitude = request.longitude();
         Double latitude = request.latitude();
 
-        if (longitude == null || latitude == null) return;
+        log.debug("longitude: " + longitude);
+        log.debug("latitude" + latitude);
 
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
         if (locationService.isDropRequest(longitude, latitude, user)) return;
