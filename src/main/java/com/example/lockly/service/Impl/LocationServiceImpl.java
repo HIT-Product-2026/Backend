@@ -24,11 +24,9 @@ public class LocationServiceImpl implements LocationService {
     private final GISProvinceRepository gisProvinceRepository;
 
     @Override
-    public boolean isDropRequest(Double longitude, Double latitude){
+    public boolean isDropRequest(Double longitude, Double latitude, User user){
         final double distanceLimit = 5;
         final long timeLimit = 10;
-
-        User user = authService.getCurrentUser();
 
         LocationUserResponseDto dto = redisService.getUserLocation(user.getId());
 
@@ -65,10 +63,8 @@ public class LocationServiceImpl implements LocationService {
         return false;
     }
 
-    public boolean isUnknownLocation(Double longitude, Double latitude){
+    public boolean isUnknownLocation(Double longitude, Double latitude, User user){
         double safeDistance = 500; // Khoảng cách an toàn là 500m/s (đây là vận tốc của máy bay dân dụng)
-
-        User user = authService.getCurrentUser();
 
         LocationUserResponseDto dto = redisService.getUserLocation(user.getId());
 

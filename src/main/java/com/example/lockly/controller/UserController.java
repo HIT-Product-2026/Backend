@@ -71,7 +71,7 @@ public class UserController {
         User user = authService.getCurrentUser();
 
         // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
-        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude);
+        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
         if (isUpdateFromUknownLocation) {
             String jwtId = redisService.getAccessToken(user.getId());
             // logout
@@ -89,7 +89,7 @@ public class UserController {
         }
 
         // Giảm tần suất cập nhật vị trí
-        boolean isDropRequest = locationService.isDropRequest(longitude, latitude);
+        boolean isDropRequest = locationService.isDropRequest(longitude, latitude, user);
         if (!isDropRequest)
             userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
 
