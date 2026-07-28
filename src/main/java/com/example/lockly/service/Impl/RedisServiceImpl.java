@@ -55,7 +55,7 @@ public class RedisServiceImpl implements RedisService {
         Double longitude = (Double) redisTemplate.opsForHash().get(key, "longitude");
         LocalDateTime lastActiveAt = (LocalDateTime) redisTemplate.opsForHash().get(key, "lastActiveAt");
 
-        return new LocationUserResponseDto(latitude, longitude, lastActiveAt);
+        return new LocationUserResponseDto(userId, latitude, longitude, lastActiveAt);
     }
 
     @Override
