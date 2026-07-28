@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class MinIOServiceImpl implements MinIOService {
 
     @PublicMinio
@@ -31,6 +31,16 @@ public class MinIOServiceImpl implements MinIOService {
 
     private final MinioClient minioClient;
     private final MinioProperties props;
+
+    public MinIOServiceImpl(
+            @PublicMinio MinioClient publicMinioClient,
+            MinioClient minioClient,
+            MinioProperties props
+    ) {
+        this.publicMinioClient = publicMinioClient;
+        this.minioClient = minioClient;
+        this.props = props;
+    }
 
     @Override
     public void saveFile(MultipartFile file, String objectName){
