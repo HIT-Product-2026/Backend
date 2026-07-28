@@ -226,17 +226,24 @@ public class MinIOServiceImpl implements MinIOService {
             log.info("props.publicEndpoint = {}", props.getPublicEndpoint());
             log.info("publicMinioClient = {}", publicMinioClient);
 
-
             Field asyncField = MinioClient.class.getDeclaredField("asyncClient");
             asyncField.setAccessible(true);
 
             Object asyncClient = asyncField.get(publicMinioClient);
 
-            for (Field field : asyncClient.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                log.info("{} -> {}", field.getName(), field.get(asyncClient));
+            log.info("asyncClient class = {}", asyncClient.getClass().getName());
+            Field[] fields = asyncClient.getClass().getDeclaredFields();
+
+            log.info("field count={}", fields.length);
+
+            for (Field f : fields) {
+                log.info("field={}", f.getName());
             }
 
+            for (Field f : MinioClient.class.getDeclaredFields()) {
+                log.info("MinioClient field={}", f.getName());
+            }
+            
             String url = publicMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
