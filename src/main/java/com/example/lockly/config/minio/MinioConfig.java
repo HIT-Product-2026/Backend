@@ -39,6 +39,7 @@ public class MinioConfig {
                 .build();
 
         log.info("Public MinIO client created");
+        log.info("endpoint={}", props.getPublicEndpoint());
 
         return client;
     }
