@@ -153,6 +153,8 @@ public class WebSocketController {
             ShareLocationRequest request
     ){
 
+        log.debug("Đã nhận request location");
+
         User user = getCurrentUser(headerAccessor);
 
         Double longitude = request.longitude();
@@ -163,6 +165,8 @@ public class WebSocketController {
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
         if (locationService.isDropRequest(longitude, latitude)) return;
 
+        log.debug("Request hợp lệ");
+
         UserCacheDto userDto = redisService.getUser(user.getId());
 
         if (userDto == null) {
@@ -172,14 +176,20 @@ public class WebSocketController {
 
         // Lưu vào redis
         redisService.saveUserLocation(userDto.id(), latitude, longitude);
+        log.debug("Lưu thành công location");
+
 
         if (userDto.mode() == UserMode.PRIVATE)
             return;
 
         LocationUserResponseDto response = redisService.getUserLocation(userDto.id());
 
+        log.debug("Bắt đầu chia sẻ vị trí");
+
         // Chuyển lên topic cá nhân
         webSocketService.shareLocationToFriend(userDto.id(), response);
+
+        log.debug("Chia sẻ thành công");
     }
 
     @MessageMapping("/online")
