@@ -111,6 +111,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_SERVER_URL: https://lockly-minio.duckdns.org
     # Port 9000 (API) chuyển thành expose. Port 9001 (Console UI) giữ lại ports để bạn quản lý giao diện.
     expose:
       - "9000"
