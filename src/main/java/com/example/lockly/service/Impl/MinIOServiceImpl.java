@@ -10,9 +10,8 @@ import com.example.lockly.service.MinIOService;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
-import lombok.AccessLevel;
+import java.lang.reflect.Field;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
@@ -226,6 +225,17 @@ public class MinIOServiceImpl implements MinIOService {
 
             log.info("props.publicEndpoint = {}", props.getPublicEndpoint());
             log.info("publicMinioClient = {}", publicMinioClient);
+
+
+            Field asyncField = MinioClient.class.getDeclaredField("asyncClient");
+            asyncField.setAccessible(true);
+
+            Object asyncClient = asyncField.get(publicMinioClient);
+
+            for (Field field : asyncClient.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                log.info("{} -> {}", field.getName(), field.get(asyncClient));
+            }
 
             String url = publicMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
