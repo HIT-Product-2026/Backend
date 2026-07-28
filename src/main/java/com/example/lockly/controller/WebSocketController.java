@@ -1,5 +1,6 @@
 package com.example.lockly.controller;
 
+import com.example.lockly.domain.dto.request.ShareLocationRequest;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
@@ -149,11 +150,13 @@ public class WebSocketController {
     @MessageMapping("/share.location")
     public void sendLocationToUserFriends(
             SimpMessageHeaderAccessor headerAccessor,
-            Double longitude,
-            Double latitude
+            ShareLocationRequest request
     ){
 
         User user = getCurrentUser(headerAccessor);
+
+        Double longitude = request.longitude();
+        Double latitude = request.latitude();
 
         if (longitude == null || latitude == null) return;
 
