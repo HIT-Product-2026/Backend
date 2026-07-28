@@ -224,7 +224,10 @@ public class MinIOServiceImpl implements MinIOService {
 
         try {
 
-            return publicMinioClient.getPresignedObjectUrl(
+            log.info("props.publicEndpoint = {}", props.getPublicEndpoint());
+            log.info("publicMinioClient = {}", publicMinioClient);
+
+            String url = publicMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(props.getBucketName())
@@ -232,6 +235,10 @@ public class MinIOServiceImpl implements MinIOService {
                             .expiry(1, TimeUnit.HOURS)
                             .build()
             );
+
+            log.info("Generated presigned URL = {}", url);
+
+            return url;
 
         } catch (Exception e) {
 
