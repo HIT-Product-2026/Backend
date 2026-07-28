@@ -7,11 +7,13 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
     @Override
@@ -36,7 +38,9 @@ public class NotificationServiceImpl implements NotificationService {
                     .putData("conversationId", conversationId.toString())
                     .build();
 
-            return FirebaseMessaging.getInstance().send(message);
+            String messageId = FirebaseMessaging.getInstance().send(message);
+            log.info("FCM messageId: {}", messageId);
+            return messageId;
 
         } catch (FirebaseMessagingException e) {
             throw new FcmNotificationException(
