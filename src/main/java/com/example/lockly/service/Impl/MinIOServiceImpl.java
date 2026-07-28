@@ -243,7 +243,7 @@ public class MinIOServiceImpl implements MinIOService {
             for (Field f : MinioClient.class.getDeclaredFields()) {
                 log.info("MinioClient field={}", f.getName());
             }
-            
+
             String url = publicMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)

@@ -60,6 +60,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             UUID userId,
             Object payload
     ) {
+        log.debug("Đã gửi paylod location thành công cho client");
 
         messagingTemplate.convertAndSend(
                 "/topic/location/" + userId,
