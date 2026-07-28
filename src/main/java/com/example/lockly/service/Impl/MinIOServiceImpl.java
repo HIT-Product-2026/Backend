@@ -236,7 +236,7 @@ public class MinIOServiceImpl implements MinIOService {
                             .build()
             );
 
-            log.info("Generated presigned URL = {}", url);git 
+            log.info("Generated presigned URL = {}", url);
             log.info("publicMinioClient class = {}", publicMinioClient.getClass());
 
             return url;
