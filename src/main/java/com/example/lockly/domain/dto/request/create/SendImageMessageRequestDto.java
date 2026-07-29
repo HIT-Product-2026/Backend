@@ -10,7 +10,6 @@ public record SendImageMessageRequestDto(
         @NotNull
         UUID conversationId,
 
-        @NotNull
         String imageUrl,
 
         @NotNull
