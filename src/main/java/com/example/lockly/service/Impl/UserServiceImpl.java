@@ -43,10 +43,7 @@ public class UserServiceImpl implements UserService {
     private final String prefix = "users/avatar";
 
     @Override
-    public List<UserResponseDto> findFriendsByUserId(UUID userId){
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
+    public List<UserResponseDto> findFriendsByUser(User user){
 
         // Lấy tất cả lời mời đã chấp thuận với user là người gửi
         List<UserResponseDto> fromRequester = friendshipsRepository
@@ -68,8 +65,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isFriendByUserId(UUID userId, UUID friendId) {
-        List<UserResponseDto> friends = findFriendsByUserId(userId);
+    public boolean isFriendByUserId(User user, UUID friendId) {
+        List<UserResponseDto> friends = findFriendsByUser(user);
 
         for (UserResponseDto friend : friends){
             if (friend.id().equals(friendId))
@@ -134,9 +131,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> findFcmTokenOfFriendsByUserId(UUID userId){
+    public List<String> findFcmTokenOfFriendsByUserId(User user){
 
-        List<UserResponseDto> friends = findFriendsByUserId(userId);
+        List<UserResponseDto> friends = findFriendsByUser(user);
 
         friends.forEach(friend ->
                 log.info(

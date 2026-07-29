@@ -171,7 +171,7 @@ public class WebSocketController {
         UserCacheDto userDto = redisService.getUser(user.getId());
 
         if (userDto == null) {
-            userDto = UserCacheDto.from(userRepository.findById(user.getId()).orElseThrow());
+            userDto = UserCacheDto.from(user);
             redisService.saveUser(userDto);
         }
 
@@ -183,7 +183,7 @@ public class WebSocketController {
         if (userDto.mode() == UserMode.PRIVATE)
             return;
 
-        LocationUserResponseDto response = redisService.getUserLocation(userDto.id());
+        LocationUserResponseDto response = redisService.getUserLocation(user.getId());
 
         log.debug("Bắt đầu chia sẻ vị trí");
 

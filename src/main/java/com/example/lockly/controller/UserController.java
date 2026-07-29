@@ -168,7 +168,7 @@ public class UserController {
     ) {
         User user = authService.getCurrentUser();
 
-        boolean isFriend = userService.isFriendByUserId(user.getId(), friendId);
+        boolean isFriend = userService.isFriendByUserId(user, friendId);
         if (!isFriend)
             throw new ForbiddenException("User không có người bạn này");
 
@@ -183,13 +183,11 @@ public class UserController {
             );
         }
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
                         "Thành công",
-                        ListResponse.of(
-                                listPost,
-                                nextCursor
-                        )
+                        ListResponse.of(listPost, nextCursor)
                 )
         );
     }

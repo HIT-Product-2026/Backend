@@ -16,13 +16,13 @@ import java.util.UUID;
 
 public interface UserService{
 
-    List<UserResponseDto> findFriendsByUserId(UUID userId);
-    List<String> findFcmTokenOfFriendsByUserId(UUID userId);
+    List<UserResponseDto> findFriendsByUser(User user);
+    List<String> findFcmTokenOfFriendsByUserId(User user);
     String getAvatar(UUID userId);
     List<UserSimpleResponseDto> searchFriend(String keywork);
 
     boolean isUserOnlineByUserId(UUID userId);
-    boolean isFriendByUserId(UUID userId, UUID friendId);
+    boolean isFriendByUserId(User user, UUID friendId);
 
     void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude);
     void updateDisplayNameByUserId(UUID userId, String displayName);

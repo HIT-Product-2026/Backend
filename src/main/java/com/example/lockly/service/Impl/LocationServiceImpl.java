@@ -3,18 +3,22 @@ package com.example.lockly.service.Impl;
 import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.domain.dto.query.ProvinceInfo;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.repository.location.GISProvinceRepository;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.LocationService;
 import com.example.lockly.service.RedisService;
+import com.example.lockly.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -22,6 +26,7 @@ import java.time.LocalDateTime;
 public class LocationServiceImpl implements LocationService {
 
     private final RedisService redisService;
+    private final UserService userService;
     private final GISProvinceRepository gisProvinceRepository;
 
     @Override
@@ -112,5 +117,23 @@ public class LocationServiceImpl implements LocationService {
         return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
                 .map(ProvinceInfo::getFullName)
                 .orElse(null);
+    }
+
+    @Override
+    public List<LocationUserResponseDto> getLocationFriends(User user){
+
+        List<UserResponseDto> friends = userService.findFriendsByUser(user);
+
+        List<LocationUserResponseDto> locationResponse = new ArrayList<>();
+
+        for (UserResponseDto friend : friends) {
+            LocationUserResponseDto dto = redisService.getUserLocation(friend.id());
+
+            if (dto != null) {
+                locationResponse.add(dto);
+            }
+        }
+
+        return locationResponse;
     }
 }

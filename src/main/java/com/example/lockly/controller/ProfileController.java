@@ -52,8 +52,12 @@ public class ProfileController {
 
         boolean success = profileService.registerFace(currentUser.getId(), image);
 
-        return ResponseEntity.ok(
-                ApiResponse.success("Đăng ký khuôn mặt thành công", success)
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        "Đăng ký khuôn mặt thành công",
+                        success
+                )
         );
     }
 

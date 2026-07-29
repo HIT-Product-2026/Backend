@@ -4,6 +4,7 @@ import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.ForgotPasswordCacheDto;
 import com.example.lockly.domain.dto.request.auth.RegisterCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -49,6 +50,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public LocationUserResponseDto getUserLocation(UUID userId){
+
         String key = userLocationKey + userId;
 
         Double latitude = (Double) redisTemplate.opsForHash().get(key, "latitude");
