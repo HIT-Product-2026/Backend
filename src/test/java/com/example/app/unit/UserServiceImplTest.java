@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -206,7 +207,11 @@ class UserServiceImplTest {
                 "image-content".getBytes()
         );
 
-        when(props.getBucketName()).thenReturn("bucket");
+        when(userRepository.findById(user.getId()))
+                .thenReturn(Optional.of(user));
+
+        when(props.getBucketName())
+                .thenReturn("bucket");
 
         userService.updateAvatarByUserId(user, file);
 
