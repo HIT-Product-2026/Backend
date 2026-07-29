@@ -18,9 +18,15 @@ public record PostDetailResponseDto(
         NsfwStatus nsfw,
         String urlImage,
         ConversationSimpleResponseDto conversation,
-        LocalDateTime createAt
+        LocalDateTime createAt,
+        String locationName
 ){
-    public static PostDetailResponseDto from(Post post, Conversation conversation, String urlImage) {
+    public static PostDetailResponseDto from(
+            Post post,
+            Conversation conversation,
+            String urlImage,
+            String locationName
+    ) {
         return new PostDetailResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
@@ -31,7 +37,8 @@ public record PostDetailResponseDto(
                 NsfwStatus.PROCESSING,
                 urlImage,
                 ConversationSimpleResponseDto.from(conversation),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                locationName
         );
     }
 }
