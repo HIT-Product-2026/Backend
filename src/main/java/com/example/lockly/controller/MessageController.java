@@ -126,19 +126,18 @@ public class MessageController {
     }
 
 
-//    @GetMapping("/{message_id}/image")
-//    @Operation(summary = "Lấy ảnh message", description = "Trả về ảnh binary từ MinIO")
-//    public ResponseEntity<byte[]> getImage(
-//            @Parameter(description = "ID message")
-//            @PathVariable("message_id")
-//            UUID messageId
-//
-//    ) throws Exception {
-//        InputStream inputStream = messageService.findImageMessageById(messageId);
-//
-//        return ResponseEntity
-//                .ok()
-//                .contentType(MediaType.IMAGE_JPEG)
-//                .body(inputStream.readAllBytes());
-//    }
+    @GetMapping("/{message_id}/image")
+    @Operation(summary = "Lấy ảnh message", description = "Trả về ảnh binary từ MinIO")
+    public ResponseEntity<ApiResponse<String>> getImage(
+            @Parameter(description = "ID message")
+            @PathVariable("message_id")
+            UUID messageId
+
+    ) {
+        String imageUrl = messageService.findImageMessageById(messageId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", imageUrl));
+    }
 }

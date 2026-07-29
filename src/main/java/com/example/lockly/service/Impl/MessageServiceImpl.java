@@ -225,7 +225,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public InputStream findImageMessageById(UUID id){
+    public String findImageMessageById(UUID id){
         Message message = messageRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Message", "id", id));
@@ -233,7 +233,7 @@ public class MessageServiceImpl implements MessageService {
         if (message.getType() != MessageType.IMAGE)
             throw new BadRequestException("Id này không phải là của image message");
 
-        return minIOService.getFile(message.getContent());
+        return minIOService.generatePresignedUrl(message.getObjectName());
     }
 
     @Override
