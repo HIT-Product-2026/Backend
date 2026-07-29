@@ -3,6 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.create.CreateConversationRequestDto;
 import com.example.lockly.domain.dto.response.MessagePageResponse;
 import com.example.lockly.domain.dto.response.common.ConversationResponseDto;
@@ -12,6 +13,7 @@ import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ConversationService;
 import com.example.lockly.service.MessageService;
+import com.example.lockly.service.RedisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,13 +40,15 @@ public class ConversationController {
     private final ConversationService conversationService;
     private final AuthService authService;
     private final MessageService messageService;
+    private final RedisService redisService;
 
     @GetMapping("/{conversation_id}")
     @Operation(summary = "Lấy conversation theo id")
     public ResponseEntity<ApiResponse<ConversationResponseDto>> getConversationById(
             @PathVariable("conversation_id") UUID conversationId
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         ConversationResponseDto response = conversationService.findById(conversationId);
         if (response.user1().id() != user.getId()
@@ -63,7 +67,7 @@ public class ConversationController {
             @Parameter(description = "Id của người muốn nhắn tin")
             @RequestParam(name = "userId") UUID userId
     ) {
-        User user = authService.getCurrentUser();
+        User user = authService.getUserFromCache();
 
         CreateConversationRequestDto request = new CreateConversationRequestDto(
                 user.getId(),

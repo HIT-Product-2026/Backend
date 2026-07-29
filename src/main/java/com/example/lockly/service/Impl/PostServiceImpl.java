@@ -68,7 +68,8 @@ public class PostServiceImpl implements PostService {
         if (request.file() == null || request.file().isEmpty())
             throw new BadRequestException("File is empty");
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         log.debug("Lấy user thành công");
 
@@ -299,7 +300,8 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation){
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         Post post = postsRepository
                 .findById(postId)
@@ -334,7 +336,8 @@ public class PostServiceImpl implements PostService {
                 .findById(request.postId())
                 .orElseThrow(() -> new BadRequestException("Post id", request.postId()));
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         User postAuthor = post.getUser();
 
         if (!userService.isFriendByUserId(user, postAuthor.getId()))
@@ -357,7 +360,8 @@ public class PostServiceImpl implements PostService {
                 .findById(request.postId())
                 .orElseThrow(() -> new BadRequestException("Post id", request.postId()));
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         User postAuthor = post.getUser();
 
         if (!userService.isFriendByUserId(user, postAuthor.getId()))

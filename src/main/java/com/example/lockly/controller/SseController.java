@@ -26,7 +26,8 @@ public class SseController {
     @Operation(summary = "Mở SSE connection")
     public SseEmitter subscribe() {
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return sseService.subscribeDetectNsfw(user.getId());
     }

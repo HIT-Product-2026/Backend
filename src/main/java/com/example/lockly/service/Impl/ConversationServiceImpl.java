@@ -33,7 +33,8 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public List<ConversationResponseDto> findAll(){
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return conversationRepository
                 .findByUser(user)

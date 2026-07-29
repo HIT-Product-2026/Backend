@@ -212,7 +212,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserSimpleResponseDto> searchFriend (String keyword) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return userRepository.searchStrangers(
                         user.getId(),

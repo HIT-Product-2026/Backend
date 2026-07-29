@@ -41,6 +41,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -154,8 +155,6 @@ public class AuthServiceImpl implements AuthService {
         }
 
         redisService.saveUser(UserCacheDto.from(user));
-
-        // Cập nhật fcm token (có api cập nhật riêng)
 
         return buildLoginResponse(user);
     }
@@ -325,6 +324,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public UUID getCurrentUserId() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getId();
+
+        }
+
+        throw new RuntimeException("Invalid authentication principal");
+    }
+
+    @Override
     @Transactional
     public LoginResponseDto refreshToken(RefreshTokenRequestDto request) {
 
@@ -373,4 +391,20 @@ public class AuthServiceImpl implements AuthService {
         // đồng thời cập nhật lại jti mới vào Redis
         return buildLoginResponse(user);
     }
+
+    @Override
+    public User getUserFromCache(){
+        // Lấy user từ cache thay vì db
+        UUID userId = this.getCurrentUserId();
+        User user;
+        UserCacheDto userCache = redisService.getUser(userId);
+        if (userCache == null){
+            user = this.getCurrentUser();
+            redisService.saveUser(UserCacheDto.from(user));
+        } else {
+            user = userCache.toEntity();
+        }
+        return user;
+    }
+
 }
