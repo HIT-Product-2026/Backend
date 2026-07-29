@@ -33,28 +33,19 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final ConversationService conversationService;
 
     @Override
-    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(UUID id) {
-        User requester = userRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+    public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(User requester) {
 
         List<Friendship> friendshipList = friendshipsRepository
                 .findByRequesterAndStatus(requester, FriendshipStatus.SENT);
 
-        List<FriendshipsResponseDto> friendshipsDtoList = friendshipList
+        return friendshipList
                 .stream()
                 .map(FriendshipsResponseDto::from)
                 .toList();
-
-        return friendshipsDtoList;
     }
 
     @Override
-    public List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(UUID userId) {
-
-        User receiver = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+    public List<FriendshipsResponseDto> findFriendRequestsReceivedByUserId(User receiver) {
 
         List<Friendship> friendshipList = friendshipsRepository
                 .findByReceiverAndStatus(receiver, FriendshipStatus.SENT);

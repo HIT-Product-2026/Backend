@@ -79,7 +79,8 @@
         public ResponseEntity<ApiResponse<Void>> sendOtpForForgotPassword(
                 @Valid @RequestBody ForgotPasswordRequestDto request) {
             authService.sendOtpForForgotPassword(request);
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity
+                    .status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.SEND_OTP_SUCCESS));
         }
 
@@ -88,7 +89,8 @@
         public ResponseEntity<ApiResponse<Void>> verifyOtpForgotPassword(
                 @Valid @RequestBody VerifyOtpRequestDto request) {
             authService.verifyOtpForgotPassword(request);
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity
+                    .status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.VERIFY_OTP_SUCCESS));
         }
 
@@ -97,7 +99,8 @@
         public ResponseEntity<ApiResponse<Void>> resetPassword(
                 @Valid @RequestBody ResetPasswordRequestDto request) {
             authService.resetPassword(request);
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity
+                    .status(HttpStatus.OK)
                     .body(ApiResponse.success(SuccessMessage.Auth.RESET_PASSWORD_SUCCESS));
         }
 

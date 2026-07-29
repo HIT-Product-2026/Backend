@@ -76,7 +76,7 @@ public class PostController {
 
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
-                user.getId(),
+                user,
                 response.id()
         );
 
@@ -98,7 +98,8 @@ public class PostController {
             @PathVariable("post_id") UUID postId
     ) {
         return ResponseEntity
-                .ok(ApiResponse.success("Thành công", postService.getPostById(postId)));
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", postService.getPostById(postId)));
     }
 
     @GetMapping("/{post_id}/image")
@@ -198,8 +199,9 @@ public class PostController {
 
         log.debug("Decode sucessful");
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
                         "Thành công",
                         ListResponse.of(listPost, nextCursor)
                 )

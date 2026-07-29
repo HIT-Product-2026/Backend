@@ -102,7 +102,7 @@ public class FriendshipController {
     @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user")
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getFriends() {
         User user = authService.getCurrentUser();
-        List<UserResponseDto> listFriend = userService.findFriendsByUserId(user.getId());
+        List<UserResponseDto> listFriend = userService.findFriendsByUser(user);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -115,7 +115,7 @@ public class FriendshipController {
         User user = authService.getCurrentUser();
 
         List<FriendshipsResponseDto> result = friendshipService
-                .findFriendRequestRequesterByUserId(user.getId());
+                .findFriendRequestRequesterByUserId(user);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -132,10 +132,11 @@ public class FriendshipController {
         User user = authService.getCurrentUser();
 
         List<FriendshipsResponseDto> result =
-                friendshipService.findFriendRequestsReceivedByUserId(user.getId());
+                friendshipService.findFriendRequestsReceivedByUserId(user);
 
         return ResponseEntity
-                .ok(ApiResponse.success("Thành công", ListResponse.of(result)));
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Thành công", ListResponse.of(result)));
     }
 
     @GetMapping("/friendships/search")
