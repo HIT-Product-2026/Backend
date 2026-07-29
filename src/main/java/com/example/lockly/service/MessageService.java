@@ -20,6 +20,6 @@ public interface MessageService {
             Integer pageSize
     );
     MessageResponseDto findMessageById(UUID id);
-    InputStream findImageMessageById(UUID id);
+    String findImageMessageById(UUID id);
     MessagePageResponse buildMessageResponseDtos(List<Message> messages, String nextCursor);
 }
