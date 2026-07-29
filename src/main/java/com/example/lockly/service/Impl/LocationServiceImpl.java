@@ -114,6 +114,9 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public String getProvinceFullName(Double latitude, Double longitude) {
 
+        if (latitude == null || longitude == null)
+            throw new ResourceNotFoundException("Tên vị trí", "tọa độ", null);
+
         return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
                 .map(ProvinceInfo::getFullName)
                 .orElse(null);
