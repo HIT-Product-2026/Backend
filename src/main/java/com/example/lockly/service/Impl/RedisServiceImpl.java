@@ -44,8 +44,6 @@ public class RedisServiceImpl implements RedisService {
         redisTemplate.opsForHash().put(key, "longitude", longitude);
         redisTemplate.opsForHash().put(key, "lastActiveAt", LocalDateTime.now());
 
-        // Xóa sau 5 phút
-        redisTemplate.expire(key, 5, TimeUnit.MINUTES);
     }
 
     @Override
@@ -85,9 +83,7 @@ public class RedisServiceImpl implements RedisService {
     public Boolean getUserOnline(UUID userId){
         String key = userOnlineKey + userId;
 
-        Boolean isOnline = (Boolean) redisTemplate.opsForHash().get(key, "isOnline");
-
-        return isOnline;
+        return (Boolean) redisTemplate.opsForHash().get(key, "isOnline");
     }
 
     @Override

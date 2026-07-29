@@ -101,6 +101,10 @@ public class WebSocketController {
             @Valid SendImageMessageRequestDto request
     ) {
 
+        log.info("Url image: " + request.imageUrl());
+        log.info("conversation id: " + request.conversationId());
+        log.info("Is read: " + request.isRead());
+
         User user = getCurrentUser(headerAccessor);
 
         // Lưu vào DB
