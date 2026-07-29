@@ -49,7 +49,7 @@ public class UserController {
     private final UserRepository userRepository;
 
 
-    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Cập nhật avatar", description = "Upload ảnh avatar lên MinIO và update user.avatarUrl")
     public ResponseEntity<ApiResponse<Void>> updateAvatar(
             @Parameter(description = "File ảnh avatar")
@@ -65,7 +65,7 @@ public class UserController {
                 .body(ApiResponse.success("Cập nhật avatar thành công", null));
     }
 
-    @PostMapping("/location")
+    @PutMapping("/location")
     @Operation(summary = "Cập nhật vị trí user", description = "Lưu latitude (vĩ độ) và longitude (kinh độ) của user")
     public ResponseEntity<ApiResponse<Void>> updateUserLocation(
             @RequestParam("latitude") Double latitude,

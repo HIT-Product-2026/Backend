@@ -76,7 +76,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatarByUserId(User user, MultipartFile file) throws Exception {
+    public void updateAvatarByUserId(User userRequest, MultipartFile file) throws Exception {
+
+        log.info("Bắt đầu câ nhật avt");
+
+        User user = userRepository
+                .findById(userRequest.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userRequest.getId()));
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
@@ -84,7 +90,11 @@ public class UserServiceImpl implements UserService {
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty())
             throw new IllegalArgumentException("Original filename is missing");
 
+        log.info("Bắt đầu tạo object name");
+
         String objectName = FileUtil.getObjectNameFile(prefix, user.getId());
+
+        log.info("Bắt đầu lưu vào minIO");
 
         minioClient.putObject(
                 PutObjectArgs.builder()
@@ -95,9 +105,15 @@ public class UserServiceImpl implements UserService {
                         .build()
         );
 
+        log.info("Bắt đầu set vào User");
+
         user.setAvatarUrl(objectName);
 
+        log.info("Bắt đầu lưu vào db");
+
         userRepository.save(user);
+
+        log.info("Lưu thành công với object name: " + objectName);
     }
 
     @Override
