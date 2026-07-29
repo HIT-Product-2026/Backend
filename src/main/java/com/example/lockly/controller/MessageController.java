@@ -65,7 +65,8 @@ public class MessageController {
             SendImageMessageRequestDto request
     ){
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         // Lưu vào DB
         MessageResponseDto response = messageService.sendImageMessage(request, user);

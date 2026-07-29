@@ -52,7 +52,8 @@ public class UserController {
             @Parameter(description = "File ảnh avatar")
             @RequestParam("file") MultipartFile file
     ) throws Exception {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         userService.updateAvatarByUserId(user.getId(), file);
 
@@ -68,7 +69,8 @@ public class UserController {
 
             @RequestParam("longitude") Double longitude
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
         boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
@@ -106,7 +108,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> updateDisplayName(
             @RequestParam("displayName") String displayName
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         userService.updateDisplayNameByUserId(user.getId(), displayName);
 
         return ResponseEntity
@@ -122,7 +125,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> updateMode(
             @RequestParam("mode") UserMode mode
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         userService.updateModeByUserId(user.getId(), mode);
 
         return ResponseEntity
@@ -135,7 +139,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> updateFcmToken(
             @RequestParam("fcm_token") String fcmToken
     ){
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         userService.updateFcmTokenByUserId(user.getId(), fcmToken);
 
         return ResponseEntity
@@ -166,7 +171,8 @@ public class UserController {
             @Parameter(description = "Cursor (null với lần đầu gọi)")
             @RequestParam(name = "cursor", required = false) String cursor
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         boolean isFriend = userService.isFriendByUserId(user, friendId);
         if (!isFriend)

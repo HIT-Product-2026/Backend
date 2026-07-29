@@ -53,7 +53,8 @@ public class LocationController {
     @Operation(summary = "Lấy vị trí của tất cả bạn bè")
     public ResponseEntity<ApiResponse<ListResponse<LocationUserResponseDto>>> getLocationFriends() {
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return ResponseEntity
                 .status(HttpStatus.OK)

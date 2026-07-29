@@ -148,7 +148,8 @@ public class MessageServiceImpl implements MessageService {
                 .findById(conversationId)
                 .orElseThrow(() -> new BadRequestException("conversation id", conversationId));
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         validateSender(conversation, user);
 

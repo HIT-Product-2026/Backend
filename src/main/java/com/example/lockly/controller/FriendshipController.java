@@ -3,6 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
+import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
@@ -10,6 +11,7 @@ import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FriendshipService;
+import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,6 +39,7 @@ public class FriendshipController {
     private final UserService userService;
     private final AuthService authService;
     private final FriendshipService friendshipService;
+    private final RedisService redisService;
 
     @PostMapping("/request")
     @Operation(summary = "Gửi lời mời kết bạn")
@@ -44,7 +47,8 @@ public class FriendshipController {
             @Parameter(description = "Id người nhận")
             @RequestParam("receiverId") UUID receiverId
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         CreateFriendshipRequestDto request = new CreateFriendshipRequestDto(
                 user.getId(),
@@ -63,7 +67,8 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> acceptFriendRequest(
             @PathVariable("friendships_id") UUID friendshipId
     ){
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -77,7 +82,8 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> rejectFriendRequest(
             @PathVariable("friendships_id") UUID friendshipId
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -90,7 +96,8 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<FriendshipsResponseDto>> unfriendRequest(
             @PathVariable("friendId") UUID friendId
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -101,7 +108,8 @@ public class FriendshipController {
     @GetMapping("/friends")
     @Operation(summary = "Lấy danh sách bạn bè", description = "Trả về danh sách bạn bè của user")
     public ResponseEntity<ApiResponse<ListResponse<UserResponseDto>>> getFriends() {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
         List<UserResponseDto> listFriend = userService.findFriendsByUser(user);
 
         return ResponseEntity
@@ -112,7 +120,8 @@ public class FriendshipController {
     @GetMapping("/friendships/requester")
     @Operation(summary = "Lấy danh sách lời mời kết bạn", description = "Trả về danh sách lời mời kết bạn (PENDING)")
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getFriendRequests() {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         List<FriendshipsResponseDto> result = friendshipService
                 .findFriendRequestRequesterByUserId(user);
@@ -129,7 +138,8 @@ public class FriendshipController {
     )
     public ResponseEntity<ApiResponse<ListResponse<FriendshipsResponseDto>>> getReceivedFriendRequests() {
 
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         List<FriendshipsResponseDto> result =
                 friendshipService.findFriendRequestsReceivedByUserId(user);

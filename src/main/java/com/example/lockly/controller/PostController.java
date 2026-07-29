@@ -72,7 +72,9 @@ public class PostController {
         PostResponseDto response = postService.createPost(request);
 
         log.debug("Tạo bài viết thành công");
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
+
 
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
@@ -184,7 +186,8 @@ public class PostController {
             @Parameter(description = "Thẻ đánh dấu trang")
             @RequestParam(name = "cursor", required = false) String cursor
     ) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         log.debug("curor: " + cursor);
 

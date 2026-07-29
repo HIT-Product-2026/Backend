@@ -48,7 +48,8 @@ public class ProfileController {
             @Parameter(description = "Ảnh khuôn mặt cần đăng ký")
             @RequestParam("image") MultipartFile image
     ) {
-        User currentUser = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User currentUser = authService.getUserFromCache();
 
         boolean success = profileService.registerFace(currentUser.getId(), image);
 
@@ -67,7 +68,8 @@ public class ProfileController {
             description = "Kiểm tra người dùng hiện tại đã đăng ký khuôn mặt hay chưa"
     )
     public ResponseEntity<ApiResponse<Boolean>> checkFace() {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         Boolean hasFace = profileService.checkFace(user.getId());
 

@@ -65,7 +65,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public void updateProfile(UpdateProfileRequestDto request){
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         Profile profile = profileRepository
                 .findByUser(user)
@@ -222,8 +223,8 @@ public class ProfileServiceImpl implements ProfileService {
             Double longitude
     ){
 
-        User user = authService.getCurrentUser();
-
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         List<Post> completedPosts =
                 postsRepository.findFriendPostsWithinDistance(
@@ -271,7 +272,8 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public Profile updateProcessPhotoWithFriends(Profile profile, String objectName) {
-        User user = authService.getCurrentUser();
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
 
         List<UUID> detectedIds;
         try {
