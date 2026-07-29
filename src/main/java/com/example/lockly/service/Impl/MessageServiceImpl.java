@@ -20,8 +20,10 @@ import com.example.lockly.service.AuthService;
 import com.example.lockly.service.MessageService;
 import com.example.lockly.service.MinIOService;
 import com.github.f4b6a3.uuid.UuidCreator;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,9 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final AuthService authService;
     private final MinIOService minIOService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private final String prefix = "message";
     private final Integer pageSize = 10;
@@ -120,16 +125,18 @@ public class MessageServiceImpl implements MessageService {
                 .isRead(request.isRead())
                 .build();
 
-        messageRepository.save(message);
-
         conversation.setLastMessage(message);
         conversation.setLastMessageTime(message.getCreatedAt());
         conversation.setLastMessageContent("Đã gửi 1 ảnh");
 
+        messageRepository.save(message);
+        entityManager.flush();
+
         conversationRepository.save(conversation);
+        entityManager.flush();
 
         return MessageResponseDto.from(
-                messageRepository.save(message),
+                message,
                 request.imageUrl()
         );
 
