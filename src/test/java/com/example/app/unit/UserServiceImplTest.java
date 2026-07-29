@@ -27,14 +27,13 @@ import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import static org.mockito.ArgumentMatchers.eq;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -327,8 +326,8 @@ class UserServiceImplTest {
         Page<User> page = new PageImpl<>(List.of(stranger));
 
         when(userRepository.searchStrangers(
-                user.getId(),
-                "str",
+                eq(user.getId()),
+                eq("str"),
                 any(Pageable.class)
         )).thenReturn(page);
 
@@ -340,8 +339,8 @@ class UserServiceImplTest {
         assertEquals(stranger.getDisplayName(), result.get(0).displayName());
 
         verify(userRepository).searchStrangers(
-                user.getId(),
-                "str",
+                eq(user.getId()),
+                eq("str"),
                 any(Pageable.class)
         );
     }
