@@ -12,6 +12,8 @@ import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
+import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,6 +46,7 @@ public class UserController {
     private final LocationService locationService;
     private final RedisService redisService;
     private final PostService postService;
+    private final UserRepository userRepository;
 
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -159,7 +162,9 @@ public class UserController {
     ) {
 
         // Lấy user từ cache thay vì db
-        User user = authService.getUserFromCache();
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "user id", userId));
 
         String presignedUrl = userService.getAvatar(user);
 

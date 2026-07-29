@@ -1,9 +1,49 @@
 spring:
+  application:
+    name: lockly
+
   datasource:
     url: ${DB_URL_POSTGRE}
     username: ${DB_USERNAME_POSTGRE}
     password: ${DB_PASSWORD_POSTGRE}
     driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ntdnqb2006@gmail.com
+    password: xrmw ndlx xecf oxku
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
   flyway:
     enabled: true
@@ -13,23 +53,10 @@ spring:
     user: ${DB_USERNAME_POSTGRE}
     password: ${DB_PASSWORD_POSTGRE}
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
+  websocket:
+    heartbeat:
+      server: 30000
+      client: 30000
 
   qdrant:
     host: qdrant
@@ -49,6 +76,25 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+jwt:
+  secret: ${JWT_SECRET:lockly-super-secret-key-must-be-at-least-32-characters-long}
+  access:
+    expiration_time: ${JWT_ACCESS_EXPIRATION:12960000000}
+  refresh:
+    expiration_time: ${JWT_REFRESH_EXPIRATION:604800000}
+
+otp:
+  expiration-minutes: 5
+  resend-cooldown-seconds: 60
+  max-attempts: 5
+
+minio:
+  endpoint: ${MINIO_ENDPOINT}
+  public-endpoint: ${MINIO_PUBLIC_ENDPOINT}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: ${MINIO_BUCKET_NAME}
 
 resilience4j:
   circuitbreaker:
@@ -73,3 +119,8 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.engine.internal.Cascade: TRACE
     org.hibernate.event.internal.AbstractFlushingEventListener: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.security.web.access: DEBUG
+    org.springframework.security.web.FilterChainProxy: TRACE
+    com.example.lockly: DEBUG
+    org.springframework.amqp: DEBUG
