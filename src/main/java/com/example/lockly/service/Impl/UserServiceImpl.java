@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
     private final MinioClient minioClient;
     private final MinioProperties props;
     private final RedisService redisService;
-    private final AuthService authService;
 
     private final String prefix = "users/avatar";
 
@@ -77,17 +76,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatarByUserId(UUID userId, MultipartFile file) throws Exception {
+    public void updateAvatarByUserId(User user, MultipartFile file) throws Exception {
 
         if (file == null || file.isEmpty())
             throw new BadRequestException("file", null);
 
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty())
             throw new IllegalArgumentException("Original filename is missing");
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         String objectName = FileUtil.getObjectNameFile(prefix, user.getId());
 
@@ -106,17 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude) {
-
-        redisService.saveUserLocation(userId, latitude, longitude);
-    }
-
-    @Override
-    public boolean isUserOnlineByUserId(UUID userId) {
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
+    public boolean isUserOnlineByUserId(User user) {
 
         LocalDateTime lastActiveAt = redisService
                 .getUserLocation(user.getId())
@@ -151,14 +136,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateDisplayNameByUserId(UUID userId, String displayName) {
+    public void updateDisplayNameByUserId(User user, String displayName) {
 
         if (displayName == null || displayName.trim().isEmpty())
             throw new BadRequestException("displayName", displayName);
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setDisplayName(displayName);
 
@@ -167,14 +148,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateModeByUserId(UUID userId, UserMode mode) {
+    public void updateModeByUserId(User user, UserMode mode) {
 
         if (mode == null)
             throw new BadRequestException("mode", null);
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setMode(mode);
 
@@ -183,14 +160,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateFcmTokenByUserId(UUID userId, String fcmToken) {
+    public void updateFcmTokenByUserId(User user, String fcmToken) {
 
         if (fcmToken == null || fcmToken.trim().isEmpty())
             throw new BadRequestException("fcmToken", fcmToken);
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new BadRequestException("User id", userId));
 
         user.setFcmToken(fcmToken);
 
@@ -198,22 +171,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getAvatar(UUID userId){
-
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+    public String getAvatar(User user){
 
         if (user.getAvatarUrl() == null)
-            throw new ResourceNotFoundException("Avatar", "userId", userId);;
+            throw new ResourceNotFoundException("Avatar", "userId", user.getId());;
 
         return minIOService.generatePresignedUrl(user.getAvatarUrl());
     }
 
     @Override
-    public List<UserSimpleResponseDto> searchFriend (String keyword) {
-        // Lấy user từ cache thay vì db
-        User user = authService.getUserFromCache();
+    public List<UserSimpleResponseDto> searchFriend (User user, String keyword) {
 
         return userRepository.searchStrangers(
                         user.getId(),

@@ -55,7 +55,7 @@ public class UserController {
         // Lấy user từ cache thay vì db
         User user = authService.getUserFromCache();
 
-        userService.updateAvatarByUserId(user.getId(), file);
+        userService.updateAvatarByUserId(user, file);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -93,7 +93,7 @@ public class UserController {
         // Giảm tần suất cập nhật vị trí
         boolean isDropRequest = locationService.isDropRequest(longitude, latitude, user);
         if (!isDropRequest)
-            userService.updateUserLocationByUserId(user.getId(), latitude, longitude);
+            redisService.saveUserLocation(user.getId(), latitude, longitude);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -110,7 +110,8 @@ public class UserController {
     ) {
         // Lấy user từ cache thay vì db
         User user = authService.getUserFromCache();
-        userService.updateDisplayNameByUserId(user.getId(), displayName);
+
+        userService.updateDisplayNameByUserId(user, displayName);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -127,7 +128,8 @@ public class UserController {
     ) {
         // Lấy user từ cache thay vì db
         User user = authService.getUserFromCache();
-        userService.updateModeByUserId(user.getId(), mode);
+
+        userService.updateModeByUserId(user, mode);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -141,7 +143,8 @@ public class UserController {
     ){
         // Lấy user từ cache thay vì db
         User user = authService.getUserFromCache();
-        userService.updateFcmTokenByUserId(user.getId(), fcmToken);
+
+        userService.updateFcmTokenByUserId(user, fcmToken);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -155,7 +158,10 @@ public class UserController {
             @PathVariable("user_id") UUID userId
     ) {
 
-        String presignedUrl = userService.getAvatar(userId);
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
+
+        String presignedUrl = userService.getAvatar(user);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
