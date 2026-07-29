@@ -157,7 +157,10 @@ public class FriendshipController {
     public ResponseEntity<ApiResponse<ListResponse<UserSimpleResponseDto>>> searchFriend(
             @RequestParam String keyword
     ) {
-        List<UserSimpleResponseDto> result = userService.searchFriend(keyword);
+        // Lấy user từ cache thay vì db
+        User user = authService.getUserFromCache();
+
+        List<UserSimpleResponseDto> result = userService.searchFriend(user, keyword);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

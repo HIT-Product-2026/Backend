@@ -209,7 +209,7 @@ public class WebSocketController {
             redisService.saveUser(userDto);
         }
 
-        boolean isOnline = userService.isUserOnlineByUserId(userDto.id());
+        boolean isOnline = userService.isUserOnlineByUserId(user);
 
         // Redis lưu trạng thái online
         redisService.saveUserOnline(userDto.id(), isOnline);

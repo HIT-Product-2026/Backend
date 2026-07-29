@@ -18,15 +18,14 @@ public interface UserService{
 
     List<UserResponseDto> findFriendsByUser(User user);
     List<String> findFcmTokenOfFriendsByUserId(User user);
-    String getAvatar(UUID userId);
-    List<UserSimpleResponseDto> searchFriend(String keywork);
+    String getAvatar(User user);
+    List<UserSimpleResponseDto> searchFriend(User user, String keywork);
 
-    boolean isUserOnlineByUserId(UUID userId);
+    boolean isUserOnlineByUserId(User user);
     boolean isFriendByUserId(User user, UUID friendId);
 
-    void updateUserLocationByUserId(UUID userId, Double latitude, Double longitude);
-    void updateDisplayNameByUserId(UUID userId, String displayName);
-    void updateAvatarByUserId(UUID userId, MultipartFile file) throws Exception;
-    void updateModeByUserId(UUID userId, UserMode mode);
-    void updateFcmTokenByUserId(UUID userId, String fcmToken);
+    void updateDisplayNameByUserId(User user, String displayName);
+    void updateAvatarByUserId(User user, MultipartFile file) throws Exception;
+    void updateModeByUserId(User user, UserMode mode);
+    void updateFcmTokenByUserId(User user, String fcmToken);
 }
