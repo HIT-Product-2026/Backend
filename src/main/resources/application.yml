@@ -105,6 +105,7 @@ resilience4j:
         waitDurationInOpenState: 30s
         permittedNumberOfCallsInHalfOpenState: 3
 
+#DB Thứ 2
 location:
   datasource:
     url: ${LOCATION_DB_URL_POSTGRE}
@@ -114,8 +115,11 @@ location:
 
 logging:
   level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.engine.internal.Cascade: TRACE
+    org.hibernate.event.internal.AbstractFlushingEventListener: TRACE
     org.springframework.security: DEBUG
-    # org.springframework.security.web.FilterChainProxy: DEBUG
     org.springframework.security.web.access: DEBUG
     org.springframework.security.web.FilterChainProxy: TRACE
     com.example.lockly: DEBUG
