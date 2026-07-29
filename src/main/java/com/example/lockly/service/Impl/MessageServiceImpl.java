@@ -46,7 +46,6 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private EntityManager entityManager;
 
-    private final String prefix = "message";
     private final Integer pageSize = 10;
 
     private void validateSender(Conversation conversation, User sender){
@@ -125,18 +124,18 @@ public class MessageServiceImpl implements MessageService {
                 .isRead(request.isRead())
                 .build();
 
-        conversation.setLastMessage(message);
-        conversation.setLastMessageTime(message.getCreatedAt());
-        conversation.setLastMessageContent("Đã gửi 1 ảnh");
-
-        messageRepository.save(message);
+        Message saved = messageRepository.save(message);
         entityManager.flush();
+
+        conversation.setLastMessage(saved);
+        conversation.setLastMessageTime(saved.getCreatedAt());
+        conversation.setLastMessageContent("Đã gửi 1 ảnh");
 
         conversationRepository.save(conversation);
         entityManager.flush();
 
         return MessageResponseDto.from(
-                message,
+                saved,
                 request.imageUrl()
         );
 
