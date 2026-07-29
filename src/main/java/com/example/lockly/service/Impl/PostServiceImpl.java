@@ -58,6 +58,9 @@ public class PostServiceImpl implements PostService {
     private final EmojiPostRepository emojiPostRepository;
     private final ProfileService profileService;
     private final MinIOService minIOService;
+    private final LocationService locationService;
+
+
     private final String prefix = "post";
     private final int pageSize = 10;
 
@@ -218,7 +221,8 @@ public class PostServiceImpl implements PostService {
                 .map(post -> PostDetailResponseDto.from(
                         post,
                         conversationMap.get(post.getUser().getId()),
-                        minIOService.generatePresignedUrl(post.getObjectName())
+                        minIOService.generatePresignedUrl(post.getObjectName()),
+                        locationService.getProvinceFullName(post.getLatitude(), post.getLongitude())
                 ))
                 .toList();
     }
@@ -292,7 +296,8 @@ public class PostServiceImpl implements PostService {
                 .map(post -> PostDetailResponseDto.from(
                         post,
                         conversationMap.get(post.getUser().getId()),
-                        minIOService.generatePresignedUrl(post.getObjectName())
+                        minIOService.generatePresignedUrl(post.getObjectName()),
+                        locationService.getProvinceFullName(post.getLatitude(), post.getLongitude())
                 ))
                 .toList();
     }
