@@ -11,7 +11,7 @@ public record SendImageMessageRequestDto(
         UUID conversationId,
 
         @NotNull
-        MultipartFile file,
+        String imageUrl,
 
         @NotNull
         Boolean isRead

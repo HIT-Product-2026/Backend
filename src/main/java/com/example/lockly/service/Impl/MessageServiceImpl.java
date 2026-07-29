@@ -99,8 +99,8 @@ public class MessageServiceImpl implements MessageService {
                 .findById(request.conversationId())
                 .orElseThrow(() -> new BadRequestException("Conversation id", request.conversationId()));
 
-        if (request.file() == null || request.file().isEmpty()) {
-            throw new BadRequestException("File is empty");
+        if (request.imageUrl() == null || request.imageUrl().isEmpty()) {
+            throw new BadRequestException("Image url is empty");
         }
 
         //Kiểm tra người gửi có thuộc về đoạn chat không
@@ -108,10 +108,7 @@ public class MessageServiceImpl implements MessageService {
 
         UUID messageId = UuidCreator.getTimeOrderedEpoch();
 
-        String objectName = FileUtil.getObjectNameFile(prefix, messageId);
-
-        // Save file
-        minIOService.saveFile(request.file(), objectName);
+        String objectName = FileUtil.extractObjectName(request.imageUrl());
 
         Message message = Message.builder()
                 .id(messageId)
@@ -131,11 +128,9 @@ public class MessageServiceImpl implements MessageService {
 
         conversationRepository.save(conversation);
 
-        String imageUrl = minIOService.generatePresignedUrl(message.getObjectName());
-
         return MessageResponseDto.from(
                 messageRepository.save(message),
-                imageUrl
+                request.imageUrl()
         );
 
     }
