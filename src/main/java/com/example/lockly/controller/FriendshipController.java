@@ -3,7 +3,6 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.constant.ApiPath;
-import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.create.CreateFriendshipRequestDto;
 import com.example.lockly.domain.dto.response.common.FriendshipsResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
