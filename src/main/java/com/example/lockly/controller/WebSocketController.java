@@ -228,8 +228,20 @@ public class WebSocketController {
         CustomUserDetails details =
                 (CustomUserDetails) authentication.getPrincipal();
 
-        return userRepository.findById(details.getId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User", "id", details.getId()));
+        User user;
+
+        UserCacheDto dto = redisService.getUser(details.getId());
+
+        if (dto == null){
+            user = userRepository.findById(details.getId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("User", "id", details.getId()));
+
+            redisService.saveUser(UserCacheDto.from(user));
+        } else {
+            user = dto.toEntity();
+        }
+
+        return user;
     }
 }

@@ -66,3 +66,10 @@ location:
     username: ${LOCATION_DB_USERNAME_POSTGRE}
     password: ${LOCATION_DB_PASSWORD_POSTGRE}
     driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.engine.internal.Cascade: TRACE
+    org.hibernate.event.internal.AbstractFlushingEventListener: TRACE
