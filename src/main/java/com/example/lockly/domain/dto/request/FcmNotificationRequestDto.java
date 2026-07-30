@@ -20,7 +20,8 @@ public record FcmNotificationRequestDto(
         String displayName,
         String avatarUrl,
         String imageUrl,
-        String provinceName,
+        Double latitude,
+        Double longitude,
         String caption
 ) {
     public static FcmNotificationRequestDto from(
@@ -29,7 +30,8 @@ public record FcmNotificationRequestDto(
             List<String> fcmTokens,
             String avatarUrl,
             String imageUrl,
-            String provinceName
+            Double latitude,
+            Double longitude
     ){
         return new FcmNotificationRequestDto(
                 user.getId(),
@@ -39,7 +41,8 @@ public record FcmNotificationRequestDto(
                 user.getDisplayName(),
                 avatarUrl,
                 imageUrl,
-                provinceName,
+                latitude,
+                longitude,
                 post.caption()
         );
     }

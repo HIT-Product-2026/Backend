@@ -44,7 +44,8 @@ public class RabbitMQServiceImpl implements RabbitMQService {
                         fcmTokens,
                         minIOService.generatePresignedUrl(sender.getObjectNameAvatar()),
                         minIOService.generatePresignedUrl(post.objectName()),
-                        locationService.getProvinceFullName(post.latitude(), post.longitude())
+                        post.latitude(),
+                        post.longitude()
                 )
         );
     }
