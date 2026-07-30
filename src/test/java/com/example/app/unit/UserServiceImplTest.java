@@ -222,7 +222,7 @@ class UserServiceImplTest {
 
         verify(userRepository).save(user);
 
-        assertNotNull(user.getAvatarUrl());
+        assertNotNull(user.getObjectNameAvatar());
     }
 
     @Test
@@ -305,16 +305,16 @@ class UserServiceImplTest {
     @Test
     void getAvatar_ShouldReturnPresignedUrl() {
 
-        user.setAvatarUrl("users/avatar/avatar.png");
+        user.setObjectNameAvatar("users/avatar/avatar.png");
 
-        when(minIOService.generatePresignedUrl(user.getAvatarUrl()))
+        when(minIOService.generatePresignedUrl(user.getObjectNameAvatar()))
                 .thenReturn("https://minio/avatar");
 
         String result = userService.getAvatar(user);
 
         assertEquals("https://minio/avatar", result);
 
-        verify(minIOService).generatePresignedUrl(user.getAvatarUrl());
+        verify(minIOService).generatePresignedUrl(user.getObjectNameAvatar());
     }
 
     @Test
