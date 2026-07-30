@@ -34,8 +34,8 @@ public class User {
     @Column(length = 100, nullable = false, name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @Column(name = "object_name_avatar")
+    private String objectNameAvatar;
 
     @Enumerated(EnumType.STRING)
     private UserMode mode;

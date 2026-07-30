@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("Bắt đầu set vào User");
 
-        user.setAvatarUrl(objectName);
+        user.setObjectNameAvatar(objectName);
 
         log.info("Bắt đầu lưu vào db");
 
@@ -189,10 +189,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getAvatar(User user){
 
-        if (user.getAvatarUrl() == null)
+        if (user.getObjectNameAvatar() == null)
             throw new ResourceNotFoundException("Avatar", "userId", user.getId());;
 
-        return minIOService.generatePresignedUrl(user.getAvatarUrl());
+        return minIOService.generatePresignedUrl(user.getObjectNameAvatar());
     }
 
     @Override

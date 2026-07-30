@@ -1,9 +1,13 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.config.RabbitMQConfig;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.service.LocationService;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RabbitMQService;
 
 import com.example.lockly.service.UserService;
@@ -22,9 +26,11 @@ public class RabbitMQServiceImpl implements RabbitMQService {
 
     private final RabbitTemplate rabbitTemplate;
     private final UserService userService;
+    private final MinIOService minIOService;
+    private final LocationService locationService;
 
     @Override
-    public void sendFcmNotification(User sender, UUID responseId) {
+    public void sendFcmNotification(User sender, PostResponseDto post) {
 
         // Lấy danh sách fcm của bạn bè
         List<String> fcmTokens = userService.findFcmTokenOfFriendsByUserId(sender);
@@ -33,9 +39,12 @@ public class RabbitMQServiceImpl implements RabbitMQService {
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.POST_KEY,
                 FcmNotificationRequestDto.from(
-                        sender.getId(),
-                        responseId,
-                        fcmTokens
+                        sender,
+                        post,
+                        fcmTokens,
+                        minIOService.generatePresignedUrl(sender.getObjectNameAvatar()),
+                        minIOService.generatePresignedUrl(post.objectName()),
+                        locationService.getProvinceFullName(post.latitude(), post.longitude())
                 )
         );
     }

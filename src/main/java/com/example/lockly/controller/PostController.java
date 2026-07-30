@@ -5,7 +5,6 @@ import com.example.lockly.common.response.ListResponse;
 import com.example.lockly.common.util.CursorUtil;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.DetectNsfwPostRequestDto;
-import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
 import com.example.lockly.domain.dto.request.GetEmojiPostsRequestDto;
 import com.example.lockly.domain.dto.request.Cursor;
 import com.example.lockly.domain.dto.request.create.CreatePostRequestDto;
@@ -79,7 +78,7 @@ public class PostController {
         // Gửi thông báo (đẩy vào queue)
         rabbitMQService.sendFcmNotification(
                 user,
-                response.id()
+                response
         );
 
         log.debug("Thông báo fcm thành công");
