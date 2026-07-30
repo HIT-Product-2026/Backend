@@ -5,6 +5,7 @@ import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
 import com.example.lockly.exception.nonRetryException.InvalidFcmRequestException;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
+import com.example.lockly.service.LocationService;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class FcmServiceImpl implements FcmService {
 
     private final AuthService authService;
+    private final LocationService locationService;
 
     private void validate(FcmNotificationRequestDto data) {
 
@@ -90,6 +92,16 @@ public class FcmServiceImpl implements FcmService {
                             .putData("sender_id", data.senderId().toString())
                             .putData("post_id", data.postId().toString())
                             .putData("type", data.type().name())
+                            .putData("display_name", data.displayName())
+                            .putData("avatar_url", data.avatarUrl())
+                            .putData("image_url", data.imageUrl())
+                            .putData("latitude", data.latitude().toString())
+                            .putData("longitude", data.longitude().toString())
+                            .putData("province_name", locationService.getProvinceFullName(
+                                    data.latitude(),
+                                    data.longitude())
+                            )
+                            .putData("caption", data.caption())
                             .build();
 
             BatchResponse batchResponse =
