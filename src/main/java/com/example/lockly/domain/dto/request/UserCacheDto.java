@@ -13,7 +13,7 @@ public record UserCacheDto(
         String displayName,
         String email,
         String passwordHash,
-        String avatarUrl,
+        String objectNameAvatar,
         UserMode mode,
         String fcmToken,
         LocalDateTime createdAt
@@ -26,7 +26,7 @@ public record UserCacheDto(
                 user.getDisplayName(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.getAvatarUrl(),
+                user.getObjectNameAvatar(),
                 user.getMode(),
                 user.getFcmToken(),
                 user.getCreatedAt()
@@ -41,7 +41,7 @@ public record UserCacheDto(
         user.setDisplayName(displayName);
         user.setEmail(email);
         user.setPasswordHash(passwordHash);
-        user.setAvatarUrl(avatarUrl);
+        user.setObjectNameAvatar(objectNameAvatar);
         user.setMode(mode);
         user.setFcmToken(fcmToken);
         user.setCreatedAt(createdAt);

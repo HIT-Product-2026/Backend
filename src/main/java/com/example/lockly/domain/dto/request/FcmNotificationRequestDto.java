@@ -1,5 +1,7 @@
 package com.example.lockly.domain.dto.request;
 
+import com.example.lockly.domain.dto.response.common.PostResponseDto;
+import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,25 +13,34 @@ import java.util.UUID;
 
 public record FcmNotificationRequestDto(
 
-        @NotNull
         UUID senderId,
-
-        @NotNull
         UUID postId,
-
-        @NotNull
         FcmMessageType type,
-
-        @NotEmpty
-        @Size(max = 500)
-        List<@NotBlank String> fcmToken
+        List<String> fcmToken,
+        String displayName,
+        String avatarUrl,
+        String imageUrl,
+        String provinceName,
+        String caption
 ) {
-    public static FcmNotificationRequestDto from(UUID senderId, UUID postId, List<String> fcmTokens){
+    public static FcmNotificationRequestDto from(
+            User user,
+            PostResponseDto post,
+            List<String> fcmTokens,
+            String avatarUrl,
+            String imageUrl,
+            String provinceName
+    ){
         return new FcmNotificationRequestDto(
-                senderId,
-                postId,
+                user.getId(),
+                post.id(),
                 FcmMessageType.POST,
-                fcmTokens
+                fcmTokens,
+                user.getDisplayName(),
+                avatarUrl,
+                imageUrl,
+                provinceName,
+                post.caption()
         );
     }
 }
