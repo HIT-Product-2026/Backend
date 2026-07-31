@@ -20,7 +20,7 @@ public class FcmConfig {
             InputStream serviceAccount =
                     Thread.currentThread()
                             .getContextClassLoader()
-                            .getResourceAsStream("lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json");
+                            .getResourceAsStream("lockly-fcm-firebase.json");
 
             if (serviceAccount == null) {
                 throw new RuntimeException("Firebase JSON not found in classpath");
