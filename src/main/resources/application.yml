@@ -2,6 +2,11 @@ spring:
   application:
     name: lockly
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
   datasource:
     url: ${DB_URL_POSTGRE}
     username: ${DB_USERNAME_POSTGRE}
