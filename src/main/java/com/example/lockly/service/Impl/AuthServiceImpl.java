@@ -139,6 +139,8 @@ public class AuthServiceImpl implements AuthService {
 
         redisService.deleteRegister(request.email());
 
+        redisService.saveUser(UserCacheDto.from(user));
+
         log.info("[Register] Đăng ký thành công, email={}", request.email());
 
         return UserResponseDto.from(user);
@@ -262,6 +264,8 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         redisService.deleteForgotPasswordVerified(request.email());
+
+        redisService.saveUser(UserCacheDto.from(user));
 
         log.info("[ForgotPassword Bước 3] Đặt lại mật khẩu thành công, email={}", request.email());
     }
