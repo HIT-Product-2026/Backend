@@ -146,6 +146,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     // Cập nhật tiến trình liên quan đến post
     @Override
+    @Transactional
     public Post updatePostProfile(Post post){
 
         User user = post.getUser();
