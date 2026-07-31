@@ -79,6 +79,9 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setPhoneNumber(request.phoneNumber());
 
         profileRepository.save(profile);
+
+        log.info("Update profile object avatar find is: "+  user.getObjectNameAvatar());
+
     }
 
     @Override

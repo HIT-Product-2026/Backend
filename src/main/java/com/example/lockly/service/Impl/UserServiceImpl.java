@@ -117,6 +117,9 @@ public class UserServiceImpl implements UserService {
         redisService.saveUser(UserCacheDto.from(user));
 
         log.info("Lưu thành công với object name: " + objectName);
+
+        log.info("Update avt, avt find is: " + user.getObjectNameAvatar());
+
     }
 
     @Override
@@ -155,7 +158,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateDisplayNameByUserId(User user, String displayName) {
+    public void updateDisplayNameByUserId(User userCache, String displayName) {
+
+        User user = userRepository
+                .findById(userCache.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userCache.getId()));
+
+        log.info(user.getObjectNameAvatar());
 
         if (displayName == null || displayName.trim().isEmpty())
             throw new BadRequestException("displayName", displayName);
@@ -165,6 +174,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         redisService.saveUser(UserCacheDto.from(user));
+
+        log.info("Update display name, avt find is: " + user.getObjectNameAvatar());
     }
 
     @Override
