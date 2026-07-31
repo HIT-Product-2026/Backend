@@ -161,7 +161,6 @@ public class UserController {
             @PathVariable("user_id") UUID userId
     ) {
 
-        // Lấy user từ cache thay vì db
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "user id", userId));
