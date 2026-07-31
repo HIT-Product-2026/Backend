@@ -1,9 +1,7 @@
 package com.example.lockly.service.Impl;
 
 import com.example.lockly.domain.dto.request.FcmNotificationRequestDto;
-import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
 import com.example.lockly.exception.nonRetryException.InvalidFcmRequestException;
-import com.example.lockly.service.AuthService;
 import com.example.lockly.service.FcmService;
 import com.example.lockly.service.LocationService;
 import com.google.firebase.messaging.BatchResponse;
@@ -13,16 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.xml.validation.Validator;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FcmServiceImpl implements FcmService {
 
-    private final AuthService authService;
     private final LocationService locationService;
 
     private void validate(FcmNotificationRequestDto data) {
@@ -67,6 +62,15 @@ public class FcmServiceImpl implements FcmService {
                 );
             }
         }
+
+        if (data.displayName() == null)
+            throw new InvalidFcmRequestException("Display name cannot required");
+
+        if (data.imageUrl() == null)
+            throw new InvalidFcmRequestException("Image cannot required");
+
+        if (data.latitude() == null || data.longitude() == null)
+            throw new InvalidFcmRequestException("Location cannot required");
     }
 
     @Override
@@ -84,6 +88,18 @@ public class FcmServiceImpl implements FcmService {
             log.info("token[{}] = {}", i, fcmTokens.get(i));
         }
 
+        validate(data);
+
+        String avatarUrl = data.avatarUrl();
+        String caption = data.caption();
+
+        if (avatarUrl == null) {
+            avatarUrl = "";
+        }
+        if (caption == null) {
+            caption = "";
+        }
+
 
         try {
             MulticastMessage message =
@@ -93,7 +109,7 @@ public class FcmServiceImpl implements FcmService {
                             .putData("post_id", data.postId().toString())
                             .putData("type", data.type().name())
                             .putData("display_name", data.displayName())
-                            .putData("avatar_url", data.avatarUrl())
+                            .putData("avatar_url", avatarUrl)
                             .putData("image_url", data.imageUrl())
                             .putData("latitude", data.latitude().toString())
                             .putData("longitude", data.longitude().toString())
@@ -101,7 +117,7 @@ public class FcmServiceImpl implements FcmService {
                                     data.latitude(),
                                     data.longitude())
                             )
-                            .putData("caption", data.caption())
+                            .putData("caption", caption)
                             .build();
 
             BatchResponse batchResponse =
