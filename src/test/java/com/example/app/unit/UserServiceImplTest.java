@@ -273,6 +273,9 @@ class UserServiceImplTest {
 
         String newDisplayName = "New Display Name";
 
+        when(userRepository.findById(user.getId()))
+                .thenReturn(Optional.of(user));
+
         userService.updateDisplayNameByUserId(user, newDisplayName);
 
         assertEquals(newDisplayName, user.getDisplayName());
