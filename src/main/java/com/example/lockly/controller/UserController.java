@@ -49,7 +49,7 @@ public class UserController {
     private final UserRepository userRepository;
 
 
-    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Cập nhật avatar", description = "Upload ảnh avatar lên MinIO và update user.avatarUrl")
     public ResponseEntity<ApiResponse<Void>> updateAvatar(
             @Parameter(description = "File ảnh avatar")
