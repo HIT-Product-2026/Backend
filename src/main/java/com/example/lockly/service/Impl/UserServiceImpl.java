@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
     public String getAvatar(User user){
 
         if (user.getObjectNameAvatar() == null)
-            throw new ResourceNotFoundException("Avatar", "userId", user.getId());;
+            return null;
 
         return minIOService.generatePresignedUrl(user.getObjectNameAvatar());
     }
