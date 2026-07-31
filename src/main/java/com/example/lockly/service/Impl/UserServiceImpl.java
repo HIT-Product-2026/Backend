@@ -2,6 +2,7 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.FileUtil;
 import com.example.lockly.config.minio.MinioProperties;
+import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
@@ -113,6 +114,8 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
+        redisService.saveUser(UserCacheDto.from(user));
+
         log.info("Lưu thành công với object name: " + objectName);
     }
 
@@ -160,6 +163,8 @@ public class UserServiceImpl implements UserService {
         user.setDisplayName(displayName);
 
         userRepository.save(user);
+
+        redisService.saveUser(UserCacheDto.from(user));
     }
 
     @Override
@@ -172,6 +177,8 @@ public class UserServiceImpl implements UserService {
         user.setMode(mode);
 
         userRepository.save(user);
+
+        redisService.saveUser(UserCacheDto.from(user));
     }
 
     @Override
@@ -184,6 +191,8 @@ public class UserServiceImpl implements UserService {
         user.setFcmToken(fcmToken);
 
         userRepository.save(user);
+
+        redisService.saveUser(UserCacheDto.from(user));
     }
 
     @Override
