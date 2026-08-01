@@ -93,6 +93,7 @@ public class FcmServiceImpl implements FcmService {
         String avatarUrl = data.avatarUrl();
         String caption = data.caption();
         String provinceName = locationService.getProvinceFullName(data.latitude(), data.longitude());
+        String wardName = locationService.getWardFullName(data.latitude(), data.longitude());
 
 
         if (avatarUrl == null) {
@@ -106,9 +107,9 @@ public class FcmServiceImpl implements FcmService {
             provinceName = "";
         }
 
-        log.info("latitude: " + data.latitude());
-        log.info("longitude: " + data.longitude());
-        log.info("province: " + provinceName);
+        if (wardName == null){
+            wardName = "";
+        }
 
 
         try {
@@ -124,6 +125,7 @@ public class FcmServiceImpl implements FcmService {
                             .putData("latitude", data.latitude().toString())
                             .putData("longitude", data.longitude().toString())
                             .putData("province_name", provinceName)
+                            .putData("ward_name", wardName)
                             .putData("caption", caption)
                             .build();
 

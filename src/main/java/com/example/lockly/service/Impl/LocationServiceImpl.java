@@ -2,6 +2,7 @@ package com.example.lockly.service.Impl;
 
 import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.domain.dto.query.ProvinceInfo;
+import com.example.lockly.domain.dto.query.WardInfo;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
 import com.example.lockly.domain.entity.main.User;
@@ -119,6 +120,16 @@ public class LocationServiceImpl implements LocationService {
 
         return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
                 .map(ProvinceInfo::getFullName)
+                .orElse(null);
+    }
+
+    @Override
+    public String getWardFullName(Double latitude, Double longitude) {
+        if (latitude == null || longitude == null)
+            throw new ResourceNotFoundException("Tên vị trí", "tọa độ", null);
+
+        return gisProvinceRepository.findWardByLocation(latitude, longitude)
+                .map(WardInfo::getFullName)
                 .orElse(null);
     }
 
