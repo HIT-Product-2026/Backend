@@ -3,6 +3,7 @@ package com.example.lockly.security;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.TokenType;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
+import com.example.lockly.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 public class JwtProvider {
 
     InvalidatedTokenRepository invalidatedTokenRepository;
+    RedisService redisService;
 
     @NonFinal
     @Value("${jwt.secret}")
@@ -74,6 +76,11 @@ public class JwtProvider {
     // Lấy JWT ID (jti) - định danh duy nhất của token để check blacklist
     public String extractTokenId(String token) {
         return extractClaim(token, Claims::getId);
+    }
+
+    public UUID extractUserId(String token) {
+        String userId = extractClaim(token, Claims::getSubject);
+        return UUID.fromString(userId);
     }
 
     // Hàm generic dùng để lấy bất kỳ claim nào từ JWT

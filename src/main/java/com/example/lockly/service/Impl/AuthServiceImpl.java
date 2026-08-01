@@ -166,34 +166,45 @@ public class AuthServiceImpl implements AuthService {
     public void logout(LogoutRequestDto request) {
 
         String token = request.token();
+
         log.info("LOGOUT REQUEST RECEIVED");
 
         try {
             String jwtId = jwtProvider.extractTokenId(token);
+            String username = jwtProvider.extractUsername(token);
+
             Date expirationDate = jwtProvider.extractExpiration(token);
             boolean expired = jwtProvider.isTokenExpired(token);
-            boolean alreadyBlacklisted = invalidatedTokenRepository.existsById(jwtId);
 
-            log.info("token = {}", token);
             log.info("jwtId = {}", jwtId);
+            log.info("username = {}", username);
             log.info("expired = {}", expired);
             log.info("expirationDate = {}", expirationDate);
-            log.info("alreadyBlacklisted = {}", alreadyBlacklisted);
 
             if (expired) {
                 log.warn("Logout failed: token already expired");
-                throw new VsException(HttpStatus.UNAUTHORIZED, ErrorMessage.Auth.ERR_TOKEN_INVALIDATED);
-            }
-            if (alreadyBlacklisted) {
-                log.warn("Logout failed: token already invalidated (blacklisted)");
-                throw new VsException(HttpStatus.BAD_REQUEST, ErrorMessage.Auth.ERR_TOKEN_ALREADY_INVALIDATED);
+                throw new VsException(
+                        HttpStatus.UNAUTHORIZED,
+                        ErrorMessage.Auth.ERR_TOKEN_INVALIDATED
+                );
             }
 
-            LocalDateTime expirationTime = expirationDate.toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime();
-            invalidatedTokenRepository.save(new InvalidatedToken(jwtId, expirationTime));
-            log.info("Logout success → token blacklisted, jwtId = {}", jwtId);
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
+
+            UUID userId = ((CustomUserDetails) userDetails).getId();
+
+            String redisAccessJti = redisService.getAccessToken(userId);
+
+            if (!jwtId.equals(redisAccessJti)) {
+                throw new UnauthorizedException("Token đã hết hiệu lực.");
+            }
+
+            // Xóa whitelist trong Redis
+            redisService.deleteAccessToken(userId);
+            redisService.deleteRefreshToken(userId);
+
+            log.info("Logout success, userId={}, jwtId={}", userId, jwtId);
 
         } catch (Exception e) {
             log.error("Logout error: {}", e.getMessage(), e);
@@ -368,6 +379,11 @@ public class AuthServiceImpl implements AuthService {
         if (!jwtProvider.isTokenValid(refreshToken, userDetails)) {
             throw new UnauthorizedException("Refresh token không hợp lệ.");
         }
+
+        UUID userId = ((CustomUserDetails) userDetails).getId();
+
+        if (!redisService.existsRefreshToken(userId))
+            throw new UnauthorizedException("Refresh token không hợp lệ.");
 
         // Chỉ cho phép sử dụng Refresh Token để gọi API refresh
         TokenType type = jwtProvider.extractTokenType(refreshToken);

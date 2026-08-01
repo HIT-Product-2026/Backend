@@ -4,18 +4,15 @@ import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.ForgotPasswordCacheDto;
 import com.example.lockly.domain.dto.request.auth.RegisterCacheDto;
 import com.example.lockly.domain.dto.response.LocationUserResponseDto;
-import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -74,9 +71,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void saveUserOnline(UUID userId, boolean isOnline){
-        String key = userOnlineKey;
-
-        redisTemplate.opsForHash().put(key, "isOnline", isOnline);
+        redisTemplate.opsForHash().put(userOnlineKey, "isOnline", isOnline);
     }
 
     @Override
@@ -195,6 +190,22 @@ public class RedisServiceImpl implements RedisService {
 
         return (String) redisTemplate.opsForValue()
                 .get(REFRESH_TOKEN_KEY + userId);
+    }
+
+    @Override
+    public boolean existsAccessToken(UUID userId) {
+
+        return Boolean.TRUE.equals(
+                redisTemplate.hasKey(ACCESS_TOKEN_KEY + userId)
+        );
+    }
+
+    @Override
+    public boolean existsRefreshToken(UUID userId) {
+
+        return Boolean.TRUE.equals(
+                redisTemplate.hasKey(REFRESH_TOKEN_KEY + userId)
+        );
     }
 
     @Override
