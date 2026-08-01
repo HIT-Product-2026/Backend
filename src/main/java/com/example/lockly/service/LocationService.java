@@ -9,5 +9,6 @@ public interface LocationService {
     boolean isDropRequest(Double longitude, Double latitude, User user);
     boolean isUnknownLocation(Double longitude, Double latitude, User user);
     String getProvinceFullName(Double latitude, Double longitude);
+    String getWardFullName(Double latitude, Double longitude);
     List<LocationUserResponseDto> getLocationFriends(User user);
 }
