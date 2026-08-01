@@ -90,9 +90,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // [4] isTokenValid kiểm tra thêm: username khớp + chưa hết hạn + chưa blacklist
                 log.debug("Validating token...");
                 boolean valid = jwtProvider.isTokenValid(token, userDetails);
+
                 UUID userId = ((CustomUserDetails) userDetails).getId();
-                boolean inWhiteList = redisService.existsAccessToken(userId);
-                log.debug("Token validation result: {}", valid);
+
+                String jwtId = jwtProvider.extractTokenId(token);
+
+                String redisJwtId = redisService.getAccessToken(userId);
+
+                boolean inWhiteList = jwtId.equals(redisJwtId);
+
+                log.debug("JWT ID: {}", jwtId);
+                log.debug("Redis JWT ID: {}", redisJwtId);
+                log.debug("Whitelist check: {}", inWhiteList);
 
                 if (valid && inWhiteList) {
                     log.info("Token valid for user: {}", username);
