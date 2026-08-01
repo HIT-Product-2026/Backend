@@ -100,6 +100,9 @@ public class FcmServiceImpl implements FcmService {
             caption = "";
         }
 
+        log.info("latitude: " + data.latitude());
+        log.info("longitude: " + data.longitude());
+
 
         try {
             MulticastMessage message =
