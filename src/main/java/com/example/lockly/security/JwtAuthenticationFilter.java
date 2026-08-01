@@ -4,6 +4,7 @@ import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ErrorMessage;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.repository.main.UserRepository;
+import com.example.lockly.service.RedisService;
 import com.example.lockly.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
@@ -27,6 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -37,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     JwtProvider jwtProvider;
     UserDetailsService userDetailsService;
     ObjectMapper objectMapper;
+    RedisService redisService;
 
     // FIX: bỏ InvalidatedTokenRepository khỏi đây
     // — việc check blacklist đã có sẵn bên trong JwtProvider.isTokenValid()
@@ -87,9 +90,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // [4] isTokenValid kiểm tra thêm: username khớp + chưa hết hạn + chưa blacklist
                 log.debug("Validating token...");
                 boolean valid = jwtProvider.isTokenValid(token, userDetails);
+                UUID userId = ((CustomUserDetails) userDetails).getId();
+                boolean inWhiteList = redisService.existsAccessToken(userId);
                 log.debug("Token validation result: {}", valid);
 
-                if (valid) {
+                if (valid && inWhiteList) {
                     log.info("Token valid for user: {}", username);
 
                     UsernamePasswordAuthenticationToken authToken =

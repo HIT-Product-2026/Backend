@@ -33,4 +33,6 @@ public interface RedisService {
     void deleteRefreshToken(UUID userId);
 
     Boolean isForgotPasswordVerified(String email);
+    boolean existsAccessToken(UUID userId);
+    boolean existsRefreshToken(UUID userId);
 }
