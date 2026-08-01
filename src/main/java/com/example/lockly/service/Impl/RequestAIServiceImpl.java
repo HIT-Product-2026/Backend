@@ -1,5 +1,6 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.domain.dto.response.NsfwResponse;
 import com.example.lockly.service.RequestAIService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -59,14 +60,26 @@ public class RequestAIServiceImpl implements RequestAIService {
             HttpEntity<MultiValueMap<String, Object>> request =
                     buildMultipartRequest(file);
 
-            ResponseEntity<Boolean> response =
+            ResponseEntity<NsfwResponse> response =
                     restTemplate.postForEntity(
                             NSFW_API,
                             request,
-                            Boolean.class
+                            NsfwResponse.class
                     );
 
-            return Boolean.TRUE.equals(response.getBody());
+            NsfwResponse body = response.getBody();
+
+            if (body == null) {
+                return false;
+            }
+
+            log.info(
+                    "NSFW detect result={}, score={}",
+                    body.nsfw(),
+                    body.score()
+            );
+
+            return Boolean.TRUE.equals(body.nsfw());
 
         } catch (Exception e) {
             log.error("NSFW detect error", e);
