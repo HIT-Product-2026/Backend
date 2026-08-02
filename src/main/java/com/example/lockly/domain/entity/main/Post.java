@@ -2,6 +2,7 @@ package com.example.lockly.domain.entity.main;
 
 import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
+import com.example.lockly.domain.entity.main.enumEntity.TypePost;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,6 +39,9 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     private PostModeLocation modeLocation;
+
+    @Enumerated(EnumType.STRING)
+    private TypePost type;
 
     @Column
     private Double latitude;
