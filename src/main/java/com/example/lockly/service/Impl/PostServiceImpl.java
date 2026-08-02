@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -107,6 +108,7 @@ public class PostServiceImpl implements PostService {
                 .longitude(request.longitude())
                 .latitude(request.latitude())
                 .modeLocation(mode)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         // Thêm point cho post (để tiện cho query với PortgreGIS)
