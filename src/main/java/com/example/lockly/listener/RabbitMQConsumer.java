@@ -22,9 +22,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +32,7 @@ public class RabbitMQConsumer {
     private final SseService sseService;
     private final PostsRepository postsRepository;
     private final MinIOService minIOService;
-    private final ScheduledExecutorService executor;
+//    private final ScheduledExecutorService executor;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -109,11 +106,11 @@ public class RabbitMQConsumer {
                     response                        // PostResponseDto
             );
 
-            this.executor.schedule(
-                    () -> sseService.disconnect(data.user().id().toString()),
-                    10,
-                    TimeUnit.SECONDS
-            );
+//            this.executor.schedule(
+//                    () -> sseService.disconnect(data.user().id().toString()),
+//                    10,
+//                    TimeUnit.SECONDS
+//            );
 
             log.info(
                     "[RabbitMQ][DONE] postId={}, nsfw={}",
