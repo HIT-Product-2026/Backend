@@ -69,6 +69,7 @@ public class PostController {
 
         log.debug("Chuẩn bị tạo bài viết");
         PostResponseDto response = postService.createPost(request);
+        log.info("Post create at: " + response.createAt());
 
         log.debug("Tạo bài viết thành công");
         // Lấy user từ cache thay vì db
@@ -191,6 +192,8 @@ public class PostController {
         log.debug("curor: " + cursor);
 
         List<PostDetailResponseDto> listPost = postService.getFriendPosts(user, cursor);
+
+        log.info("Debug post create at: " + listPost.get(1).createAt());
 
         String nextCursor = null;
         if (!listPost.isEmpty()) {
