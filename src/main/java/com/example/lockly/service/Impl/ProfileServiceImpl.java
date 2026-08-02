@@ -6,6 +6,7 @@ import com.example.lockly.common.util.LocationUtil;
 import com.example.lockly.domain.dto.query.ProvinceInfo;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
+import com.example.lockly.domain.dto.response.common.ProfileResponseDto;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
@@ -304,5 +305,15 @@ public class ProfileServiceImpl implements ProfileService {
         profile.getPhotographedFriendIds().addAll(friendsInPhoto);
 
         return profile;
+    }
+
+    @Override
+    public ProfileResponseDto getProfileByUserId (UUID userId) {
+
+        Profile profile = profileRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", "user id", userId));
+
+        return ProfileResponseDto.from(profile);
     }
 }
