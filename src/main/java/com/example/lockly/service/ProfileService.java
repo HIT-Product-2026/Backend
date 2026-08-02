@@ -2,6 +2,7 @@ package com.example.lockly.service;
 
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
 import com.example.lockly.domain.dto.request.create.CreateProfileRequestDto;
+import com.example.lockly.domain.dto.response.common.ProfileResponseDto;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
@@ -13,6 +14,8 @@ public interface ProfileService {
     void createProfile(User user, CreateProfileRequestDto request);
     Boolean registerFace(UUID userId, MultipartFile file) ;
     Boolean checkFace(UUID userId);
+    ProfileResponseDto getProfileByUserId (UUID userId);
+
 
     void updateProcessProfile(UUID postId, String objectName);
 

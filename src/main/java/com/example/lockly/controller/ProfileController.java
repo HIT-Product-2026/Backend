@@ -3,6 +3,7 @@ package com.example.lockly.controller;
 import com.example.lockly.common.response.ApiResponse;
 import com.example.lockly.constant.ApiPath;
 import com.example.lockly.domain.dto.request.UpdateProfileRequestDto;
+import com.example.lockly.domain.dto.response.common.ProfileResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.ProfileService;
@@ -16,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -78,6 +81,27 @@ public class ProfileController {
                 .body(ApiResponse.success(
                         "Kiểm tra khuôn mặt thành công",
                         hasFace
+                ));
+    }
+
+
+    @GetMapping("/{user_id}")
+    @Operation(
+            summary = "Lấy thông tin profile theo userId",
+            description = "Trả về thông tin profile của người dùng"
+    )
+    public ResponseEntity<ApiResponse<ProfileResponseDto>> getProfileByUserId(
+            @Parameter(description = "ID người dùng")
+            @PathVariable("user_id") UUID userId
+    ) {
+
+        ProfileResponseDto response = profileService.getProfileByUserId(userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        "Lấy thông tin profile thành công",
+                        response
                 ));
     }
 }
