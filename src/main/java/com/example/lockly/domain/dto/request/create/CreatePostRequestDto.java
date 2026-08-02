@@ -1,9 +1,11 @@
 package com.example.lockly.domain.dto.request.create;
 
+import com.example.lockly.domain.entity.main.enumEntity.TypePost;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.checkerframework.checker.units.qual.N;
 import org.springframework.web.multipart.MultipartFile;
 
 public record CreatePostRequestDto (
@@ -20,6 +22,9 @@ public record CreatePostRequestDto (
 
         @DecimalMin("-180.0")
         @DecimalMax("180.0")
-        Double longitude
+        Double longitude,
+
+        @NotNull
+        TypePost type
 ){
 }

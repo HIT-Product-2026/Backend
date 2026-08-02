@@ -13,9 +13,9 @@ import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
-import com.example.lockly.domain.dto.response.common.ProfileResponseDto;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.TypePost;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,15 +56,19 @@ public class PostController {
             @RequestParam("latitude") Double latitude,
 
             @Parameter(description = "Nội dung bài viết")
-            @RequestParam(value = "caption", required = false) String caption
+            @RequestParam(value = "caption", required = false) String caption,
 
-    ) {
+            @Parameter(description = "Kiểu dữ liệu")
+            @RequestParam(value = "type") TypePost type
+
+            ) {
 
         CreatePostRequestDto request = new CreatePostRequestDto(
                 file,
                 caption,
                 latitude,
-                longitude
+                longitude,
+                type
         );
 
         log.debug("Chuẩn bị tạo bài viết");
@@ -85,8 +88,10 @@ public class PostController {
 
         log.debug("Thông báo fcm thành công");
 
-        // Đẩy vào queue (Client cần mở cổng sse để nhận response)
-        rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(response));
+        // Chỉ ảnh mới detect
+        if (type == TypePost.IMAGE)
+            // Đẩy vào queue (Client cần mở cổng sse để nhận response)
+            rabbitMQService.detectNsfw(DetectNsfwPostRequestDto.from(response));
 
         log.debug("Detect thành công");
         return ResponseEntity
