@@ -36,6 +36,7 @@ public class RabbitMQConsumer {
     private final SseService sseService;
     private final PostsRepository postsRepository;
     private final MinIOService minIOService;
+    private final ScheduledExecutorService executor;
 
     // Gửi thông báo fcm
     @RabbitListener(
@@ -104,17 +105,14 @@ public class RabbitMQConsumer {
             PostResponseDto response = PostResponseDto.from(data, nsfw, urlImage);
 
             sseService.push(
-                    data.user().id().toString(),
-                    EventType.detectNsfw,
-                    response
+                    data.user().id().toString(),    // id người nhận (không gửi đi)
+                    EventType.detectNsfw,           // "DETECT_NSFW"
+                    response                        // PostResponseDto
             );
 
-            ScheduledExecutorService executor =
-                    Executors.newSingleThreadScheduledExecutor();
-
-            executor.schedule(
+            this.executor.schedule(
                     () -> sseService.disconnect(data.user().id().toString()),
-                    2,
+                    10,
                     TimeUnit.SECONDS
             );
 
