@@ -11,6 +11,7 @@ import com.example.lockly.domain.entity.main.InvalidatedToken;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.TokenType;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.exception.nonRetryException.UnauthorizedException;
@@ -124,6 +125,7 @@ public class AuthServiceImpl implements AuthService {
                 .displayName(displayName)
                 .email(request.email())
                 .passwordHash(registerCache.passwordHash())
+                .mode(UserMode.PUBLIC)
                 .build();
 
         Profile profile = Profile.builder()

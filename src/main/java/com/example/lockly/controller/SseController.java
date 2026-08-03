@@ -7,6 +7,7 @@ import com.example.lockly.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping(ApiPath.API_NOW + "/sse")
 @Tag(name = "Sse Controller", description = "Dùng để quản lý Sse")
 public class SseController {
@@ -25,6 +27,8 @@ public class SseController {
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Mở SSE connection")
     public SseEmitter subscribe() {
+
+        log.info("=== SSE SUBSCRIBE ===");
 
         // Lấy user từ cache thay vì db
         User user = authService.getUserFromCache();
