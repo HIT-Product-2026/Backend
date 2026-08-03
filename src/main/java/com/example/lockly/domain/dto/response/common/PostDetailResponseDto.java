@@ -29,18 +29,20 @@ public record PostDetailResponseDto(
             String urlImage,
             String locationName
     ) {
+        boolean isPublic = post.getModeLocation() == PostModeLocation.PUBLIC;
+
         return new PostDetailResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
                 post.getCaption(),
-                post.getLatitude(),
-                post.getLongitude(),
+                isPublic ? post.getLatitude() : null,
+                isPublic ? post.getLongitude() : null,
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
                 urlImage,
                 ConversationSimpleResponseDto.from(conversation),
                 post.getCreatedAt(),
-                locationName,
+                isPublic ? locationName : null,
                 post.getType()
         );
     }

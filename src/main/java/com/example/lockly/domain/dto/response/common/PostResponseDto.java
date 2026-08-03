@@ -24,13 +24,20 @@ public record PostResponseDto (
     TypePost type
 ){
 
-    public static PostResponseDto from(Post post, String imageUrl, Double latitude, Double longitude) {
+    public static PostResponseDto from(
+            Post post,
+            String imageUrl,
+            Double latitude,
+            Double longitude
+    ) {
+        boolean isPublic = post.getModeLocation() == PostModeLocation.PUBLIC;
+
         return new PostResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
                 post.getCaption(),
-                latitude,
-                longitude,
+                isPublic ? latitude : null,
+                isPublic ? longitude : null,
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
                 imageUrl,
@@ -41,12 +48,14 @@ public record PostResponseDto (
     }
 
     public static PostResponseDto from(Post post, String urlImage) {
+        boolean isPublic = post.getModeLocation() == PostModeLocation.PUBLIC;
+
         return new PostResponseDto(
                 post.getId(),
                 UserResponseDto.from(post.getUser()),
                 post.getCaption(),
-                post.getLatitude(),
-                post.getLongitude(),
+                isPublic ? post.getLatitude() : null,
+                isPublic ? post.getLongitude() : null,
                 post.getModeLocation(),
                 NsfwStatus.PROCESSING,
                 urlImage,
@@ -57,12 +66,14 @@ public record PostResponseDto (
     }
 
     public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw, String urlImage){
+        boolean isPublic = dto.modeLocation() == PostModeLocation.PUBLIC;
+
         return new PostResponseDto(
                 dto.postId(),
                 dto.user(),
                 dto.caption(),
-                dto.latitude(),
-                dto.longitude(),
+                isPublic ? dto.latitude() : null,
+                isPublic ? dto.longitude() : null,
                 dto.modeLocation(),
                 nsfw,
                 urlImage,

@@ -116,7 +116,7 @@ public class LocationServiceImpl implements LocationService {
     public String getProvinceFullName(Double latitude, Double longitude) {
 
         if (latitude == null || longitude == null)
-            throw new ResourceNotFoundException("Tên vị trí", "tọa độ", null);
+            return null;
 
         return gisProvinceRepository.findProvinceByLocation(latitude, longitude)
                 .map(ProvinceInfo::getFullName)
