@@ -218,4 +218,17 @@ public class PostController {
                 )
         );
     }
+
+    @DeleteMapping("/{post_id}")
+    @Operation(summary = "Xóa bài viết", description = "Xóa bài viết theo ID")
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @Parameter(description = "ID bài viết")
+            @PathVariable("post_id") UUID postId
+    ) {
+        postService.deletePost(postId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Xóa bài viết thành công"));
+    }
 }
