@@ -30,6 +30,8 @@ public class SseServiceImpl implements SseService {
         emitter.onTimeout(() -> emitters.remove(id));
         emitter.onError(e -> emitters.remove(id));
 
+        log.info("Subscribe thành công");
+
         return emitter;
     }
 
