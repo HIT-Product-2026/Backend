@@ -27,4 +27,5 @@ public interface PostService {
     void updateModeLocationPostById(UUID postId, PostModeLocation modeLocation);
 
     void dropEmoji(ReactEmojiToPostRequestDto request);
+    void deletePost(UUID postId);
 }

@@ -393,4 +393,30 @@ public class PostServiceImpl implements PostService {
                 .map(EmojiPostResponseDto::from)
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void deletePost(UUID postId) {
+
+        User user = authService.getUserFromCache();
+
+        log.debug("Lấy user thành công");
+
+        Post post = postsRepository.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Post", "id", postId));
+
+        log.debug("Lấy post thành công");
+
+        // Kiểm tra quyền xóa
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new BadRequestException("You are not allowed to delete this post");
+        }
+
+        log.debug("Kiểm tra quyền thành công");
+
+        postsRepository.delete(post);
+
+        log.debug("Xóa post thành công");
+    }
 }
