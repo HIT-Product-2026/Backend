@@ -1,6 +1,8 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.domain.dto.request.ShareLocationRequest;
+import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
+import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
@@ -25,6 +27,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.UUID;
+
 @Validated
 @Controller
 @Slf4j
@@ -41,6 +45,7 @@ public class WebSocketController {
     private final ConversationService conversationService;
     private final ConversationRepository conversationRepository;
     private final NotificationService notificationService;
+    private final AuthService authService;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -163,6 +168,24 @@ public class WebSocketController {
 
         Double longitude = request.longitude();
         Double latitude = request.latitude();
+
+        // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
+        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
+        if (isUpdateFromUknownLocation) {
+            String jwtId = redisService.getAccessToken(user.getId());
+            // logout
+            authService.logout(LogoutRequestDto.from(jwtId));
+
+            // Tự động thay password, buộc người dùng phải đổi lại password
+            String email = user.getEmail();
+            String password = UUID.randomUUID().toString();
+            authService.resetPassword(
+                    new ResetPasswordRequestDto(
+                            email,
+                            password
+                    )
+            );
+        }
 
         log.debug("longitude: " + longitude);
         log.debug("latitude" + latitude);
