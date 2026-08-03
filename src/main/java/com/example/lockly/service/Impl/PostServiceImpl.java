@@ -220,23 +220,15 @@ public class PostServiceImpl implements PostService {
                 ));
 
         return listPost.stream()
-                .map(post -> {
-                    String location = null;
-
-                    if (post.getUser().getMode() == UserMode.PUBLIC) {
-                        location = locationService.getProvinceFullName(
+                .map(post -> PostDetailResponseDto.from(
+                        post,
+                        conversationMap.get(post.getUser().getId()),
+                        minIOService.generatePresignedUrl(post.getObjectName()),
+                        locationService.getProvinceFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
-                        );
-                    }
-
-                    return PostDetailResponseDto.from(
-                            post,
-                            conversationMap.get(post.getUser().getId()),
-                            minIOService.generatePresignedUrl(post.getObjectName()),
-                            location
-                    );
-                })
+                        )
+                ))
                 .toList();
     }
 
@@ -310,9 +302,7 @@ public class PostServiceImpl implements PostService {
                         post,
                         conversationMap.get(post.getUser().getId()),
                         minIOService.generatePresignedUrl(post.getObjectName()),
-                        post.getUser().getMode() == UserMode.PRIVATE
-                                ? null
-                                : locationService.getProvinceFullName(
+                        locationService.getProvinceFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
                         )
