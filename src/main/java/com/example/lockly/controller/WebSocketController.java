@@ -214,8 +214,18 @@ public class WebSocketController {
 
         log.debug("Bắt đầu chia sẻ vị trí");
 
+        // Private thì không chia sẻ vị trí
+        if (user.getMode() == UserMode.PRIVATE){
+            response = LocationUserResponseDto.from(
+                    response.userId(),
+                    null,
+                    null,
+                    response.lastActiveAt()
+            );
+        }
+
         // Chuyển lên topic cá nhân
-        webSocketService.shareLocationToFriend(userDto.id(), response);
+        webSocketService.shareLocationToFriend(userDto.toEntity(), response);
 
         log.debug("Chia sẻ thành công");
     }
