@@ -1,5 +1,7 @@
 package com.example.lockly.service.Impl;
 
+import com.example.lockly.domain.entity.main.User;
+import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,16 +56,16 @@ public class WebSocketServiceImpl implements WebSocketService {
         );
     }
 
-//     Send private message
+    // Send private message
     @Override
     public void shareLocationToFriend(
-            UUID userId,
+            User user,
             Object payload
     ) {
         log.debug("Đã gửi paylod location thành công cho client");
 
         messagingTemplate.convertAndSend(
-                "/topic/location/" + userId,
+                "/topic/location/" + user.getId(),
                 payload
         );
     }
