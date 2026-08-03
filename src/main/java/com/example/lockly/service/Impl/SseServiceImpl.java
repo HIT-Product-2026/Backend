@@ -46,12 +46,16 @@ public class SseServiceImpl implements SseService {
             return;
         }
 
+        log.info("Chuẩn bị gửi response cho SSE");
+
         try {
             emitter.send(
                     SseEmitter.event()
                             .name(eventType)
                             .data(response)
             );
+
+            log.info("Gửi SSE thành công");
 
         } catch (Exception e) {
             emitter.complete();
