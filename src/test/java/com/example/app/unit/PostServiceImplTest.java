@@ -11,10 +11,7 @@ import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.EmojiPost;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.User;
-import com.example.lockly.domain.entity.main.enumEntity.Emoji;
-import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
-import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
-import com.example.lockly.domain.entity.main.enumEntity.UserMode;
+import com.example.lockly.domain.entity.main.enumEntity.*;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
@@ -129,7 +126,8 @@ public class PostServiceImplTest {
                         null,
                         "caption",
                         21.0,
-                        105.0
+                        105.0,
+                        TypePost.IMAGE
                 );
 
         assertThrows(
@@ -154,7 +152,8 @@ public class PostServiceImplTest {
                         file,
                         "caption",
                         21.0,
-                        105.0
+                        105.0,
+                        TypePost.IMAGE
                 );
 
         assertThrows(
@@ -179,7 +178,8 @@ public class PostServiceImplTest {
                         file,
                         "caption",
                         21.02,
-                        105.84
+                        105.84,
+                        TypePost.IMAGE
                 );
 
         when(authService.getUserFromCache())
@@ -236,7 +236,8 @@ public class PostServiceImplTest {
                         file,
                         "caption",
                         21.0,
-                        105.0
+                        105.0,
+                        TypePost.IMAGE
                 );
 
         when(authService.getUserFromCache())
