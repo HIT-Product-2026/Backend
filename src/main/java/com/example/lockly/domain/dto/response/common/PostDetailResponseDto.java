@@ -38,7 +38,7 @@ public record PostDetailResponseDto(
                 isPublic ? post.getLatitude() : null,
                 isPublic ? post.getLongitude() : null,
                 post.getModeLocation(),
-                NsfwStatus.PROCESSING,
+                post.getNsfw(),
                 urlImage,
                 ConversationSimpleResponseDto.from(conversation),
                 post.getCreatedAt(),
