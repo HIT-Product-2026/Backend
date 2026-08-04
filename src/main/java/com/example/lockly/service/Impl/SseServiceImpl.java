@@ -10,6 +10,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import jakarta.annotation.PostConstruct;
 
 @Service
 @Slf4j
@@ -17,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SseServiceImpl implements SseService {
 
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService heartbeatExecutor =
+            Executors.newSingleThreadScheduledExecutor();
 
     @Override
     public SseEmitter subscribeDetectNsfw(UUID userId) {
@@ -31,6 +37,19 @@ public class SseServiceImpl implements SseService {
         emitter.onError(e -> emitters.remove(id));
 
         log.info("Subscribe thành công");
+
+        try {
+            emitter.send(
+                    SseEmitter.event()
+                            .name("connected")
+                            .data("connected")
+            );
+        } catch (Exception e) {
+            emitter.complete();
+            emitters.remove(id);
+            return emitter;
+        }
+
 
         return emitter;
     }
@@ -69,5 +88,30 @@ public class SseServiceImpl implements SseService {
         if (emitter != null) {
             emitter.complete();
         }
+    }
+
+    @PostConstruct
+    private void startHeartbeat() {
+
+        heartbeatExecutor.scheduleAtFixedRate(() -> {
+            emitters.forEach((userId, emitter) -> {
+
+                try {
+                    emitter.send(
+                            SseEmitter.event()
+                                    .name("heartbeat")
+                                    .data("ping")
+                    );
+                    log.debug("[SSE] Heartbeat {}", userId);
+                } catch (Exception e) {
+                    log.warn("[SSE] Heartbeat failed {}", userId);
+
+                    emitter.complete();
+                    emitters.remove(userId);
+                }
+
+            });
+
+        }, 30, 30, TimeUnit.SECONDS);
     }
 }
