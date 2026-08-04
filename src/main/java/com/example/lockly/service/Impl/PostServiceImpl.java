@@ -169,6 +169,8 @@ public class PostServiceImpl implements PostService {
         if (post.getModeLocation() == PostModeLocation.PRIVATE){
             return PostResponseDto.from(post, urlImage, null, null);
         }
+
+        log.info("Nsfw của bài post được lấy ra là: " + post.getNsfw());
         return PostResponseDto.from(post, urlImage);
     }
 
