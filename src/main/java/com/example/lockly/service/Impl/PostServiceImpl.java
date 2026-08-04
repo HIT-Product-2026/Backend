@@ -109,6 +109,7 @@ public class PostServiceImpl implements PostService {
                 .latitude(request.latitude())
                 .modeLocation(mode)
                 .createdAt(LocalDateTime.now())
+                .type(request.type())
                 .build();
 
         // Thêm point cho post (để tiện cho query với PortgreGIS)
@@ -237,6 +238,8 @@ public class PostServiceImpl implements PostService {
 
         Slice<Post> posts;
 
+        log.info("Bắt đầu lấy post friend");
+
         if (cursor == null || cursor.isBlank()) {
             posts = postsRepository.findFriendPostsFirstPage(
                     user.getId(),
@@ -255,8 +258,12 @@ public class PostServiceImpl implements PostService {
             );
         }
 
+        log.info("Lấy thành post friend thành công");
+
         // Lấy ds post
         List<Post> listPost = posts.getContent();
+
+        log.info("type post đầu tiên là: " + listPost.get(0).getType());
 
         // Lấy ds user của post
         List<UUID> userIds = listPost.stream()
