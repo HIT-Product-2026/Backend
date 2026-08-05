@@ -19,4 +19,6 @@ public interface AuthService {
     User getCurrentUser();
     LoginResponseDto refreshToken(RefreshTokenRequestDto refreshToken);
     User getUserFromCache();
+    void forceLogout(UUID userId);
+    void forceResetPassword(User user);
 }
