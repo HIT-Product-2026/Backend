@@ -8,6 +8,7 @@ import com.example.lockly.domain.dto.response.LocationPostResponseDto;
 import com.example.lockly.domain.dto.response.common.EmojiPostResponseDto;
 import com.example.lockly.domain.dto.response.common.PostDetailResponseDto;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
+import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.EmojiPost;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.User;
@@ -19,11 +20,7 @@ import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.PostsRepository;
 import com.example.lockly.repository.main.UserRepository;
-import com.example.lockly.service.AuthService;
-import com.example.lockly.service.LocationService;
-import com.example.lockly.service.MinIOService;
-import com.example.lockly.service.ProfileService;
-import com.example.lockly.service.UserService;
+import com.example.lockly.service.*;
 import com.example.lockly.service.Impl.PostServiceImpl;
 import com.example.lockly.common.util.CursorUtil;
 
@@ -71,6 +68,9 @@ public class PostServiceImplTest {
 
     @Mock
     private ConversationRepository conversationRepository;
+
+    @Mock
+    private ConversationService conversationService;
 
     @Mock
     private AuthService authService;
@@ -296,11 +296,29 @@ public class PostServiceImplTest {
     @Test
     void getPostById_Public() {
 
+        Conversation conversation = Conversation.builder()
+                .id(UUID.randomUUID())
+                .user1(post.getUser())
+                .user2(user)
+                .build();
+
         when(postsRepository.findById(post.getId()))
                 .thenReturn(Optional.of(post));
 
         when(minIOService.generatePresignedUrl(post.getObjectName()))
                 .thenReturn("url");
+
+        when(authService.getCurrentUser())
+                .thenReturn(user);
+
+        when(conversationRepository.findByUsers(post.getUser(), user))
+                .thenReturn(Optional.of(conversation));
+
+        when(locationService.getWardFullName(any(), any()))
+                .thenReturn("Ward ");
+
+        when(locationService.getProvinceFullName(any(), any()))
+                .thenReturn("Ha Noi");
 
         PostDetailResponseDto dto =
                 postService.getPostById(post.getId());
@@ -311,6 +329,20 @@ public class PostServiceImplTest {
 
     @Test
     void getPostById_Private() {
+
+        Conversation conversation = Conversation.builder()
+                .id(UUID.randomUUID())
+                .user1(post.getUser())
+                .user2(user)
+                .build();
+
+        when(authService.getCurrentUser())
+                .thenReturn(user);
+
+        when(conversationRepository.findByUsers(
+                post.getUser(),
+                user
+        )).thenReturn(Optional.of(conversation));
 
         post.setModeLocation(PostModeLocation.PRIVATE);
 
