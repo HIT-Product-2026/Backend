@@ -60,6 +60,7 @@ public class PostServiceImpl implements PostService {
     private final ProfileService profileService;
     private final MinIOService minIOService;
     private final LocationService locationService;
+    private final ConversationService conversationService;
 
 
     private final String prefix = "post";
@@ -156,7 +157,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto getPostById(UUID postId){
+    public PostDetailResponseDto getPostById(UUID postId){
         Post post = postsRepository
                 .findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
@@ -165,13 +166,29 @@ public class PostServiceImpl implements PostService {
 
         String urlImage = minIOService.generatePresignedUrl(objectName);
 
+        Conversation conversation = conversationRepository.findByUsers(
+                post.getUser(),
+                authService.getCurrentUser()
+        ).orElseThrow(() -> new ResourceNotFoundException("Conversation", "user id", post.getUser().getId()));
+
         // Public mới trả tọa độ, không thì null
         if (post.getModeLocation() == PostModeLocation.PRIVATE){
-            return PostResponseDto.from(post, urlImage, null, null);
+            return PostDetailResponseDto.from(
+                    post,
+                    conversation,
+                    urlImage,
+                    null
+            );
         }
 
         log.info("Nsfw của bài post được lấy ra là: " + post.getNsfw());
-        return PostResponseDto.from(post, urlImage);
+        return PostDetailResponseDto.from(
+                post,
+                conversation,
+                urlImage,
+                locationService.getWardFullName(post.getLatitude(), post.getLongitude())
+                + locationService.getProvinceFullName(post.getLatitude(), post.getLongitude())
+        );
     }
 
     @Override
@@ -227,7 +244,10 @@ public class PostServiceImpl implements PostService {
                         post,
                         conversationMap.get(post.getUser().getId()),
                         minIOService.generatePresignedUrl(post.getObjectName()),
-                        locationService.getProvinceFullName(
+                        locationService.getWardFullName(
+                                post.getLatitude(),
+                                post.getLongitude()
+                        ) + locationService.getProvinceFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
                         )
@@ -311,7 +331,10 @@ public class PostServiceImpl implements PostService {
                         post,
                         conversationMap.get(post.getUser().getId()),
                         minIOService.generatePresignedUrl(post.getObjectName()),
-                        locationService.getProvinceFullName(
+                        locationService.getWardFullName(
+                                post.getLatitude(),
+                                post.getLongitude()
+                        ) + locationService.getProvinceFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
                         )
