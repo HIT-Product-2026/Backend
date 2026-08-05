@@ -101,7 +101,7 @@ public class PostController {
 
     @GetMapping("/{post_id}")
     @Operation(summary = "Lấy bài viết theo ID", description = "Trả về thông tin post")
-    public ResponseEntity<ApiResponse<PostResponseDto>> getPostById(
+    public ResponseEntity<ApiResponse<PostDetailResponseDto>> getPostById(
             @Parameter(description = "ID bài viết")
             @PathVariable("post_id") UUID postId
     ) {

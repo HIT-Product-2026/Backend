@@ -302,7 +302,7 @@ public class PostServiceImplTest {
         when(minIOService.generatePresignedUrl(post.getObjectName()))
                 .thenReturn("url");
 
-        PostResponseDto dto =
+        PostDetailResponseDto dto =
                 postService.getPostById(post.getId());
 
         assertEquals(post.getLatitude(), dto.latitude());
@@ -320,7 +320,7 @@ public class PostServiceImplTest {
         when(minIOService.generatePresignedUrl(anyString()))
                 .thenReturn("url");
 
-        PostResponseDto dto =
+        PostDetailResponseDto dto =
                 postService.getPostById(post.getId());
 
         assertNull(dto.latitude());
