@@ -429,4 +429,31 @@ public class AuthServiceImpl implements AuthService {
         return user;
     }
 
+    @Override
+    @Transactional
+    public void forceLogout(UUID userId) {
+
+        redisService.deleteAccessToken(userId);
+        redisService.deleteRefreshToken(userId);
+
+        log.info("Force logout user {}", userId);
+    }
+
+    @Override
+    @Transactional
+    public void forceResetPassword(User user) {
+
+        String randomPassword = UUID.randomUUID().toString();
+
+        user.setPasswordHash(passwordUtil.hash(randomPassword));
+
+        userRepository.save(user);
+
+        redisService.saveUser(UserCacheDto.from(user));
+
+        redisService.deleteAccessToken(user.getId());
+        redisService.deleteRefreshToken(user.getId());
+
+        log.warn("Force reset password, userId={}", user.getId());
+    }
 }

@@ -169,31 +169,23 @@ public class WebSocketController {
         Double longitude = request.longitude();
         Double latitude = request.latitude();
 
-        // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
-        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
-        if (isUpdateFromUknownLocation) {
-            String jwtId = redisService.getAccessToken(user.getId());
-            // logout
-            authService.logout(LogoutRequestDto.from(jwtId));
-
-            // Tự động thay password, buộc người dùng phải đổi lại password
-            String email = user.getEmail();
-            String password = UUID.randomUUID().toString();
-            authService.resetPassword(
-                    new ResetPasswordRequestDto(
-                            email,
-                            password
-                    )
-            );
-        }
-
-        log.debug("longitude: " + longitude);
-        log.debug("latitude" + latitude);
-
         // Kiểm tra xem request có được chấp nhận không (để giảm tần suất request)
         if (locationService.isDropRequest(longitude, latitude, user)) return;
 
         log.debug("Request hợp lệ");
+
+        // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
+        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
+        if (isUpdateFromUknownLocation) {
+            // logout
+            authService.forceLogout(user.getId());
+
+            // Tự động thay password, buộc người dùng phải đổi lại password
+            authService.forceResetPassword(user);
+        }
+
+        log.debug("longitude: " + longitude);
+        log.debug("latitude" + latitude);
 
         UserCacheDto userDto = redisService.getUser(user.getId());
 
