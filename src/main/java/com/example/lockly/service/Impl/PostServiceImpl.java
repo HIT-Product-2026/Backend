@@ -334,7 +334,7 @@ public class PostServiceImpl implements PostService {
                         locationService.getWardFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
-                        ) + locationService.getProvinceFullName(
+                        ) + " - " + locationService.getProvinceFullName(
                                 post.getLatitude(),
                                 post.getLongitude()
                         )
