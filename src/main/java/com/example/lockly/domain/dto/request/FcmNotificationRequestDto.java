@@ -3,6 +3,7 @@ package com.example.lockly.domain.dto.request;
 import com.example.lockly.domain.dto.response.common.PostResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.FcmMessageType;
+import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
 import com.example.lockly.domain.entity.main.enumEntity.TypePost;
 
 import java.util.List;
@@ -20,7 +21,8 @@ public record FcmNotificationRequestDto(
         Double latitude,
         Double longitude,
         String caption,
-        TypePost typePost
+        TypePost typePost,
+        NsfwStatus nsfw
 ) {
     public static FcmNotificationRequestDto from(
             User user,
@@ -42,7 +44,8 @@ public record FcmNotificationRequestDto(
                 latitude,
                 longitude,
                 post.caption(),
-                post.type()
+                post.type(),
+                post.nsfw()
         );
     }
 }

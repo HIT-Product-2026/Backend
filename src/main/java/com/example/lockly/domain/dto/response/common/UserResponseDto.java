@@ -11,8 +11,7 @@ public record UserResponseDto(
     UUID id,
     String username,
     String displayName,
-    UserMode mode,
-    String fcmToken
+    UserMode mode
 ){
 
     public static UserResponseDto from(User user){
@@ -20,8 +19,7 @@ public record UserResponseDto(
                 user.getId(),
                 user.getUsername(),
                 user.getDisplayName(),
-                user.getMode(),
-                user.getFcmToken()
+                user.getMode()
         );
     }
 }

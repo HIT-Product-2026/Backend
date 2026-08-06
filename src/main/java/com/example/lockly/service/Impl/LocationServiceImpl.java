@@ -47,14 +47,10 @@ public class LocationServiceImpl implements LocationService {
             return false; // Không drop request do chưa có tọa độ nào được lưu trữ
 
         long duration = Duration
-                .between(LocalDateTime.now(), dto.lastActiveAt())
+                .between(dto.lastActiveAt(), LocalDateTime.now())
                 .toSeconds();
 
         log.info("duration: " + duration);
-
-        // Tần suất request trên timeLimit thì chấp nhận (tính bằng giây)
-        if (duration > timeLimit)
-            return false;
 
         // Chuyển sang double
         double longitude1 = dto.longitude();
@@ -66,12 +62,16 @@ public class LocationServiceImpl implements LocationService {
         double distance = LocationUtil.calculateDistance(
                 latitude1, longitude1,
                 latitude2, longitude2
-                );
+        );
 
         log.info("distance: " + distance);
 
         // Di chuyển ít hơn distanceLimit thì drop
-        if (distance < distanceLimit)
+        if (distance >= distanceLimit)
+            return false;
+
+        // Tần suất request trên timeLimit thì chấp nhận (tính bằng giây)
+        if (duration <= timeLimit)
             return true;
 
         return false;
