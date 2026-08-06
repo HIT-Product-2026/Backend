@@ -16,6 +16,8 @@ import com.example.lockly.domain.entity.main.enumEntity.*;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.post.PostDetailResponseMapper;
+import com.example.lockly.mapper.post.PostResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.PostsRepository;
@@ -89,6 +91,12 @@ public class PostServiceImplTest {
 
     @InjectMocks
     private PostServiceImpl postService;
+
+    @Mock
+    private PostResponseMapper postResponseMapper;
+
+    @Mock
+    private PostDetailResponseMapper postDetailResponseMapper;
 
     private User user;
     private Post post;
@@ -173,6 +181,7 @@ public class PostServiceImplTest {
                         "abc".getBytes()
                 );
 
+
         CreatePostRequestDto request =
                 new CreatePostRequestDto(
                         file,
@@ -182,46 +191,122 @@ public class PostServiceImplTest {
                         TypePost.IMAGE
                 );
 
+
         when(authService.getUserFromCache())
                 .thenReturn(user);
+
 
         when(props.getBucketName())
                 .thenReturn("bucket");
 
+
         when(minIOService.generatePresignedUrl(anyString()))
                 .thenReturn("url");
+
+
+        when(postResponseMapper.from(
+                any(Post.class),
+                eq("url")
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+                    return new PostResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            p.getObjectName(),
+                            p.getCreatedAt(),
+                            p.getType()
+                    );
+                });
+
 
         PostResponseDto response =
                 postService.createPost(request);
 
+
         ArgumentCaptor<Post> captor =
                 ArgumentCaptor.forClass(Post.class);
 
-        verify(postsRepository).save(captor.capture());
+
+        verify(postsRepository)
+                .save(captor.capture());
+
 
         Post saved = captor.getValue();
 
-        assertEquals(user, saved.getUser());
-        assertEquals(PostModeLocation.PUBLIC, saved.getModeLocation());
-        assertEquals(21.02, saved.getLatitude());
-        assertEquals(105.84, saved.getLongitude());
 
-        assertNotNull(saved.getLocation());
+        assertEquals(
+                user,
+                saved.getUser()
+        );
+
+
+        assertEquals(
+                PostModeLocation.PUBLIC,
+                saved.getModeLocation()
+        );
+
+
+        assertEquals(
+                21.02,
+                saved.getLatitude()
+        );
+
+
+        assertEquals(
+                105.84,
+                saved.getLongitude()
+        );
+
+
+        assertNotNull(
+                saved.getLocation()
+        );
+
 
         verify(minIOService)
-                .saveFile(eq(file), anyString());
+                .saveFile(
+                        eq(file),
+                        anyString()
+                );
+
 
         verify(profileService)
-                .updateProcessProfile(saved.getId(), saved.getObjectName());
+                .updateProcessProfile(
+                        saved.getId(),
+                        saved.getObjectName()
+                );
+
 
         assertNotNull(response);
-        assertEquals(21.02, response.latitude());
+
+
+        assertEquals(
+                21.02,
+                response.latitude()
+        );
+
+
+        assertEquals(
+                "url",
+                response.urlImage()
+        );
     }
 
     @Test
     void createPost_PrivateMode_ShouldHideLocation() {
 
+
         user.setMode(UserMode.PRIVATE);
+
 
         MockMultipartFile file =
                 new MockMultipartFile(
@@ -230,6 +315,7 @@ public class PostServiceImplTest {
                         "image/jpeg",
                         "abc".getBytes()
                 );
+
 
         CreatePostRequestDto request =
                 new CreatePostRequestDto(
@@ -240,30 +326,90 @@ public class PostServiceImplTest {
                         TypePost.IMAGE
                 );
 
+
         when(authService.getUserFromCache())
                 .thenReturn(user);
+
 
         when(props.getBucketName())
                 .thenReturn("bucket");
 
+
         when(minIOService.generatePresignedUrl(anyString()))
                 .thenReturn("url");
+
+
+        when(postResponseMapper.from(
+                any(Post.class),
+                anyString(),
+                eq(null),
+                eq(null)
+        ))
+                .thenAnswer(invocation -> {
+
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            null,
+                            null,
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            p.getObjectName(),
+                            p.getCreatedAt(),
+                            p.getType()
+                    );
+                });
+
+
 
         PostResponseDto response =
                 postService.createPost(request);
 
-        assertNull(response.latitude());
-        assertNull(response.longitude());
+
+
+        assertNull(
+                response.latitude()
+        );
+
+
+        assertNull(
+                response.longitude()
+        );
+
+
 
         ArgumentCaptor<Post> captor =
                 ArgumentCaptor.forClass(Post.class);
 
-        verify(postsRepository).save(captor.capture());
+
+
+        verify(postsRepository)
+                .save(captor.capture());
+
+
+
+        Post saved =
+                captor.getValue();
+
+
 
         assertEquals(
                 PostModeLocation.PRIVATE,
-                captor.getValue().getModeLocation()
+                saved.getModeLocation()
         );
+
+
+        verify(profileService)
+                .updateProcessProfile(
+                        saved.getId(),
+                        saved.getObjectName()
+                );
     }
 
     @Test
@@ -302,29 +448,91 @@ public class PostServiceImplTest {
                 .user2(user)
                 .build();
 
+
         when(postsRepository.findById(post.getId()))
                 .thenReturn(Optional.of(post));
 
-        when(minIOService.generatePresignedUrl(post.getObjectName()))
+
+        when(minIOService.generatePresignedUrl(
+                post.getObjectName()
+        ))
                 .thenReturn("url");
+
 
         when(authService.getCurrentUser())
                 .thenReturn(user);
 
-        when(conversationRepository.findByUsers(post.getUser(), user))
+
+        when(conversationRepository.findByUsers(
+                post.getUser(),
+                user
+        ))
                 .thenReturn(Optional.of(conversation));
 
-        when(locationService.getWardFullName(any(), any()))
+
+        when(locationService.getWardFullName(
+                any(),
+                any()
+        ))
                 .thenReturn("Ward ");
 
-        when(locationService.getProvinceFullName(any(), any()))
+
+        when(locationService.getProvinceFullName(
+                any(),
+                any()
+        ))
                 .thenReturn("Ha Noi");
+
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(conversation),
+                eq("url"),
+                anyString()
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            "Ward Ha Noi",
+                            p.getType()
+                    );
+                });
+
+
 
         PostDetailResponseDto dto =
                 postService.getPostById(post.getId());
 
-        assertEquals(post.getLatitude(), dto.latitude());
-        assertEquals(post.getLongitude(), dto.longitude());
+
+
+        assertEquals(
+                post.getLatitude(),
+                dto.latitude()
+        );
+
+
+        assertEquals(
+                post.getLongitude(),
+                dto.longitude()
+        );
+
+
+        assertEquals(
+                "Ward Ha Noi",
+                dto.locationName()
+        );
     }
 
     @Test
@@ -336,27 +544,81 @@ public class PostServiceImplTest {
                 .user2(user)
                 .build();
 
-        when(authService.getCurrentUser())
-                .thenReturn(user);
 
-        when(conversationRepository.findByUsers(
-                post.getUser(),
-                user
-        )).thenReturn(Optional.of(conversation));
+        post.setModeLocation(
+                PostModeLocation.PRIVATE
+        );
 
-        post.setModeLocation(PostModeLocation.PRIVATE);
 
         when(postsRepository.findById(post.getId()))
                 .thenReturn(Optional.of(post));
 
-        when(minIOService.generatePresignedUrl(anyString()))
+
+        when(authService.getCurrentUser())
+                .thenReturn(user);
+
+
+        when(conversationRepository.findByUsers(
+                post.getUser(),
+                user
+        ))
+                .thenReturn(Optional.of(conversation));
+
+
+        when(minIOService.generatePresignedUrl(
+                anyString()
+        ))
                 .thenReturn("url");
+
+
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(conversation),
+                eq("url"),
+                eq(null)
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            null,
+                            null,
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            null,
+                            p.getType()
+                    );
+                });
+
+
 
         PostDetailResponseDto dto =
                 postService.getPostById(post.getId());
 
-        assertNull(dto.latitude());
-        assertNull(dto.longitude());
+
+
+        assertNull(
+                dto.latitude()
+        );
+
+
+        assertNull(
+                dto.longitude()
+        );
+
+
+        assertNull(
+                dto.locationName()
+        );
     }
 
     @Test
@@ -374,37 +636,101 @@ public class PostServiceImplTest {
     @Test
     void getPostByUserId_FirstPage() {
 
+
         when(userRepository.findById(user.getId()))
                 .thenReturn(Optional.of(user));
+
 
         Slice<Post> slice =
                 new SliceImpl<>(List.of(post));
 
+
         when(postsRepository.findFirstPage(
                 eq(user.getId()),
                 any(PageRequest.class)
-        )).thenReturn(slice);
+        ))
+                .thenReturn(slice);
+
+
 
         when(conversationRepository.findByUserIdAndUserIds(
                 eq(user.getId()),
                 anyList()
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        when(minIOService.generatePresignedUrl(post.getObjectName()))
+
+
+        when(minIOService.generatePresignedUrl(
+                post.getObjectName()
+        ))
                 .thenReturn("url");
 
+
+
+        when(locationService.getWardFullName(
+                any(),
+                any()
+        ))
+                .thenReturn("Ward");
+
+
+
         when(locationService.getProvinceFullName(
-                post.getLatitude(),
-                post.getLongitude()
-        )).thenReturn("Ha Noi");
+                any(),
+                any()
+        ))
+                .thenReturn("Ha Noi");
+
+
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(null),
+                eq("url"),
+                anyString()
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            "WardHa Noi",
+                            p.getType()
+                    );
+                });
+
+
 
         List<PostDetailResponseDto> result =
-                postService.getPostByUserId(user.getId(), null);
+                postService.getPostByUserId(
+                        user.getId(),
+                        null
+                );
 
-        assertEquals(1, result.size());
+
+        assertEquals(
+                1,
+                result.size()
+        );
+
 
         verify(postsRepository)
-                .findFirstPage(eq(user.getId()), any(PageRequest.class));
+                .findFirstPage(
+                        eq(user.getId()),
+                        any(PageRequest.class)
+                );
     }
 
     @Test
@@ -416,32 +742,91 @@ public class PostServiceImplTest {
                         UUID.randomUUID()
                 );
 
+
         String encoded =
                 CursorUtil.encode(cursor);
+
+
 
         when(userRepository.findById(user.getId()))
                 .thenReturn(Optional.of(user));
 
+
+
         Slice<Post> slice =
                 new SliceImpl<>(List.of(post));
+
+
 
         when(postsRepository.findNextPage(
                 eq(user.getId()),
                 eq(cursor.createdAt()),
                 eq(cursor.id()),
                 any(PageRequest.class)
-        )).thenReturn(slice);
+        ))
+                .thenReturn(slice);
+
+
 
         when(conversationRepository.findByUserIdAndUserIds(
-                any(),
+                eq(user.getId()),
                 anyList()
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        when(minIOService.generatePresignedUrl(anyString()))
+
+
+        when(minIOService.generatePresignedUrl(
+                post.getObjectName()
+        ))
                 .thenReturn("url");
 
-        when(locationService.getProvinceFullName(any(), any()))
+
+
+        when(locationService.getWardFullName(
+                any(),
+                any()
+        ))
+                .thenReturn("Ward ");
+
+
+
+        when(locationService.getProvinceFullName(
+                any(),
+                any()
+        ))
                 .thenReturn("Ha Noi");
+
+
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(null),
+                eq("url"),
+                anyString()
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            "Ward Ha Noi",
+                            p.getType()
+                    );
+                });
+
+
 
         List<PostDetailResponseDto> result =
                 postService.getPostByUserId(
@@ -449,7 +834,14 @@ public class PostServiceImplTest {
                         encoded
                 );
 
-        assertEquals(1, result.size());
+
+
+        assertEquals(
+                1,
+                result.size()
+        );
+
+
 
         verify(postsRepository)
                 .findNextPage(
@@ -478,34 +870,98 @@ public class PostServiceImplTest {
     @Test
     void getFriendPosts_FirstPage() {
 
+
         Slice<Post> slice =
                 new SliceImpl<>(List.of(post));
+
+
 
         when(postsRepository.findFriendPostsFirstPage(
                 eq(user.getId()),
                 eq(FriendshipStatus.ACCEPTED),
                 any(PageRequest.class)
-        )).thenReturn(slice);
+        ))
+                .thenReturn(slice);
+
+
 
         when(conversationRepository.findByUserIdAndUserIds(
                 any(),
                 anyList()
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        when(minIOService.generatePresignedUrl(anyString()))
+
+
+        when(minIOService.generatePresignedUrl(
+                anyString()
+        ))
                 .thenReturn("url");
 
-        when(locationService.getProvinceFullName(any(), any()))
+
+
+        when(locationService.getWardFullName(
+                any(),
+                any()
+        ))
+                .thenReturn("Ward ");
+
+
+
+        when(locationService.getProvinceFullName(
+                any(),
+                any()
+        ))
                 .thenReturn("Ha Noi");
 
-        List<PostDetailResponseDto> result =
-                postService.getFriendPosts(user, null);
 
-        assertEquals(1, result.size());
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(null),
+                eq("url"),
+                anyString()
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            "Ward Ha Noi",
+                            p.getType()
+                    );
+                });
+
+
+
+        List<PostDetailResponseDto> result =
+                postService.getFriendPosts(
+                        user,
+                        null
+                );
+
+
+
+        assertEquals(
+                1,
+                result.size()
+        );
     }
 
     @Test
     void getFriendPosts_NextPage() {
+
 
         Cursor cursor =
                 new Cursor(
@@ -513,11 +969,17 @@ public class PostServiceImplTest {
                         UUID.randomUUID()
                 );
 
+
+
         String encoded =
                 CursorUtil.encode(cursor);
 
+
+
         Slice<Post> slice =
                 new SliceImpl<>(List.of(post));
+
+
 
         when(postsRepository.findFriendPostsNextPage(
                 eq(user.getId()),
@@ -525,23 +987,83 @@ public class PostServiceImplTest {
                 eq(cursor.createdAt()),
                 eq(cursor.id()),
                 any(PageRequest.class)
-        )).thenReturn(slice);
+        ))
+                .thenReturn(slice);
+
+
 
         when(conversationRepository.findByUserIdAndUserIds(
                 any(),
                 anyList()
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        when(minIOService.generatePresignedUrl(anyString()))
+
+
+        when(minIOService.generatePresignedUrl(
+                anyString()
+        ))
                 .thenReturn("url");
 
-        when(locationService.getProvinceFullName(any(), any()))
+
+
+        when(locationService.getWardFullName(
+                any(),
+                any()
+        ))
+                .thenReturn("Ward ");
+
+
+
+        when(locationService.getProvinceFullName(
+                any(),
+                any()
+        ))
                 .thenReturn("Ha Noi");
 
-        List<PostDetailResponseDto> result =
-                postService.getFriendPosts(user, encoded);
 
-        assertEquals(1, result.size());
+
+        when(postDetailResponseMapper.from(
+                eq(post),
+                eq(null),
+                eq("url"),
+                anyString()
+        ))
+                .thenAnswer(invocation -> {
+
+                    Post p = invocation.getArgument(0);
+
+
+                    return new PostDetailResponseDto(
+                            p.getId(),
+                            null,
+                            p.getCaption(),
+                            p.getLatitude(),
+                            p.getLongitude(),
+                            p.getModeLocation(),
+                            p.getNsfw(),
+                            "url",
+                            null,
+                            p.getCreatedAt(),
+                            "Ward Ha Noi",
+                            p.getType()
+                    );
+                });
+
+
+
+        List<PostDetailResponseDto> result =
+                postService.getFriendPosts(
+                        user,
+                        encoded
+                );
+
+
+
+        assertEquals(
+                1,
+                result.size()
+        );
     }
 
     @Test

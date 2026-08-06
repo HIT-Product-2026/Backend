@@ -42,12 +42,16 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import com.example.lockly.mapper.user.UserResponseMapper;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserResponseMapper userResponseMapper;
 
     @Mock
     private FriendshipsRepository friendshipsRepository;
@@ -126,50 +130,113 @@ class UserServiceImplTest {
         Friendship friendship1 = requesterFriendship(user, friend1);
         Friendship friendship2 = receiverFriendship(friend2, user);
 
+
         when(friendshipsRepository.findByRequesterAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of(friendship1));
+        ))
+                .thenReturn(List.of(friendship1));
+
 
         when(friendshipsRepository.findByReceiverAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of(friendship2));
+        ))
+                .thenReturn(List.of(friendship2));
 
-        List<UserResponseDto> result = userService.findFriendsByUser(user);
+
+        when(userResponseMapper.from(friend1))
+                .thenReturn(
+                        new UserResponseDto(
+                                friend1.getId(),
+                                friend1.getUsername(),
+                                friend1.getDisplayName(),
+                                friend1.getMode(),
+                                null
+                        )
+                );
+
+
+        when(userResponseMapper.from(friend2))
+                .thenReturn(
+                        new UserResponseDto(
+                                friend2.getId(),
+                                friend2.getUsername(),
+                                friend2.getDisplayName(),
+                                friend2.getMode(),
+                                null
+                        )
+                );
+
+
+        List<UserResponseDto> result =
+                userService.findFriendsByUser(user);
+
+
 
         assertEquals(2, result.size());
 
-        assertTrue(
-                result.stream()
-                        .anyMatch(f -> f.id().equals(friend1.getId()))
-        );
 
         assertTrue(
                 result.stream()
-                        .anyMatch(f -> f.id().equals(friend2.getId()))
+                        .anyMatch(
+                                f -> f.id().equals(friend1.getId())
+                        )
+        );
+
+
+        assertTrue(
+                result.stream()
+                        .anyMatch(
+                                f -> f.id().equals(friend2.getId())
+                        )
         );
     }
 
     @Test
     void isFriendByUserId_ShouldReturnTrue_WhenFriendExists() {
 
-        Friendship friendship = requesterFriendship(user, friend1);
+        Friendship friendship =
+                requesterFriendship(user, friend1);
+
+
 
         when(friendshipsRepository.findByRequesterAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of(friendship));
+        ))
+                .thenReturn(List.of(friendship));
+
+
 
         when(friendshipsRepository.findByReceiverAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        boolean result = userService.isFriendByUserId(
-                user,
-                friend1.getId()
-        );
+
+
+        when(userResponseMapper.from(friend1))
+                .thenReturn(
+                        new UserResponseDto(
+                                friend1.getId(),
+                                friend1.getUsername(),
+                                friend1.getDisplayName(),
+                                friend1.getMode(),
+                                null
+                        )
+                );
+
+
+
+        boolean result =
+                userService.isFriendByUserId(
+                        user,
+                        friend1.getId()
+                );
+
+
 
         assertTrue(result);
     }
@@ -177,22 +244,47 @@ class UserServiceImplTest {
     @Test
     void isFriendByUserId_ShouldReturnFalse_WhenFriendDoesNotExist() {
 
-        Friendship friendship = requesterFriendship(user, friend1);
+        Friendship friendship =
+                requesterFriendship(user, friend1);
+
+
 
         when(friendshipsRepository.findByRequesterAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of(friendship));
+        ))
+                .thenReturn(List.of(friendship));
+
+
 
         when(friendshipsRepository.findByReceiverAndStatus(
                 user,
                 FriendshipStatus.ACCEPTED
-        )).thenReturn(List.of());
+        ))
+                .thenReturn(List.of());
 
-        boolean result = userService.isFriendByUserId(
-                user,
-                UUID.randomUUID()
-        );
+
+
+        when(userResponseMapper.from(friend1))
+                .thenReturn(
+                        new UserResponseDto(
+                                friend1.getId(),
+                                friend1.getUsername(),
+                                friend1.getDisplayName(),
+                                friend1.getMode(),
+                                null
+                        )
+                );
+
+
+
+        boolean result =
+                userService.isFriendByUserId(
+                        user,
+                        UUID.randomUUID()
+                );
+
+
 
         assertFalse(result);
     }
