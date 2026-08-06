@@ -1,6 +1,6 @@
-package com.example.lockly.mapper;
+package com.example.lockly.mapper.user;
 
-import com.example.lockly.domain.dto.response.common.UserResponseDto;
+import com.example.lockly.domain.dto.response.common.UserSimpleResponseDto;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.service.MinIOService;
 import lombok.RequiredArgsConstructor;
@@ -8,16 +8,14 @@ import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
-public class UserResponseMapper {
+public class UserSimpleResponseMapper {
 
     public static MinIOService minIOService;
 
-    public static UserResponseDto from(User user){
-        return new UserResponseDto(
+    public static UserSimpleResponseDto from(User user){
+        return new UserSimpleResponseDto(
                 user.getId(),
-                user.getUsername(),
                 user.getDisplayName(),
-                user.getMode(),
                 minIOService.generatePresignedUrl(user.getObjectNameAvatar())
         );
     }

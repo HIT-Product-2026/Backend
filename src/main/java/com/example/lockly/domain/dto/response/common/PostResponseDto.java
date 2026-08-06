@@ -5,7 +5,7 @@ import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
 import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.example.lockly.domain.entity.main.enumEntity.TypePost;
-import com.example.lockly.mapper.UserResponseMapper;
+import com.example.lockly.mapper.user.UserResponseMapper;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,47 +24,6 @@ public record PostResponseDto (
     LocalDateTime createAt,
     TypePost type
 ){
-
-    public static PostResponseDto from(
-            Post post,
-            String imageUrl,
-            Double latitude,
-            Double longitude
-    ) {
-        boolean isPublic = post.getModeLocation() == PostModeLocation.PUBLIC;
-
-        return new PostResponseDto(
-                post.getId(),
-                UserResponseMapper.from(post.getUser()),
-                post.getCaption(),
-                isPublic ? latitude : null,
-                isPublic ? longitude : null,
-                post.getModeLocation(),
-                post.getNsfw(),
-                imageUrl,
-                post.getObjectName(),
-                post.getCreatedAt(),
-                post.getType()
-        );
-    }
-
-    public static PostResponseDto from(Post post, String urlImage) {
-        boolean isPublic = post.getModeLocation() == PostModeLocation.PUBLIC;
-
-        return new PostResponseDto(
-                post.getId(),
-                UserResponseMapper.from(post.getUser()),
-                post.getCaption(),
-                isPublic ? post.getLatitude() : null,
-                isPublic ? post.getLongitude() : null,
-                post.getModeLocation(),
-                post.getNsfw(),
-                urlImage,
-                post.getObjectName(),
-                post.getCreatedAt(),
-                post.getType()
-        );
-    }
 
     public static PostResponseDto from(DetectNsfwPostRequestDto dto, NsfwStatus nsfw, String urlImage){
         boolean isPublic = dto.modeLocation() == PostModeLocation.PUBLIC;

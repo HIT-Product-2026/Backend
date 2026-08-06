@@ -15,8 +15,7 @@ import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.exception.nonRetryException.UnauthorizedException;
 import com.example.lockly.exception.nonRetryException.VsException;
-import com.example.lockly.mapper.UserResponseMapper;
-import com.example.lockly.repository.main.InvalidatedTokenRepository;
+import com.example.lockly.mapper.user.UserResponseMapper;
 import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
@@ -54,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private final ProfileRepository profileRepository;
     private final UserDetailsService userDetailsService;
     private final MinIOService minIOService;
+    private final UserResponseMapper userResponseMapper;
 
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -142,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("[Register] Đăng ký thành công, email={}", request.email());
 
-        return UserResponseMapper.from(user);
+        return userResponseMapper.from(user);
     }
 
     @Override
@@ -312,7 +312,7 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .user(UserResponseMapper.from(user))
+                .user(userResponseMapper.from(user))
                 .avatarUrl(minIOService.generatePresignedUrl(user.getObjectNameAvatar()))
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();

@@ -11,6 +11,7 @@ import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.DuplicateResourceException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.friendship.FriendshipsResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
@@ -31,6 +32,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipsRepository friendshipsRepository;
     private final ConversationRepository conversationRepository;
     private final ConversationService conversationService;
+    private final FriendshipsResponseMapper friendshipsResponseMapper;
 
     @Override
     public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(User requester) {
@@ -40,7 +42,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         return friendshipList
                 .stream()
-                .map(FriendshipsResponseDto::from)
+                .map(friendshipsResponseMapper::from)
                 .toList();
     }
 
@@ -51,7 +53,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .findByReceiverAndStatus(receiver, FriendshipStatus.SENT);
 
         return friendshipList.stream()
-                .map(FriendshipsResponseDto::from)
+                .map(friendshipsResponseMapper::from)
                 .toList();
     }
 
@@ -81,7 +83,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendshipsRepository.save(friendship);
 
-        return FriendshipsResponseDto.from(friendship);
+        return friendshipsResponseMapper.from(friendship);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendshipsRepository.delete(friendship);
 
-        return FriendshipsResponseDto.from(friendship);
+        return friendshipsResponseMapper.from(friendship);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             conversationRepository.delete(conversation);
         }
 
-        return FriendshipsResponseDto.from(friendship);
+        return friendshipsResponseMapper.from(friendship);
     }
 
 
@@ -174,7 +176,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendshipsRepository.save(friendship);
 
-        return FriendshipsResponseDto.from(
+        return friendshipsResponseMapper.from(
                 friendshipsRepository.save(friendship)
         );
     }

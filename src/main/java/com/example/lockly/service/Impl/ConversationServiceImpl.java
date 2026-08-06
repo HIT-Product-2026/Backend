@@ -9,6 +9,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.DuplicateResourceException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.conversation.ConversationResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.AuthService;
@@ -28,6 +29,7 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final AuthService authService;
+    private final ConversationResponseMapper conversationResponseMapper;
 
 //    private final int pageSize = 10;
 
@@ -39,7 +41,7 @@ public class ConversationServiceImpl implements ConversationService {
         return conversationRepository
                 .findByUser(user)
                 .stream()
-                .map(ConversationResponseDto::from)
+                .map(conversationResponseMapper::from)
                 .toList();
     }
 
@@ -82,7 +84,7 @@ public class ConversationServiceImpl implements ConversationService {
                 .user2(user2)
                 .build();
 
-        return ConversationResponseDto.from(conversationRepository.save(conversation));
+        return conversationResponseMapper.from(conversationRepository.save(conversation));
     }
 
     @Override
@@ -91,7 +93,7 @@ public class ConversationServiceImpl implements ConversationService {
                 .findById(id)
                 .orElseThrow(() -> new BadRequestException("Conversation id", id));
 
-        return ConversationResponseDto.from(conversation);
+        return conversationResponseMapper.from(conversation);
     }
 
 

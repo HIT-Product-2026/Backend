@@ -20,6 +20,8 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.post.PostDetailResponseMapper;
+import com.example.lockly.mapper.post.PostResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.EmojiPostRepository;
 import com.example.lockly.repository.main.PostsRepository;
@@ -61,6 +63,8 @@ public class PostServiceImpl implements PostService {
     private final MinIOService minIOService;
     private final LocationService locationService;
     private final ConversationService conversationService;
+    private final PostResponseMapper postResponseMapper;
+    private final PostDetailResponseMapper postDetailResponseMapper;
 
 
     private final String prefix = "post";
@@ -136,14 +140,14 @@ public class PostServiceImpl implements PostService {
         log.debug("Tiến trình cập nhật thành công");
 
         if (mode == PostModeLocation.PRIVATE)
-            return PostResponseDto.from(
+            return postResponseMapper.from(
                     post,
                     minIOService.generatePresignedUrl(post.getObjectName()),
                     null,
                     null
             );
 
-        return PostResponseDto.from(post, urlImage);
+        return postResponseMapper.from(post, urlImage);
     }
 
     @Override
@@ -173,7 +177,7 @@ public class PostServiceImpl implements PostService {
 
         // Public mới trả tọa độ, không thì null
         if (post.getModeLocation() == PostModeLocation.PRIVATE){
-            return PostDetailResponseDto.from(
+            return postDetailResponseMapper.from(
                     post,
                     conversation,
                     urlImage,
@@ -182,7 +186,7 @@ public class PostServiceImpl implements PostService {
         }
 
         log.info("Nsfw của bài post được lấy ra là: " + post.getNsfw());
-        return PostDetailResponseDto.from(
+        return postDetailResponseMapper.from(
                 post,
                 conversation,
                 urlImage,
@@ -240,7 +244,7 @@ public class PostServiceImpl implements PostService {
                 ));
 
         return listPost.stream()
-                .map(post -> PostDetailResponseDto.from(
+                .map(post -> postDetailResponseMapper.from(
                         post,
                         conversationMap.get(post.getUser().getId()),
                         minIOService.generatePresignedUrl(post.getObjectName()),
@@ -327,7 +331,7 @@ public class PostServiceImpl implements PostService {
         });
 
         return listPost.stream()
-                .map(post -> PostDetailResponseDto.from(
+                .map(post -> postDetailResponseMapper.from(
                         post,
                         conversationMap.get(post.getUser().getId()),
                         minIOService.generatePresignedUrl(post.getObjectName()),
