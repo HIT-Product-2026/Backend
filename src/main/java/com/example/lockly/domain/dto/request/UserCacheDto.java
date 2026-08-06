@@ -15,7 +15,6 @@ public record UserCacheDto(
         String passwordHash,
         String objectNameAvatar,
         UserMode mode,
-        String fcmToken,
         LocalDateTime createdAt
 ) implements Serializable {
 
@@ -28,7 +27,6 @@ public record UserCacheDto(
                 user.getPasswordHash(),
                 user.getObjectNameAvatar(),
                 user.getMode(),
-                user.getFcmToken(),
                 user.getCreatedAt()
         );
     }
@@ -43,7 +41,6 @@ public record UserCacheDto(
         user.setPasswordHash(passwordHash);
         user.setObjectNameAvatar(objectNameAvatar);
         user.setMode(mode);
-        user.setFcmToken(fcmToken);
         user.setCreatedAt(createdAt);
 
         return user;
