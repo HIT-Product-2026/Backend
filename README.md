@@ -109,7 +109,7 @@ Lockly là một nền tảng mạng xã hội hiện đại, tập trung vào t
 ### Bước cơ bản
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/HIT-Product-2026/Backend.git
 cd lockly
 cp .env.example .env
 mvn clean package
@@ -132,7 +132,7 @@ Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng.
 
 ## 📫 Liên Hệ
 
-- Email: [pkhuong535@gmail.com](mailto:pkhuong535@gmail.com)
+- Email: [dinhkhanh19042006@gmail.com](mailto:dinhkhanh19042006@gmail.com)
 
 ---
 
