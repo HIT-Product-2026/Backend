@@ -1,6 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.main.Conversation;
+import com.example.lockly.mapper.UserResponseMapper;
 
 import java.util.UUID;
 
@@ -16,8 +17,8 @@ public record ConversationSimpleResponseDto(
 
         return new ConversationSimpleResponseDto(
                 conversation.getId(),
-                UserResponseDto.from(conversation.getUser1()),
-                UserResponseDto.from(conversation.getUser2())
+                UserResponseMapper.from(conversation.getUser1()),
+                UserResponseMapper.from(conversation.getUser2())
         );
     }
 }

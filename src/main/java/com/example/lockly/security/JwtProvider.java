@@ -3,6 +3,7 @@ package com.example.lockly.security;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.TokenType;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,6 +31,7 @@ public class JwtProvider {
 
     InvalidatedTokenRepository invalidatedTokenRepository;
     RedisService redisService;
+    MinIOService minIOService;
 
     @NonFinal
     @Value("${jwt.secret}")
@@ -46,6 +48,7 @@ public class JwtProvider {
                 .claim("email", user.getEmail())
                 .claim("mode", user.getMode() != null ? user.getMode().name() : null)
                 .claim("type", type)
+                .claim("avatarUrl", minIOService.generatePresignedUrl(user.getObjectNameAvatar()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

@@ -2,6 +2,7 @@ package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.main.enumEntity.Emoji;
 import com.example.lockly.domain.entity.main.EmojiPost;
+import com.example.lockly.mapper.UserSimpleResponseMapper;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,7 +18,7 @@ public record EmojiPostResponseDto(
         return new EmojiPostResponseDto(
                 emojiPost.getId(),
                 emojiPost.getPost().getId(),
-                UserSimpleResponseDto.from(emojiPost.getSender()),
+                UserSimpleResponseMapper.from(emojiPost.getSender()),
                 emojiPost.getEmoji(),
                 emojiPost.getCreatedAt()
         );
