@@ -140,19 +140,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> findFcmTokenOfFriendsByUserId(User user){
 
-        List<UserResponseDto> friends = findFriendsByUser(user);
+        // Lấy tất cả lời mời đã chấp thuận với user là người gửi
+        List<User> fromRequester = friendshipsRepository
+                .findByRequesterAndStatus(user, FriendshipStatus.ACCEPTED)
+                .stream()
+                .map(Friendship::getReceiver)
+                .toList();
+
+        // Lấy tất cả lời mời đã chấp thuận với user là người nhận
+        List<User> fromReceiver = friendshipsRepository
+                .findByReceiverAndStatus(user, FriendshipStatus.ACCEPTED)
+                .stream()
+                .map(Friendship::getRequester)
+                .toList();
+
+
+        List<User> friends = Stream.concat(fromRequester.stream(), fromReceiver.stream()).toList();
 
         friends.forEach(friend ->
                 log.info(
-                        "Friend: id={}, name={}, token={}",
-                        friend.id(),
-                        friend.displayName(),
-                        friend.fcmToken()
+                        "Friend: id={}, name={}",
+                        friend.getId(),
+                        friend.getDisplayName()
                 )
         );
 
         return friends.stream()
-                .map(UserResponseDto::fcmToken)
+                .map(User::getFcmToken)
                 .toList();
     }
 
