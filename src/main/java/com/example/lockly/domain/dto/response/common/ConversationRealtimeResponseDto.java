@@ -1,6 +1,7 @@
 package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.main.Conversation;
+import com.example.lockly.mapper.UserSimpleResponseMapper;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,8 +16,8 @@ public record ConversationRealtimeResponseDto(
     public static ConversationRealtimeResponseDto from(Conversation conversation){
         return new ConversationRealtimeResponseDto(
                 conversation.getId(),
-                UserSimpleResponseDto.from(conversation.getUser1()),
-                UserSimpleResponseDto.from(conversation.getUser2()),
+                UserSimpleResponseMapper.from(conversation.getUser1()),
+                UserSimpleResponseMapper.from(conversation.getUser2()),
                 conversation.getLastMessageContent(),
                 conversation.getLastMessageTime()
         );

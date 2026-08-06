@@ -1,6 +1,5 @@
 package com.example.lockly.domain.dto.response.common;
 
-import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import lombok.Builder;
 
@@ -11,15 +10,6 @@ public record UserResponseDto(
     UUID id,
     String username,
     String displayName,
-    UserMode mode
-){
-
-    public static UserResponseDto from(User user){
-        return new UserResponseDto(
-                user.getId(),
-                user.getUsername(),
-                user.getDisplayName(),
-                user.getMode()
-        );
-    }
-}
+    UserMode mode,
+    String avatarUrl
+){ }

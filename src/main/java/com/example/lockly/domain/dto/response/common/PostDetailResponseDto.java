@@ -5,6 +5,7 @@ import com.example.lockly.domain.entity.main.Post;
 import com.example.lockly.domain.entity.main.enumEntity.NsfwStatus;
 import com.example.lockly.domain.entity.main.enumEntity.PostModeLocation;
 import com.example.lockly.domain.entity.main.enumEntity.TypePost;
+import com.example.lockly.mapper.UserResponseMapper;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,7 +34,7 @@ public record PostDetailResponseDto(
 
         return new PostDetailResponseDto(
                 post.getId(),
-                UserResponseDto.from(post.getUser()),
+                UserResponseMapper.from(post.getUser()),
                 post.getCaption(),
                 isPublic ? post.getLatitude() : null,
                 isPublic ? post.getLongitude() : null,

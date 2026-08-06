@@ -2,6 +2,7 @@ package com.example.lockly.domain.dto.response.common;
 
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.main.Friendship;
+import com.example.lockly.mapper.UserResponseMapper;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,8 +18,8 @@ public record FriendshipsResponseDto(
     public static <T> FriendshipsResponseDto from(Friendship friendship){
         return new FriendshipsResponseDto(
                 friendship.getId(),
-                UserResponseDto.from(friendship.getRequester()),
-                UserResponseDto.from(friendship.getReceiver()),
+                UserResponseMapper.from(friendship.getRequester()),
+                UserResponseMapper.from(friendship.getReceiver()),
                 friendship.getStatus(),
                 friendship.getCreatedAt(),
                 friendship.getUpdatedAt()

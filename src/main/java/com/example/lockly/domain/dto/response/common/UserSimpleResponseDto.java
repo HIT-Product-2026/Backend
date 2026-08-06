@@ -6,12 +6,7 @@ import java.util.UUID;
 
 public record UserSimpleResponseDto (
         UUID userId,
-        String displayName
+        String displayName,
+        String avatarUrl
 ){
-    public static UserSimpleResponseDto from(User user){
-        return new UserSimpleResponseDto(
-                user.getId(),
-                user.getDisplayName()
-        );
-    }
 }

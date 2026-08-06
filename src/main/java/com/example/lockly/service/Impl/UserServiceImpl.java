@@ -11,6 +11,8 @@ import com.example.lockly.domain.entity.main.Friendship;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.UserResponseMapper;
+import com.example.lockly.mapper.UserSimpleResponseMapper;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.*;
@@ -50,7 +52,7 @@ public class UserServiceImpl implements UserService {
                 .findByRequesterAndStatus(user, FriendshipStatus.ACCEPTED)
                 .stream()
                 .map(Friendship::getReceiver)
-                .map(UserResponseDto::from)
+                .map(UserResponseMapper::from)
                 .toList();
 
         // Lấy tất cả lời mời đã chấp thuận với user là người nhận
@@ -58,7 +60,7 @@ public class UserServiceImpl implements UserService {
                 .findByReceiverAndStatus(user, FriendshipStatus.ACCEPTED)
                 .stream()
                 .map(Friendship::getRequester)
-                .map(UserResponseDto::from)
+                .map(UserResponseMapper::from)
                 .toList();
 
         return Stream.concat(fromRequester.stream(), fromReceiver.stream()).toList();
@@ -239,7 +241,7 @@ public class UserServiceImpl implements UserService {
                 )
                 .getContent()
                 .stream()
-                .map(UserSimpleResponseDto::from)
+                .map(UserSimpleResponseMapper::from)
                 // Lọc: chỉ giữ lại những user có ID KHÁC với ID của user hiện tại
                 .filter(u -> !u.userId().equals(user.getId()))
                 .toList();

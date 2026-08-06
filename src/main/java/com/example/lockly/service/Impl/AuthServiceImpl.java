@@ -15,6 +15,7 @@ import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.exception.nonRetryException.UnauthorizedException;
 import com.example.lockly.exception.nonRetryException.VsException;
+import com.example.lockly.mapper.UserResponseMapper;
 import com.example.lockly.repository.main.InvalidatedTokenRepository;
 import com.example.lockly.repository.main.ProfileRepository;
 import com.example.lockly.repository.main.UserRepository;
@@ -141,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("[Register] Đăng ký thành công, email={}", request.email());
 
-        return UserResponseDto.from(user);
+        return UserResponseMapper.from(user);
     }
 
     @Override
@@ -311,7 +312,7 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .user(UserResponseDto.from(user))
+                .user(UserResponseMapper.from(user))
                 .avatarUrl(minIOService.generatePresignedUrl(user.getObjectNameAvatar()))
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
