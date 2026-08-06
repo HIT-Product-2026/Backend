@@ -11,8 +11,8 @@ import com.example.lockly.domain.entity.main.Friendship;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
-import com.example.lockly.mapper.UserResponseMapper;
-import com.example.lockly.mapper.UserSimpleResponseMapper;
+import com.example.lockly.mapper.user.UserResponseMapper;
+import com.example.lockly.mapper.user.UserSimpleResponseMapper;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.*;
@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final MinioClient minioClient;
     private final MinioProperties props;
     private final RedisService redisService;
+    private final UserResponseMapper userResponseMapper;
 
     private final String prefix = "users/avatar";
 
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
                 .findByRequesterAndStatus(user, FriendshipStatus.ACCEPTED)
                 .stream()
                 .map(Friendship::getReceiver)
-                .map(UserResponseMapper::from)
+                .map(userResponseMapper::from)
                 .toList();
 
         // Lấy tất cả lời mời đã chấp thuận với user là người nhận
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
                 .findByReceiverAndStatus(user, FriendshipStatus.ACCEPTED)
                 .stream()
                 .map(Friendship::getRequester)
-                .map(UserResponseMapper::from)
+                .map(userResponseMapper::from)
                 .toList();
 
         return Stream.concat(fromRequester.stream(), fromReceiver.stream()).toList();

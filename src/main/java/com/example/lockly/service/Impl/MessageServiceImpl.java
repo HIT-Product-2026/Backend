@@ -14,6 +14,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.message.MessageResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.MessageRepository;
 import com.example.lockly.service.AuthService;
@@ -42,6 +43,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final AuthService authService;
     private final MinIOService minIOService;
+    private final MessageResponseMapper messageResponseMapper;
 
     @Autowired
     private EntityManager entityManager;
@@ -92,7 +94,7 @@ public class MessageServiceImpl implements MessageService {
 
         conversationRepository.save(conversation);
 
-        return MessageResponseDto.from(message, null);
+        return messageResponseMapper.from(message, null);
     }
 
     @Override
@@ -134,7 +136,7 @@ public class MessageServiceImpl implements MessageService {
         conversationRepository.save(conversation);
         entityManager.flush();
 
-        return MessageResponseDto.from(
+        return messageResponseMapper.from(
                 saved,
                 request.imageUrl()
         );
@@ -212,12 +214,12 @@ public class MessageServiceImpl implements MessageService {
         MessageResponseDto dto;
 
         if (message.getType() == MessageType.IMAGE){
-            dto = MessageResponseDto.from(
+            dto = messageResponseMapper.from(
                     message,
                     minIOService.generatePresignedUrl(message.getObjectName())
             );
         } else {
-            dto = MessageResponseDto.from(message, null);
+            dto = messageResponseMapper.from(message, null);
         }
 
         return dto;
@@ -238,7 +240,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessagePageResponse buildMessageResponseDtos(List<Message> messages, String nextCursor){
         List<MessageResponseDto> messageDtos = messages.stream()
-                .map(message -> MessageResponseDto.from(
+                .map(message -> messageResponseMapper.from(
                         message,
                         minIOService.generatePresignedUrl(message.getObjectName()))
                 ).toList();
