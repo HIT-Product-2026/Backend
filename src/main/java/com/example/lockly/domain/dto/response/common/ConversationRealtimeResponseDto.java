@@ -13,13 +13,4 @@ public record ConversationRealtimeResponseDto(
         String lastMessageContent,
         LocalDateTime lastMessageTime
 ) {
-    public static ConversationRealtimeResponseDto from(Conversation conversation){
-        return new ConversationRealtimeResponseDto(
-                conversation.getId(),
-                UserSimpleResponseMapper.from(conversation.getUser1()),
-                UserSimpleResponseMapper.from(conversation.getUser2()),
-                conversation.getLastMessageContent(),
-                conversation.getLastMessageTime()
-        );
-    }
 }

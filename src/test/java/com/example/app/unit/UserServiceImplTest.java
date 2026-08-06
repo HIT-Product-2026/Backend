@@ -8,6 +8,7 @@ import com.example.lockly.domain.entity.main.Friendship;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.FriendshipStatus;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
+import com.example.lockly.mapper.user.UserSimpleResponseMapper;
 import com.example.lockly.repository.main.FriendshipsRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.MinIOService;
@@ -52,6 +53,9 @@ class UserServiceImplTest {
 
     @Mock
     private UserResponseMapper userResponseMapper;
+
+    @Mock
+    private UserSimpleResponseMapper userSimpleResponseMapper;
 
     @Mock
     private FriendshipsRepository friendshipsRepository;
@@ -431,6 +435,15 @@ class UserServiceImplTest {
                 any(Pageable.class)
         )).thenReturn(page);
 
+        UserSimpleResponseDto strangerDto = new UserSimpleResponseDto(
+                stranger.getId(),
+                stranger.getDisplayName(),
+                null
+        );
+
+        when(userSimpleResponseMapper.from(stranger))
+                .thenReturn(strangerDto);
+
         List<UserSimpleResponseDto> result =
                 userService.searchFriend(user, "str");
 
@@ -443,5 +456,7 @@ class UserServiceImplTest {
                 eq("str"),
                 any(Pageable.class)
         );
+
+        verify(userSimpleResponseMapper).from(stranger);
     }
 }
