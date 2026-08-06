@@ -110,7 +110,7 @@ public class RedisServiceImpl implements RedisService {
 
         redisTemplate.opsForValue().set(
                 FORGOT_PASSWORD_KEY + email,
-                forgotPassword.otp(),
+                forgotPassword,
                 FORGOT_PASSWORD_TTL
         );
     }
