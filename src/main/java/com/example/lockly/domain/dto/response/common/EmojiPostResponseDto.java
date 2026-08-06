@@ -14,13 +14,4 @@ public record EmojiPostResponseDto(
         Emoji emoji,
         LocalDateTime createdAt
 ) {
-    public static EmojiPostResponseDto from(EmojiPost emojiPost){
-        return new EmojiPostResponseDto(
-                emojiPost.getId(),
-                emojiPost.getPost().getId(),
-                UserSimpleResponseMapper.from(emojiPost.getSender()),
-                emojiPost.getEmoji(),
-                emojiPost.getCreatedAt()
-        );
-    }
 }

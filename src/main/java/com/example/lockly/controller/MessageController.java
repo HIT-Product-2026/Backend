@@ -9,6 +9,7 @@ import com.example.lockly.domain.dto.response.common.MessageResponseDto;
 import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.conversation.ConversationRealtimeResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.service.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,7 @@ public class MessageController {
     private final ConversationService conversationService;
     private final ConversationRepository conversationRepository;
     private final NotificationService notificationService;
+    private final ConversationRealtimeResponseMapper conversationRealtimeResponseMapper;
 
 //    @PostMapping("/text")
 //    @Operation(summary = "Gửi text message", description = "Gửi tin nhắn văn bản")
@@ -93,7 +95,7 @@ public class MessageController {
                 ));
 
         ConversationRealtimeResponseDto dto =
-                ConversationRealtimeResponseDto.from(conversation);
+                conversationRealtimeResponseMapper.from(conversation);
 
         // Gửi cập nhật danh sách conversation cho người nhận
         webSocketService.pubMessageToConversations(

@@ -20,6 +20,7 @@ import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.emoji.EmojiPostResponseMapper;
 import com.example.lockly.mapper.post.PostDetailResponseMapper;
 import com.example.lockly.mapper.post.PostResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
@@ -65,6 +66,7 @@ public class PostServiceImpl implements PostService {
     private final ConversationService conversationService;
     private final PostResponseMapper postResponseMapper;
     private final PostDetailResponseMapper postDetailResponseMapper;
+    private final EmojiPostResponseMapper emojiPostResponseMapper;
 
 
     private final String prefix = "post";
@@ -432,7 +434,7 @@ public class PostServiceImpl implements PostService {
         return emojiPostRepository
                 .findByPostIdsWithSender(postIds)
                 .stream()
-                .map(EmojiPostResponseDto::from)
+                .map(emojiPostResponseMapper::from)
                 .toList();
     }
 

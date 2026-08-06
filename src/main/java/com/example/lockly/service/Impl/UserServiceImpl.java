@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final MinioProperties props;
     private final RedisService redisService;
     private final UserResponseMapper userResponseMapper;
+    private final UserSimpleResponseMapper userSimpleResponseMapper;
 
     private final String prefix = "users/avatar";
 
@@ -242,7 +243,7 @@ public class UserServiceImpl implements UserService {
                 )
                 .getContent()
                 .stream()
-                .map(UserSimpleResponseMapper::from)
+                .map(userSimpleResponseMapper::from)
                 // Lọc: chỉ giữ lại những user có ID KHÁC với ID của user hiện tại
                 .filter(u -> !u.userId().equals(user.getId()))
                 .toList();

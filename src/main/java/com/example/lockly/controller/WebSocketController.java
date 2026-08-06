@@ -11,6 +11,7 @@ import com.example.lockly.domain.entity.main.Conversation;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.UserMode;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.conversation.ConversationRealtimeResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.security.CustomUserDetails;
@@ -42,6 +43,7 @@ public class WebSocketController {
     private final ConversationRepository conversationRepository;
     private final NotificationService notificationService;
     private final AuthService authService;
+    private final ConversationRealtimeResponseMapper conversationRealtimeResponseMapper;
 
     @MessageMapping("/chat.sendText")
     public void sendTextMessage(
@@ -78,7 +80,7 @@ public class WebSocketController {
                 ));
 
         ConversationRealtimeResponseDto dto =
-                ConversationRealtimeResponseDto.from(conversation);
+                conversationRealtimeResponseMapper.from(conversation);
 
         // Gửi response sang màn của người nhận tin nhắn
         webSocketService.pubMessageToConversations(
@@ -134,7 +136,7 @@ public class WebSocketController {
                 ));
 
         ConversationRealtimeResponseDto dto =
-                ConversationRealtimeResponseDto.from(conversation);
+                conversationRealtimeResponseMapper.from(conversation);
 
         // Gửi cập nhật danh sách conversation cho người nhận
         webSocketService.pubMessageToConversations(
