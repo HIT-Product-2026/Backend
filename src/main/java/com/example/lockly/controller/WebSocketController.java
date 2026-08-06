@@ -1,8 +1,6 @@
 package com.example.lockly.controller;
 
 import com.example.lockly.domain.dto.request.ShareLocationRequest;
-import com.example.lockly.domain.dto.request.auth.LogoutRequestDto;
-import com.example.lockly.domain.dto.request.auth.ResetPasswordRequestDto;
 import com.example.lockly.domain.dto.request.create.SendImageMessageRequestDto;
 import com.example.lockly.domain.dto.request.create.SendTextMessageRequestDto;
 import com.example.lockly.domain.dto.request.UserCacheDto;
@@ -26,8 +24,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.UUID;
 
 @Validated
 @Controller
@@ -197,10 +193,6 @@ public class WebSocketController {
         // Lưu vào redis
         redisService.saveUserLocation(userDto.id(), latitude, longitude);
         log.debug("Lưu thành công location");
-
-
-        if (userDto.mode() == UserMode.PRIVATE)
-            return;
 
         LocationUserResponseDto response = redisService.getUserLocation(user.getId());
 

@@ -7,7 +7,6 @@ import com.example.lockly.domain.dto.request.UserCacheDto;
 import com.example.lockly.domain.dto.request.auth.*;
 import com.example.lockly.domain.dto.response.LoginResponseDto;
 import com.example.lockly.domain.dto.response.common.UserResponseDto;
-import com.example.lockly.domain.entity.main.InvalidatedToken;
 import com.example.lockly.domain.entity.main.Profile;
 import com.example.lockly.domain.entity.main.User;
 import com.example.lockly.domain.entity.main.enumEntity.TokenType;
@@ -23,11 +22,11 @@ import com.example.lockly.security.CustomUserDetails;
 import com.example.lockly.security.JwtProvider;
 import com.example.lockly.service.AuthService;
 import com.example.lockly.service.EmailService;
+import com.example.lockly.service.MinIOService;
 import com.example.lockly.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,9 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -51,12 +47,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final EmailService emailService;
     private final PasswordUtil passwordUtil;
     private final RedisService redisService;
     private final ProfileRepository profileRepository;
     private final UserDetailsService userDetailsService;
+    private final MinIOService minIOService;
 
     static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -316,6 +312,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .user(UserResponseDto.from(user))
+                .avatarUrl(minIOService.generatePresignedUrl(user.getObjectNameAvatar()))
                 .tokenType(CommonConstant.BEARER_TOKEN)
                 .build();
     }

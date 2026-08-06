@@ -18,6 +18,7 @@ public class LoginResponseDto{
         String accessToken;
         String refreshToken;
         UserResponseDto user;
+        String avatarUrl;
 
         @Builder.Default
         String tokenType = CommonConstant.BEARER_TOKEN;

@@ -127,7 +127,8 @@ public class FcmServiceImpl implements FcmService {
                             .putData("province_name", provinceName)
                             .putData("ward_name", wardName)
                             .putData("caption", caption)
-                            .putData("type_post", data.typePost().toString())
+                            .putData("type_post", data.typePost().name())
+                            .putData("nsfw", data.nsfw().name())
                             .build();
 
             BatchResponse batchResponse =
