@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserSimpleResponseMapper {
 
-    public static MinIOService minIOService;
+    public final MinIOService minIOService;
 
-    public static UserSimpleResponseDto from(User user){
+    public UserSimpleResponseDto from(User user){
         return new UserSimpleResponseDto(
                 user.getId(),
                 user.getDisplayName(),
