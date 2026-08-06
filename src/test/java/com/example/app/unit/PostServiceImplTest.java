@@ -16,6 +16,7 @@ import com.example.lockly.domain.entity.main.enumEntity.*;
 import com.example.lockly.exception.nonRetryException.BadRequestException;
 import com.example.lockly.exception.nonRetryException.ForbiddenException;
 import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
+import com.example.lockly.mapper.emoji.EmojiPostResponseMapper;
 import com.example.lockly.mapper.post.PostDetailResponseMapper;
 import com.example.lockly.mapper.post.PostResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
@@ -94,6 +95,9 @@ public class PostServiceImplTest {
 
     @Mock
     private PostResponseMapper postResponseMapper;
+
+    @Mock
+    private EmojiPostResponseMapper emojiPostResponseMapper;
 
     @Mock
     private PostDetailResponseMapper postDetailResponseMapper;
@@ -1390,21 +1394,30 @@ public class PostServiceImplTest {
                 List.of(post.getId())
         )).thenReturn(List.of(emojiPost));
 
+        EmojiPostResponseDto dto = new EmojiPostResponseDto(
+                emojiPost.getId(),
+                post.getId(),
+                null, // hoặc mock UserSimpleResponseDto nếu cần
+                Emoji.LIKE,
+                emojiPost.getCreatedAt()
+        );
+
+        when(emojiPostResponseMapper.from(emojiPost))
+                .thenReturn(dto);
+
         List<EmojiPostResponseDto> result =
                 postService.getEmojiPosts(
                         List.of(post.getId())
                 );
 
         assertEquals(1, result.size());
+        assertEquals(Emoji.LIKE, result.get(0).emoji());
+        assertEquals(post.getId(), result.get(0).postId());
 
-        assertEquals(
-                Emoji.LIKE,
-                result.get(0).emoji()
-        );
+        verify(emojiPostRepository)
+                .findByPostIdsWithSender(List.of(post.getId()));
 
-        assertEquals(
-                post.getId(),
-                result.get(0).postId()
-        );
+        verify(emojiPostResponseMapper)
+                .from(emojiPost);
     }
 }
