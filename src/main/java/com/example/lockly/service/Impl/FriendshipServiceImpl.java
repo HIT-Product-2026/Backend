@@ -14,6 +14,7 @@ import com.example.lockly.exception.nonRetryException.ResourceNotFoundException;
 import com.example.lockly.mapper.friendship.FriendshipsResponseMapper;
 import com.example.lockly.repository.main.ConversationRepository;
 import com.example.lockly.repository.main.FriendshipsRepository;
+import com.example.lockly.repository.main.UserBlockRepository;
 import com.example.lockly.repository.main.UserRepository;
 import com.example.lockly.service.ConversationService;
 import com.example.lockly.service.FriendshipService;
@@ -33,6 +34,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final ConversationRepository conversationRepository;
     private final ConversationService conversationService;
     private final FriendshipsResponseMapper friendshipsResponseMapper;
+    private final UserBlockRepository userBlockRepository;
 
     @Override
     public List<FriendshipsResponseDto> findFriendRequestRequesterByUserId(User requester) {
@@ -162,6 +164,9 @@ public class FriendshipServiceImpl implements FriendshipService {
         if (requester.getId().equals(receiver.getId()))
             throw new BadRequestException("Người gửi và người nhận không được trùng nhau");
 
+        if (userBlockRepository.existsBlockBetweenUsers(requester, receiver)) {
+            throw new ForbiddenException("Không thể gửi lời mời kết bạn");
+        }
         // Không được kết bạn với người đã là bạn
         if (friendshipsRepository.existsByRequesterAndReceiver(requester, receiver)
                 || friendshipsRepository.existsByRequesterAndReceiver(receiver, requester)) {
