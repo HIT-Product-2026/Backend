@@ -225,6 +225,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void deleteCurrentUser(User userCache) {
+            User user = userRepository.findById(userCache.getId())
+                    .orElseThrow(()->new ResourceNotFoundException("User", "id", userCache.getId()));
+
+            if(user.getDeletedAt() !=null){
+                throw new BadRequestException("User already deleted");
+            }
+
+            user.setDeletedAt(LocalDateTime.now());
+            user.setFcmToken(null);
+            userRepository.save(user);
+            redisService.deleteAccessToken(user.getId());
+            redisService.deleteRefreshToken(user.getId());
+    }
+
+    @Override
     public String getAvatar(User user){
 
         if (user.getObjectNameAvatar() == null)
@@ -248,4 +265,6 @@ public class UserServiceImpl implements UserService {
                 .filter(u -> !u.userId().equals(user.getId()))
                 .toList();
     }
+
+    
 }

@@ -148,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findByEmailAndDeletedAtIsNull(request.email())
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.Auth.ERR_INVALID_CREDENTIALS));
 
         if (!passwordUtil.verify(request.password(), user.getPasswordHash())) {
@@ -392,9 +392,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Lấy User từ database
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UnauthorizedException("Không tìm thấy người dùng."));
+        User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
+            .orElseThrow(() ->
+                    new UnauthorizedException("Không tìm thấy người dùng."));
 
         // Lấy jti của Refresh Token gửi lên
         String refreshJti = jwtProvider.extractTokenId(refreshToken);

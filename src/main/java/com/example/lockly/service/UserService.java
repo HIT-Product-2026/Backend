@@ -23,4 +23,5 @@ public interface UserService{
     void updateAvatarByUserId(User user, MultipartFile file) throws Exception;
     void updateModeByUserId(User user, UserMode mode);
     void updateFcmTokenByUserId(User user, String fcmToken);
+    void deleteCurrentUser(User user);
 }

@@ -21,7 +21,6 @@ public class User {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-
     @Column(length = 100, nullable = false, unique = true)
     private String username;
 
@@ -39,6 +38,14 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserMode mode;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public boolean isDeleted(){
+        return deletedAt !=null;
+    }
+
 
     // Địa chỉ của thiết bị, giúp fe biết cần gửi thông báo đến đâu
     @Column(name = "fcm_token")

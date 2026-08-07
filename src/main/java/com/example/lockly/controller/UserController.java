@@ -207,4 +207,16 @@ public class UserController {
                 )
         );
     }
+
+    @DeleteMapping("/me")
+    @Operation(summary = "Xóa tài khoản hiện tại")
+    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(){
+        User user = authService.getUserFromCache();
+        userService.deleteCurrentUser(user);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Xóa tài khoản thành công"));
+
+    }
 }

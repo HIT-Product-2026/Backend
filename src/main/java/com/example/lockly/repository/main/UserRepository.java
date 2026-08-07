@@ -17,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername (String username);
     Optional<User> findUserDetailByUsername(String username);
     Optional<User> findByEmail(String email);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
+    Optional<User> findByUsernameAndDeletedAtIsNull(String username);
+    Optional<User> findByIdAndDeletedAtIsNull(UUID id);
 
     @Query("""
         SELECT u
@@ -27,6 +30,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
         AND u.id <> :currentUserId
+        AND u.deletedAt IS NULL
+        AND NOT EXISTS (
+            SELECT 1
+            FROM UserBlock b
+            WHERE
+                (b.blocker.id = :currentUserId AND b.blocked.id = u.id)
+                OR
+                (b.blocker.id = u.id AND b.blocked.id = :currentUserId)
+            )
         AND NOT EXISTS (
             SELECT 1
             FROM Friendship f
