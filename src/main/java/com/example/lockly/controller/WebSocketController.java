@@ -42,7 +42,6 @@ public class WebSocketController {
     private final ConversationService conversationService;
     private final ConversationRepository conversationRepository;
     private final NotificationService notificationService;
-    private final AuthService authService;
     private final ConversationRealtimeResponseMapper conversationRealtimeResponseMapper;
 
     @MessageMapping("/chat.sendText")

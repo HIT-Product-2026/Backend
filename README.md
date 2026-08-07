@@ -6,7 +6,6 @@
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
 [![Python](https://img.shields.io/badge/Python-AI-3776AB.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Container-2496ED.svg)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](LICENSE)
 
 **Nền tảng mạng xã hội / chat thời gian thực tích hợp AI để hỗ trợ đăng bài, kết bạn, nhắn tin và kiểm duyệt nội dung**
 
@@ -155,6 +154,3 @@ Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng.
 
 ---
 
-## 📄 License
-
-Dự án này được cấp phép theo giấy phép GPL v3.
