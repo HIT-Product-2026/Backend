@@ -173,14 +173,14 @@ public class WebSocketController {
         log.debug("Request hợp lệ");
 
         // Kiểm tra tài khoản có bị đăng nhập từ nơi khác không
-        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
-        if (isUpdateFromUknownLocation) {
-            // logout
-            authService.forceLogout(user.getId());
-
-            // Tự động thay password, buộc người dùng phải đổi lại password
-            authService.forceResetPassword(user);
-        }
+//        boolean isUpdateFromUknownLocation = locationService.isUnknownLocation(longitude, latitude, user);
+//        if (isUpdateFromUknownLocation) {
+//            // logout
+//            authService.forceLogout(user.getId());
+//
+//            // Tự động thay password, buộc người dùng phải đổi lại password
+//            authService.forceResetPassword(user);
+//        }
 
         log.debug("longitude: " + longitude);
         log.debug("latitude" + latitude);
