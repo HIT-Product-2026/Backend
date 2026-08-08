@@ -43,3 +43,4 @@ vn_geo.zip
 
 mysql-init/
 postgres-init/
+src/main/resources/lockly-fcm-firebase.json
