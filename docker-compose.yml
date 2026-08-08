@@ -247,6 +247,10 @@ services:
     restart: always
     expose:
       - "8080"
+
+    volumes:
+      - ./secrets/lockly-fcm-firebase.json:/app/secrets/lockly-fcm-firebase.json:ro
+
     environment:
       TZ: Asia/Ho_Chi_Minh
       JAVA_TOOL_OPTIONS: "-Duser.timezone=Asia/Ho_Chi_Minh"

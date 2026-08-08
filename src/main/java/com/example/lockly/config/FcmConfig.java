@@ -14,30 +14,28 @@ public class FcmConfig {
 
     @PostConstruct
     public void init() {
-        try {
-//            FileInputStream serviceAccount =
-//                    new FileInputStream("src/main/resources/lockly-fcm-firebase-adminsdk-fbsvc-59f4582a60.json");
-            InputStream serviceAccount =
-                    Thread.currentThread()
-                            .getContextClassLoader()
-                            .getResourceAsStream("lockly-fcm-firebase.json");
+        String firebasePath = "/app/secrets/lockly-fcm-firebase.json";
 
-            if (serviceAccount == null) {
-                throw new RuntimeException("Firebase JSON not found in classpath");
-            }
+        try (InputStream serviceAccount =
+                     new FileInputStream(firebasePath)) {
 
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setCredentials(
+                            GoogleCredentials.fromStream(serviceAccount)
+                    )
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
 
-            System.out.println("Firebase initialized");
+            System.out.println("Firebase initialized successfully");
 
         } catch (Exception e) {
-            throw new RuntimeException("Firebase init failed", e);
+            throw new RuntimeException(
+                    "Firebase init failed. Cannot read: " + firebasePath,
+                    e
+            );
         }
     }
 }
