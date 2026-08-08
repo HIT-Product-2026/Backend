@@ -33,9 +33,9 @@ public class EmailServiceImpl implements EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(fromEmail, "Lockly App");
+            helper.setFrom(fromEmail, "PanDo App");
             helper.setTo(toEmail);
-            helper.setSubject("[Lockly] Mã xác nhận " + purpose);
+            helper.setSubject("[PanDo] Mã xác nhận " + purpose);
             helper.setText(buildEmailHtml(otpCode, purpose), true); // true = HTML
 
             mailSender.send(message);
@@ -56,7 +56,7 @@ public class EmailServiceImpl implements EmailService {
     private String buildEmailHtml(String otpCode, String purpose) {
         return """
                 <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px; border: 1px solid #e0e0e0; border-radius: 12px;">
-                    <h2 style="color: #333; text-align: center;">🔐 Lockly</h2>
+                    <h2 style="color: #333; text-align: center;">🔐 PanDo</h2>
                     <p style="color: #555; font-size: 15px;">Xin chào,</p>
                     <p style="color: #555; font-size: 15px;">
                         Đây là mã xác nhận <strong>%s</strong> của bạn:
