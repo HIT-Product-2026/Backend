@@ -1,15 +1,17 @@
-# Lockly
+# 📱 Pando
 
 <div align="center">
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+<img src="app/src/main/ic_launcher-playstore.png" alt="Pando logo" width="120" />
+
+[![Social App](https://img.shields.io/badge/Product-Social%20App-blue.svg)](https://example.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Python](https://img.shields.io/badge/Python-AI-3776AB.svg)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Docker-Container-2496ED.svg)](https://www.docker.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com/)
 
-**Nền tảng mạng xã hội / chat thời gian thực tích hợp AI để hỗ trợ đăng bài, kết bạn, nhắn tin và kiểm duyệt nội dung**
+**Pando là nền tảng kết nối bạn bè bằng khoảnh khắc đời thường, tin nhắn realtime và AI hỗ trợ kiểm duyệt nội dung.**
 
-[Giới Thiệu](#-giới-thiệu) • [Tính Năng](#-tính-năng) • [Tổng Quan Hệ Thống](#️-tổng-quan-hệ-thống) • [Cài Đặt](#-cài-đặt) • [Đóng Góp](#-đóng-góp)
+[Giới Thiệu](#-giới-thiệu) • [Tính Năng Chính](#-tính-năng-chính) • [Kiến Trúc](#-kiến-trúc) • [Công Nghệ](#-công-nghệ-sử-dụng) • [Cài Đặt Local](#-cài-đặt-local)
 
 </div>
 
@@ -17,140 +19,168 @@
 
 ## 📖 Giới Thiệu
 
-Lockly là một nền tảng mạng xã hội hiện đại, tập trung vào trải nghiệm tương tác thời gian thực giữa người dùng. Hệ thống cung cấp các chức năng đăng ký, đăng nhập, kết bạn, nhắn tin, đăng bài, chia sẻ ảnh và vị trí, đồng thời tích hợp trí tuệ nhân tạo để phát hiện ảnh nhạy cảm và nhận diện khuôn mặt.
+Pando hướng tới việc tạo ra một không gian chia sẻ đơn giản và riêng tư cho bạn bè, gia đình và các mối quan hệ thân thiết. Ứng dụng giúp người dùng duy trì kết nối hàng ngày bằng cách chia sẻ khoảnh khắc, vị trí và tin nhắn một cách nhanh chóng.
 
-### 🎯 Mục tiêu chính
+### 🎯 Mục tiêu sản phẩm
 
-- Xây dựng nền tảng giao tiếp trực tuyến nhanh và ổn định.
-- Cho phép người dùng tạo kết nối xã hội thông qua bạn bè, hội thoại và bài viết.
-- Cung cấp trải nghiệm nội dung đa phương tiện với upload ảnh và vị trí.
-- Tích hợp AI để tăng tính bảo mật và kiểm duyệt nội dung.
-- Hỗ trợ theo dõi hoạt động realtime qua WebSocket, SSE và push notification.
+- Xây dựng nền tảng kết nối bạn bè thân thiết, tập trung vào khoảnh khắc đời thường.
+- Tạo trải nghiệm chia sẻ nhanh, ít friction và an toàn.
+- Kết hợp vị trí, media và realtime để tạo cảm giác kết nối tự nhiên.
+- Tăng tính bảo mật bằng AI kiểm duyệt nội dung và nhận diện khuôn mặt.
+- Giúp người dùng duy trì trò chuyện và cập nhật hoạt động một cách dễ dàng.
+
+### 👥 Đối tượng sử dụng
+
+- Người dùng muốn chia sẻ hình ảnh và khoảnh khắc với bạn bè thân thiết.
+- Nhóm bạn bè, gia đình hoặc cộng đồng nhỏ cần cập nhật hoạt động hàng ngày.
+- Người dùng cần một mạng xã hội riêng tư, ít phô trương nhưng nhiều tương tác.
 
 ---
 
-## ✨ Tính Năng
+## ✨ Tính Năng Chính
 
-### 🔐 Xác thực và tài khoản
-- Đăng ký tài khoản bằng OTP qua email.
-- Xác thực OTP, đăng nhập, refresh token và đăng xuất.
+### 🔐 Đăng ký & Đăng nhập
+
+- Đăng ký tài khoản và xác thực bằng email/OTP.
+- Đăng nhập, refresh token và đăng xuất.
 - Quên mật khẩu và reset mật khẩu.
 
-### 👥 Mạng xã hội và bạn bè
-- Gửi lời mời kết bạn.
-- Chấp nhận, từ chối và hủy kết bạn.
-- Xem danh sách bạn bè và tìm kiếm người dùng.
-- Xem bài viết của người bạn.
+### 👥 Quản lý bạn bè
 
-### 💬 Hội thoại và tin nhắn
-- Tạo conversation giữa 2 người dùng.
-- Lấy lịch sử tin nhắn.
-- Gửi tin nhắn ảnh và cập nhật realtime.
+- Tìm kiếm người dùng và gửi lời mời kết bạn.
+- Chấp nhận, từ chối hoặc hủy lời mời kết bạn.
+- Xem danh sách bạn bè và quản lý mối quan hệ.
+- Xóa bạn bè khi cần.
 
-### 📝 Bài viết và media
-- Tạo bài viết với ảnh, caption và vị trí.
-- Lấy chi tiết bài viết, ảnh bài viết và feed của bạn bè.
-- Thả emoji vào bài viết.
-- Thay đổi chế độ hiển thị vị trí và xóa bài viết.
+### 📸 Chia sẻ hình ảnh & khoảnh khắc
 
-### 🧠 AI và nhận diện
-- Phát hiện ảnh NSFW bằng mô hình AI.
-- Nhận diện khuôn mặt và lưu embedding vào vector database.
-- Hỗ trợ kiểm duyệt nội dung và các luồng nhận diện liên quan hồ sơ người dùng.
+- Chụp ảnh trực tiếp hoặc upload ảnh từ thư viện.
+- Gắn vị trí địa lý vào bài đăng.
+- Xem lại lịch sử bài đăng và khoảnh khắc đã chia sẻ.
+- Tương tác với bài đăng bằng reaction và comments (đang phát triển).
 
-### 🏅 Thành tựu và hệ thống cup
-- Hỗ trợ tính năng thành tựu người dùng như Explorer, Legacy Inheritor, Popular Leader và các cup định kỳ.
-- Dùng job định kỳ để refresh điểm/cup cho người dùng theo tháng.
+### 💬 Nhắn tin realtime
 
----
+- Gửi và nhận tin nhắn 1-1 giữa bạn bè.
+- Đồng bộ tin nhắn theo thời gian thực.
+- Xem lịch sử trò chuyện và trạng thái tin nhắn.
+- Nhận thông báo khi có tin nhắn mới.
 
-## 🏗️ Tổng Quan Hệ Thống
+### 🗺️ Bản đồ & vị trí
 
-### 🖥️ Back-end
+- Hiển thị vị trí người dùng và bạn bè trên bản đồ.
+- Gắn tọa độ vào bài đăng và hiển thị check-in.
+- Dẫn đường nhanh tới vị trí của bài đăng.
+- Xem thông tin địa điểm liên quan đến bài đăng.
 
-- Spring Boot 3.5: xây dựng REST API và xử lý nghiệp vụ.
-- Spring Security + JWT: xác thực và phân quyền.
-- Spring Data JPA / Hibernate: truy cập dữ liệu và ORM.
-- PostgreSQL: cơ sở dữ liệu chính.
-- Redis: cache và lưu token/session.
-- RabbitMQ: xử lý tác vụ nền bất đồng bộ.
-- MinIO: lưu trữ file ảnh và media.
-- Qdrant: lưu trữ embedding khuôn mặt.
-- WebSocket / SSE: realtime và cập nhật nhanh.
-- Swagger / OpenAPI: tài liệu API.
-- Docker Compose: triển khai và vận hành môi trường.
+### 🧠 AI & kiểm duyệt
 
-### 🧠 AI Service
+- Kiểm tra ảnh NSFW tự động trước khi chia sẻ.
+- Nhận diện khuôn mặt và trích xuất embedding cho tìm kiếm.
+- Hỗ trợ kiểm duyệt nội dung và bảo vệ người dùng.
+- Tách luồng xử lý AI cho hình ảnh và nhận diện khuôn mặt.
 
-- FastAPI: service riêng phục vụ xử lý ảnh.
-- InsightFace: phát hiện và trích xuất embedding khuôn mặt.
-- Transformers + PyTorch: phân loại ảnh NSFW.
-- Model weights được load từ local folder hoặc Hugging Face khi cần.
+### 📰 Widget & thông báo
 
-### 🛡️ Reliability và vận hành
-
-- Resilience4j Circuit Breaker: bảo vệ các lời gọi đến AI service.
-- Nginx rate limiting: giới hạn request để tránh overload.
-- Health checks: kiểm tra tình trạng database, Redis, MinIO và các dependency.
-- GitHub Actions: pipeline CI/CD tự động build, test và deploy.
+- Widget cập nhật bài đăng mới ngay trên màn hình chính.
+- Gửi thông báo kết bạn, tin nhắn và hoạt động mạng xã hội.
+- Widget hỗ trợ thao tác mở nhanh và chỉ đường.
 
 ---
 
-## ⚙️ Cài Đặt
+## 🏗️ Kiến Trúc
+
+Pando được xây dựng theo mô hình backend monolith, kết hợp REST API, WebSocket/SSE, và các dịch vụ phụ trợ để tạo ra trải nghiệm realtime và media mượt mà.
+
+### Thành phần chính
+
+- Mobile/Web client: gửi yêu cầu REST và kết nối realtime.
+- Nginx: reverse proxy, HTTPS, route và bảo mật.
+- Spring Boot backend: xử lý auth, bạn bè, chat, bài đăng, location, notification.
+- PostgreSQL / PostGIS: dữ liệu người dùng, bài viết, friendship, địa lý.
+- Redis: cache, token và state tạm thời.
+- RabbitMQ: xử lý job bất đồng bộ như moderation, email và notification.
+- MinIO: lưu trữ ảnh và media.
+- Qdrant: lưu trữ vector embedding khuôn mặt.
+- External systems: Firebase FCM, SMTP email, AI service.
+
+### Hệ thống high level
+
+![High Level Architecture](./high%20level%20desig.png)
+
+> Kiến trúc high level của Pando, bao gồm client, reverse proxy, backend và các dịch vụ phụ trợ.
+
+### ERD cơ sở dữ liệu
+
+![ERD](./erd.png)
+
+> Sơ đồ ERD thể hiện các bảng người dùng, bài đăng, bạn bè, hội thoại và dữ liệu địa lý.
+
+---
+
+## 💻 Công Nghệ Sử Dụng
+
+| Nhóm | Công nghệ |
+| --- | --- |
+| Backend | Java 17, Spring Boot 3.5 |
+| Auth & bảo mật | Spring Security, JWT |
+| ORM | Spring Data JPA, Hibernate |
+| Database | PostgreSQL, PostGIS |
+| Cache | Redis |
+| Message Broker | RabbitMQ |
+| Storage | MinIO |
+| Vector DB | Qdrant |
+| Realtime | WebSocket, SSE, STOMP |
+| AI | InsightFace, Hugging Face Transformers, PyTorch |
+| CI/CD | GitHub Actions |
+| Container | Docker, Docker Compose |
+
+---
+
+## 💻 Cài Đặt Local
 
 ### Yêu cầu
 
-- Java 17 trở lên
+- Java 17+
 - Maven 3.8+
-- Docker và Docker Compose
-- Python 3.10+ (cho AI service)
+- Docker & Docker Compose
+- Python 3.10+ (AI service)
 
-### Bước cơ bản
+### Chạy nhanh
 
 ```bash
-git clone https://github.com/HIT-Product-2026/Backend.git
+git clone <repository-url>
 cd lockly
 cp .env.example .env
-mvn clean package
+./mvnw clean package
 docker compose up -d
 ```
 
-> Cần cấu hình các biến môi trường như DB, Redis, RabbitMQ, MinIO, JWT và AI service trước khi chạy.
+> Cập nhật các biến môi trường DB, Redis, RabbitMQ, MinIO, JWT và AI service trước khi chạy.
 
 ---
 
-## 🤝 Đóng Góp
+## 🧪 Kiểm Thử
 
-Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng.
-
-- Báo lỗi và vấn đề gặp phải
-- Đề xuất tính năng mới
-- Gửi pull request cho các cải tiến
+- Unit test: `./mvnw test`
+- Chạy service bằng Docker Compose và kiểm tra endpoints
 
 ---
 
-## 📫 Liên Hệ
+## 🌱 Roadmap
 
-- Email: [dinhkhanh19042006@gmail.com](mailto:dinhkhanh19042006@gmail.com)
+### ✅ Đã hoàn thành
 
----
+- Đăng ký/đăng nhập, OTP, refresh token
+- Quản lý bạn bè và hội thoại realtime
+- Chia sẻ ảnh, bài đăng và vị trí
+- Kiểm duyệt AI cho nội dung NSFW
+- Widget và notification realtime
 
-## 🗺️ Lộ Trình Phát Triển
+### 🚧 Đang phát triển
 
-### ✅ Đã Hoàn Thành
-
-- Xây dựng hệ thống xác thực và phân quyền
-- Quản lý bạn bè, hội thoại và tin nhắn
-- Quản lý bài viết, ảnh và vị trí
-- Tích hợp realtime, notification và monitoring
-- Tích hợp AI kiểm duyệt ảnh NSFW và face embedding cơ bản
-
-### 🚧 Đang Phát Triển
-
-- Tính năng thành tựu người dùng và hệ thống cup định kỳ
-- Tính năng nhận diện khuôn mặt cho hồ sơ và xác thực
-- Tối ưu hóa gợi ý và trải nghiệm cá nhân hóa
-- Mở rộng tích hợp AI và các luồng phân tích hành vi người dùng
-
----
+- Tính năng thành tựu người dùng và cup định kỳ
+- Kết nối bảo mật khuôn mặt đăng ký
+- Nâng cấp trải nghiệm gợi ý và cá nhân hóa
+- Mở rộng tương tác trên bản đồ và báo gần nhau
 
